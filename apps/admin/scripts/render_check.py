@@ -1,8 +1,9 @@
 # Render an admin page as a TEMPORARY admin (created + deleted with the secret key).
+# The temp admin enrolls TOTP 2FA and uses an aal2 session (works with require_two_factor on).
 # Start `npx next dev -p 3920` in apps/admin first, then from apps/admin:
 #   python scripts/render_check.py <path> <role_key> [expected text ...]
 # Prints status, final URL and FOUND/MISSING per expected text. Exit 1 if anything is missing.
-import json, base64, secrets, sys, urllib.request, urllib.error
+import base64, hashlib, hmac, json, secrets, struct, sys, time, urllib.request, urllib.error
 
 U = "https://phkqmojtdyaohiixakvv.supabase.co"
 REF = "phkqmojtdyaohiixakvv"
@@ -16,6 +17,12 @@ def api(m, p, b=None, key=PUB, tok=None):
     with urllib.request.urlopen(r) as x:
         t = x.read().decode()
         return json.loads(t) if t else None
+
+def totp(secret_b32):
+    key = base64.b32decode(secret_b32.upper() + "=" * (-len(secret_b32) % 8))
+    h = hmac.new(key, struct.pack(">Q", int(time.time()) // 30), hashlib.sha1).digest()
+    o = h[-1] & 0x0F
+    return f"{(struct.unpack('>I', h[o:o+4])[0] & 0x7FFFFFFF) % 1_000_000:06d}"
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, *a, **k):
@@ -31,6 +38,11 @@ try:
     rid = api("GET", f"/rest/v1/admin_roles?select=id&key=eq.{role}", key=SEC)[0]["id"]
     api("POST", "/rest/v1/admin_user_roles", {"user_id": u["id"], "role_id": rid}, key=SEC)
     sess = api("POST", "/auth/v1/token?grant_type=password", {"email": email, "password": pw})
+    # Admins may be required to use 2FA → enroll an authenticator and use an aal2 session.
+    tok = sess["access_token"]
+    f = api("POST", "/auth/v1/factors", {"factor_type": "totp", "friendly_name": "render-check"}, tok=tok)
+    ch = api("POST", f"/auth/v1/factors/{f['id']}/challenge", {}, tok=tok)
+    sess = api("POST", f"/auth/v1/factors/{f['id']}/verify", {"challenge_id": ch["id"], "code": totp(f["totp"]["secret"])}, tok=tok)
     val = "base64-" + base64.urlsafe_b64encode(json.dumps(sess).encode()).decode().rstrip("=")
     name = f"sb-{REF}-auth-token"
     chunks = [val[i:i + 3180] for i in range(0, len(val), 3180)]

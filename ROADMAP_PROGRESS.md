@@ -10,10 +10,9 @@ Spec: `new-platform.md` · Rules: `CLAUDE.md` · App "where to change": `XPLAYER
 ---
 
 ## ▶ NEXT
-**Phase 3 · Step 3.0 — Customization basics:** shared "draft → publish" bar (shows unpublished
-changes since the last config version, Publish button with notes) + form kit (zod + server
-actions + toasts) + Storage bucket for images. Then **3.2 Feature flags** (list, toggle,
-platforms/versions/schedule, overrides).
+**Phase 3 · Step 3.1 — Branding & theme:** edit the theme colours (black & red default) with
+a live phone/TV preview, logo/splash images via the image upload, publish. Then 3.3 Login &
+panels (auth mode, guest, onboarding panel types).
 
 ## Waiting on you
 - [ ] Add **`TMDB_API_KEY`** as a Supabase Edge Function secret (needed at step 1.7).
@@ -47,6 +46,7 @@ platforms/versions/schedule, overrides).
 | D13 | **Rails/Top 10 from the user's panel** (provider_added / provider_rating / provider_category / manual picks by panel id / random / watch_stats) — never TMDB lists | User decision 2026-11-15 |
 | D14 | **No bulk import of panel catalogs** (Neo ≈ 60k movies + 70k series): app caches the panel catalog locally; TMDB metadata fetched on demand (visible/opened titles, batched ≤25, tmdb id first) and cached once for all users | User decision 2026-11-15; cost + speed |
 | D15 | **Default theme black & red** (apps + admin), still changeable from admin; admin layout follows the user's reference dashboard (screenshot 2026-11-15; Figma links not readable by the connected Figma account) | User decision 2026-11-15 |
+| D16 | Vercel functions pinned to **Tokyo `hnd1`** (Supabase region ap-northeast-1); auth = local JWT verification (`getClaims`) + one `admin_session()` DB call per request | Speed: was 5–6 trans-Pacific round trips per page |
 | D10 | Provider credentials on device in secure storage; cloud sync of them only encrypted + opt-in | Spec §15.4 |
 
 ---
@@ -248,8 +248,27 @@ platforms/versions/schedule, overrides).
   DB functions that were tested).
 
 ## Phase 3 — Admin "App Customization" tab
+- [x] 3.0 Customization basics. DB (migration 017): `admin_config_status()` (live version vs draft,
+  `changed` parts: settings/flags/versions/maintenance/onboarding/theme/home, `can_publish`);
+  `publish_app_config()` now refuses empty publishes ("Nothing to publish") and trims notes; Storage
+  bucket **`app-assets`** (public read, write = `customization.write`, PNG/JPG/WebP only — no SVG,
+  2 MB max). Admin: `customization/layout.tsx` shows the **publish bar** on every customization page
+  (green "Apps are up to date" / red "Unpublished changes: …", Publish dialog with note);
+  `components/customization/image-upload.tsx` (browser → Storage, preview, remove);
+  `lib/db-errors.ts` (safe messages); shadcn switch + textarea. Test helpers:
+  `supabase/tests/_live.py` (temp users with role + TOTP aal2).
+  *Tested:* `live_customization_check.py` **16/16** (status for CM, denied for analyst; toggle → dirty
+  'flags'; analyst edit = 0 rows; bad platform rejected; toggle back → clean; empty publish refused;
+  upload PNG + public read; analyst/plain/anon upload refused; SVG and >2 MB refused; delete).
 - [ ] 3.1 Branding & theme: logo/splash upload, colours → `AppThemeConfig` JSON, live preview.
-- [ ] 3.2 Feature flags (global / android / ios / tv / plan / country / version / user, schedule).
+- [x] 3.2 Feature flags `/customization/flags`: card per flag with on/off switch (optimistic, toast
+  "publish to send it"), badges (key, platforms, version range, schedule), edit dialog (name,
+  description, platforms, from/up-to app version, turn on/off times), search + On/Off filter.
+  Server actions `setFlagEnabled` / `updateFlag` (zod, version format, end > start, all/none
+  platforms → null) + RLS. Fixed: publish bar needed `connection()` (Next 16 prerender).
+  *Tested:* tsc + eslint clean; renders: content manager sees bar + switches + Publish, admin sees
+  edit buttons, analyst → /forbidden; dev log 0 errors. *Not tested:* clicking in a browser.
+- [ ] 3.2b Feature overrides UI (per user / country / plan) — DB + app config already support it.
 - [ ] 3.3 Login policy (optional/required/disabled), guest limits, registration on/off.
 - [ ] 3.4 Onboarding "Choose your panel": enable/disable/order Xtream, M3U, Stalker-MAC,
   custom labels/help text, default ports, connect timeout.
@@ -364,6 +383,8 @@ platforms/versions/schedule, overrides).
 ## Log
 - 2026-11-14 — Phase 0 done (planning files only, no code). Untested (nothing to run).
 - 2026-11-14 — Step 1.1 done: admin scaffold + Supabase folder in `apps/admin`; build + redirect smoke test pass.
+- 2026-11-15 — Steps 3.0 + 3.2 done: publish bar + image storage + feature flags page; 16/16 live checks.
+- 2026-11-15 — Speed fix (live site slow): measured 1.6–2.8 s per signed-in page on Vercel. Causes: Supabase in Tokyo (ap-northeast-1) while Vercel functions run in the US by default, and 5–6 sequential Supabase round trips per page. Fixes: `apps/admin/vercel.json` regions `hnd1` (Tokyo, same as Supabase); `getClaims()` (local ES256 JWT verification, no Auth round trip) in proxy + `getAdminGate`; migration 016 `admin_session()` = 2FA state + permissions in ONE call (was 2). Now ~2 round trips per page. Verified: tsc/eslint clean, MFA live check 12/12, page renders for 3 roles. **Deployed by you (pushed to main); live re-measure with a temporary 2FA admin: 0.60–0.77 s total, TTFB ≈0.25 s (was 1.6–2.8 s).** Render check now enrolls TOTP (you enabled `admin.require_two_factor`). Further option if ever needed: Supabase project in Mumbai (ap-south-1) + functions in bom1 (requires a new project + migration).
 - 2026-11-15 — Step 2.5 done: My account (password) + admin 2FA enforced in the DB; 10/10 live MFA checks. Phase 2 complete.
 - 2026-11-15 — Step 2.4 done: admins & roles page + safety rules in DB; 13/13 live checks, 3-role render check.
 - 2026-11-15 — Step 2.3 done: audit log page + reusable DataTable/toolbar; permission + no-leak checks pass.

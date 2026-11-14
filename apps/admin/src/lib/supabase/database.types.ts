@@ -1718,6 +1718,7 @@ export type Database = {
           meta: Json
         }[]
       }
+      admin_config_status: { Args: never; Returns: Json }
       admin_dashboard_stats: { Args: never; Returns: Json }
       admin_find_user: { Args: { p_email: string }; Returns: string }
       admin_list_admins: {
