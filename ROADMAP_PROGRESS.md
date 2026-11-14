@@ -10,10 +10,10 @@ Spec: `new-platform.md` · Rules: `CLAUDE.md` · App "where to change": `XPLAYER
 ---
 
 ## ▶ NEXT
-**Phase 2 · Step 2.1 — Admin sign-in.** `/login` (email + password via Supabase Auth,
-server action), admin-only guard (`is_admin()` + `my_permissions()`), sign-out, redirect to
-`next`; `requirePermission(perm)` helper for server actions/pages; first signed-in RLS checks
-with your super-admin account (setting validation, publish_app_config, audit rows).
+**Phase 2 · Step 2.2 — Admin layout & building blocks.** Sidebar with modules (shown by
+permission), top bar (user menu, sign out), dark theme, breadcrumbs, toasts, skeletons,
+empty/error states, shared server-paginated DataTable, zod form kit, image upload to Storage.
+Dashboard page with first real numbers.
 
 ## Waiting on you
 - [ ] Add **`TMDB_API_KEY`** as a Supabase Edge Function secret (needed at step 1.7).
@@ -170,8 +170,19 @@ with your super-admin account (setting validation, publish_app_config, audit row
   **Phase 1 complete.**
 
 ## Phase 2 — Admin panel base
-- [ ] 2.1 Admin auth (Supabase Auth, email/password + MFA), admin-only middleware,
-  permission guard helper for server actions/routes.
+- [x] 2.1 Admin sign-in: `/login` (shadcn card, email + password, server action `signIn` with
+  zod, same error for wrong email/password, non-admins signed out again, safe `next` redirect),
+  `signOut`, `/forbidden`. `src/lib/auth.ts`: `getAdmin()` (verified `getUser` + DB
+  `my_permissions()`, cached per request), `requireAdmin()`, `requirePermission(perm)`,
+  `actionGuard(perm)` for server actions, `safeNext()` (blocks open redirects).
+  Live RLS script `supabase/tests/live_rls_check.py` (temporary plain + content-manager users).
+  *Tested:* `tsc` + eslint clean; dev server: `/login` renders form, `/` and `/forbidden` → 307
+  to login when signed out; **20/20 live signed-in checks pass** (plain user: no perms, own
+  profile only, can't change status / self-promote / read config / publish / write audit;
+  content manager: setting max + enum validation, valid save records `updated_by`, publish →
+  apps see new value, no audit read, audit rows written, can't create roles; restored + temp
+  users deleted). *Not tested:* signing in through the browser UI with your account — please try.
+- [ ] 2.1b Admin 2FA (Supabase TOTP MFA): enroll screen, require AAL2 for admin pages.
 - [ ] 2.2 Layout: sidebar modules, top bar, theme (dark-first), breadcrumbs, command
   palette, toasts, skeletons, empty/error states. Shared DataTable (server pagination,
   filters, search), Form kit (zod + react-hook-form), image upload to Storage.
@@ -296,6 +307,7 @@ with your super-admin account (setting validation, publish_app_config, audit row
 ## Log
 - 2026-11-14 — Phase 0 done (planning files only, no code). Untested (nothing to run).
 - 2026-11-14 — Step 1.1 done: admin scaffold + Supabase folder in `apps/admin`; build + redirect smoke test pass.
+- 2026-11-15 — Step 2.1 done: admin sign-in + guards; 20/20 live signed-in RLS checks pass.
 - 2026-11-15 — Step 1.8 done: Dart contract models + 12 tests (real config fixture). Phase 1 complete.
 - 2026-11-15 — Step 1.7 revised: Top 10/rails from the panel, TMDB on demand only (migrations 007–009, function redeployed, config v6).
 - 2026-11-15 — Step 1.7 done: metadata-tmdb deployed; resolve/season/lists verified live; catalog seeded (51 movies, 58 series), Top 10 live.
