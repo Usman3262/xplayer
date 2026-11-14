@@ -10,9 +10,9 @@ Spec: `new-platform.md` · Rules: `CLAUDE.md` · App "where to change": `XPLAYER
 ---
 
 ## ▶ NEXT
-**Phase 3 · Step 3.1 — Branding & theme:** edit the theme colours (black & red default) with
-a live phone/TV preview, logo/splash images via the image upload, publish. Then 3.3 Login &
-panels (auth mode, guest, onboarding panel types).
+**Phase 3 · Step 3.3 — Login & panels:** sign-in policy (optional / required / disabled),
+registration + guest switches, and the "Choose your panel" types (enable, order, labels,
+help text, form fields) with a phone preview. Publish to apply.
 
 ## Waiting on you
 - [ ] Add **`TMDB_API_KEY`** as a Supabase Edge Function secret (needed at step 1.7).
@@ -260,7 +260,21 @@ panels (auth mode, guest, onboarding panel types).
   *Tested:* `live_customization_check.py` **16/16** (status for CM, denied for analyst; toggle → dirty
   'flags'; analyst edit = 0 rows; bad platform rejected; toggle back → clean; empty publish refused;
   upload PNG + public read; analyst/plain/anon upload refused; SVG and >2 MB refused; delete).
-- [ ] 3.1 Branding & theme: logo/splash upload, colours → `AppThemeConfig` JSON, live preview.
+- [x] 3.1 Branding & theme `/customization/theme`. Migration 018: settings `branding.display_name`,
+  `branding.tagline`, `branding.logo_url`, `branding.splash_url` (public, empty = built-in).
+  `lib/theme-tokens.ts`: the 13 tokens (**same keys as Flutter `AppThemeConfig`**), default black &
+  red, 5 presets (Black & red, Midnight blue, Emerald, Royal purple, Gold on black), `normalizeTheme`,
+  WCAG `contrast()`. Editor: grouped colour pickers + hex inputs, presets, reset, readability
+  warnings (text/background, muted, white on primary), live **phone preview** (reference-style home:
+  header, Go pro, red gradient Sport card, tile grid, LIVE row) + **TV preview**; branding card with
+  name, tagline, logo + splash upload. Actions `saveTheme` (zod hex per token) / `saveBranding`
+  (https only). Read-only roles see disabled controls.
+  *Tested:* tsc + eslint clean; `live_theme_check.py` **10/10** (save theme → dirty 'theme', read-only
+  role can't save, restore → clean; javascript: URL and wrong type rejected by DB; branding → dirty
+  'settings', restore → clean); renders for content manager / marketing manager (disabled) /
+  analyst (forbidden); dev log 0 errors.
+  *App side pending (Phase 4):* Flutter must apply `theme` (AppThemeConfig.applyJson) and
+  `branding.*` from `get_app_config`.
 - [x] 3.2 Feature flags `/customization/flags`: card per flag with on/off switch (optimistic, toast
   "publish to send it"), badges (key, platforms, version range, schedule), edit dialog (name,
   description, platforms, from/up-to app version, turn on/off times), search + On/Off filter.
@@ -383,6 +397,7 @@ panels (auth mode, guest, onboarding panel types).
 ## Log
 - 2026-11-14 — Phase 0 done (planning files only, no code). Untested (nothing to run).
 - 2026-11-14 — Step 1.1 done: admin scaffold + Supabase folder in `apps/admin`; build + redirect smoke test pass.
+- 2026-11-15 — Step 3.1 done: Branding & theme editor with live phone/TV preview; 10/10 live checks.
 - 2026-11-15 — Steps 3.0 + 3.2 done: publish bar + image storage + feature flags page; 16/16 live checks.
 - 2026-11-15 — Speed fix (live site slow): measured 1.6–2.8 s per signed-in page on Vercel. Causes: Supabase in Tokyo (ap-northeast-1) while Vercel functions run in the US by default, and 5–6 sequential Supabase round trips per page. Fixes: `apps/admin/vercel.json` regions `hnd1` (Tokyo, same as Supabase); `getClaims()` (local ES256 JWT verification, no Auth round trip) in proxy + `getAdminGate`; migration 016 `admin_session()` = 2FA state + permissions in ONE call (was 2). Now ~2 round trips per page. Verified: tsc/eslint clean, MFA live check 12/12, page renders for 3 roles. **Deployed by you (pushed to main); live re-measure with a temporary 2FA admin: 0.60–0.77 s total, TTFB ≈0.25 s (was 1.6–2.8 s).** Render check now enrolls TOTP (you enabled `admin.require_two_factor`). Further option if ever needed: Supabase project in Mumbai (ap-south-1) + functions in bom1 (requires a new project + migration).
 - 2026-11-15 — Step 2.5 done: My account (password) + admin 2FA enforced in the DB; 10/10 live MFA checks. Phase 2 complete.
