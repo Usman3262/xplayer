@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
@@ -81,7 +82,7 @@ class AppNetworkSnapshot {
 }
 
 Future<Map<String, dynamic>?> _nativeNetworkDiagnostics() async {
-  if (!Platform.isAndroid) return null;
+  if (kIsWeb || !Platform.isAndroid) return null;
   try {
     const ch = MethodChannel(kDeviceChannel);
     final raw =

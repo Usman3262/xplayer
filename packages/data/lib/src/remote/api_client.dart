@@ -69,7 +69,11 @@ class ApiClient {
   /// was reused and hung: catalog lists waited 26–30 s, then "connection
   /// closed" (iPhone simulator, 12 Nov 17:36 UTC; the server answered them in
   /// under 50 ms).
-  static http.Client _defaultHttp() => IOClient(
+  /// Browser preview (flutter run -d chrome) has no dart:io sockets: it
+  /// uses the browser's fetch client; phones/TV keep the tuned client.
+  static http.Client _defaultHttp() => kIsWeb
+      ? http.Client()
+      : IOClient(
         HttpClient()
           ..idleTimeout = const Duration(seconds: 10)
           ..connectionTimeout = const Duration(seconds: 15),

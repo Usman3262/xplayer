@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:ffi';
 import 'dart:io';
-import 'package:ffi/ffi.dart';
+import 'mpv_native_stub.dart'
+    if (dart.library.ffi) 'mpv_native_ffi.dart';
 
 import 'package:media_kit/media_kit.dart';
 import 'package:flutter/foundation.dart';
@@ -265,7 +265,7 @@ Future<String> appNetworkLine(Player player) async {
 Future<void> appMpvSet(Player player, String key, String value) async {
   final native = player.platform;
   if (native == null) return;
-  if (_appMpvSetAsync(native, key, value)) return;
+  if (appMpvSetAsyncNative(native, key, value)) return;
   try {
     await (native as dynamic).setProperty(key, value)
         .timeout(const Duration(seconds: 2));
@@ -274,48 +274,10 @@ Future<void> appMpvSet(Player player, String key, String value) async {
   }
 }
 
-/// Reply ids far above media_kit's own async request counter (it starts at
-/// 0), so a reply can never complete one of media_kit's requests.
-int _appAsyncReplyId = 1 << 52;
-
-/// Test hook for [_appMpvSetAsync] with a stand-in native player.
+/// Test hook for [appMpvSetAsyncNative] with a stand-in native player.
 @visibleForTesting
 bool appMpvSetAsyncForTest(Object native, String key, String value) =>
-    _appMpvSetAsync(native, key, value);
-
-/// Queues [key] = [value] on mpv without waiting; false when the native
-/// player does not expose libmpv (then the caller writes the blocking way).
-bool _appMpvSetAsync(Object native, String key, String value) {
-  Pointer<Utf8>? name;
-  Pointer<Utf8>? text;
-  Pointer<Pointer<Utf8>>? data;
-  try {
-    final dyn = native as dynamic;
-    if (dyn.disposed == true) return true; // nothing to set any more
-    final Pointer ctx = dyn.ctx as Pointer;
-    if (ctx.address == 0) return false;
-    final mpv = dyn.mpv;
-    name = key.toNativeUtf8();
-    text = value.toNativeUtf8();
-    data = calloc<Pointer<Utf8>>()..value = text;
-    // MPV_FORMAT_STRING = 1; mpv copies the name and the value before it
-    // returns, so they are freed right after.
-    final rc = mpv.mpv_set_property_async(
-      ctx,
-      _appAsyncReplyId++,
-      name.cast<Char>(),
-      1,
-      data.cast<Void>(),
-    ) as int;
-    return rc >= 0;
-  } catch (_) {
-    return false;
-  } finally {
-    if (data != null) calloc.free(data);
-    if (text != null) calloc.free(text);
-    if (name != null) calloc.free(name);
-  }
-}
+    appMpvSetAsyncNative(native, key, value);
 
 /// Client 18 Oct #10 (ANR "the app isn't responding", reproduced on the
 /// phone emulator 18 Oct 16:41): an mpv property read is a synchronous

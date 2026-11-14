@@ -15,6 +15,9 @@ status/error model (spec §3.5) in `packages/data`, mapping into the existing do
 Then 5.2 Xtream (Neo), 5.3 M3U, 5.4 Stalker, 5.5 connection manager, 5.6 "Choose your panel" flow.
 
 ## Waiting on you
+- [ ] **Android build setup on this PC** (to run on your phone/TV): free ~10 GB, install Android Studio
+  (SDK + adb), then I enable Android in Flutter, set the SDK path, fix `JAVA_HOME`, accept licences,
+  build + install. Allow "USB debugging" on the phone when asked.
 - [ ] Add **`TMDB_API_KEY`** as a Supabase Edge Function secret (needed at step 1.7).
 - [ ] **Sports API**: which provider? (e.g. API-Football / football-data.org / TheSportsDB)
   — needed at step 3.9; key goes in Supabase secrets.
@@ -388,6 +391,10 @@ role has sports.read without sports.write).
   the app's own colours with "Try again", lifts itself when the window ends.
   *Tested:* analyze clean for changed files (no new errors in either app); phone **26/26**, TV **51/51**
   tests (incl. 3 maintenance-gate widget tests + 3 route-guard tests per app).
+- Phase 4 milestone (2026-11-15): package tests domain **159** / data **283** / design_system **33**
+  pass; phone 26 / TV 51 pass. **APK builds and on-device run NOT done: this PC has no Android SDK**
+  (Flutter has Android disabled — `no-enable-android`; no `adb`; only 3.4 GB free on C:; `JAVA_HOME`
+  points to missing `E:\java.xml\jbr`). Needs Android Studio/SDK (~8–10 GB) before device testing.
 - [→] Sign-in (old 4.3 "optional sign-in/up with Supabase Auth") **moved to Phase 5.7**, right after
   the panel connection, matching the flow "choose panel → connect → optional account" (D17).
 
