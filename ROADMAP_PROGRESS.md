@@ -10,10 +10,9 @@ Spec: `new-platform.md` · Rules: `CLAUDE.md` · App "where to change": `XPLAYER
 ---
 
 ## ▶ NEXT
-**Phase 3 · Step 3.5 — Home builder** (the big one): sections list (drag/up-down order, on/off,
-rename, type, layout, source: auto / panel newest / panel rating / panel category / manual picks /
-random / watch stats, params like days, limit, targeting platform/country/login, schedule) with a
-preview using the **app's existing home look** (D17). Then 3.6 Banners, 3.7 Top 10.
+**Phase 3 · Step 3.6 — Banners** (hero carousel: phone + TV images via upload, title, button,
+action: open title / category / screen / link, targeting + schedule, order) then **3.7 Top 10**
+(lists: source panel rating / newest / admin picks, country, items editor).
 
 ## Waiting on you
 - [ ] Add **`TMDB_API_KEY`** as a Supabase Edge Function secret (needed at step 1.7).
@@ -296,8 +295,23 @@ preview using the **app's existing home look** (D17). Then 3.6 Banners, 3.7 Top 
   disabling all refused by DB; read-only role can't edit; label/field edit; non-list fields refused;
   auth.mode accepted; >50 panels refused; all restored → clean); renders for content manager /
   marketing manager (no edit buttons) / analyst (forbidden); dev log 0 errors.
-- [ ] 3.5 Home builder: add/remove/reorder/rename sections, source = auto / manual pick /
-  random / TMDB trending, targeting, schedule, preview (phone + TV), publish.
+- [x] 3.5 Home builder `/customization/home`. `lib/home-sections.ts` = section types (17) with
+  allowed sources / layouts / content kinds per type (mirrors DB checks + Dart enums), source params
+  (days / match / min_rating). Actions: create / update (type-aware validation, params filtered to the
+  source), on/off, move up/down/top/bottom (only changed rows written), delete, set manual picks
+  (TMDB id / title match / panel id + panel key — **no hard-coded provider**). UI: numbered section
+  list with badges (type, source, layout, picks, platforms, countries, signed-in, scheduled),
+  add/edit dialog (only valid options per type, picks editor, platforms, countries, signed-in only,
+  show from/until), phone/TV toggle **preview in the app's existing home style** (hero with VIP/4K,
+  match cards, continue tiles with progress, ranked Top 10 numbers, channel circles, poster rails).
+  *Tested:* tsc + eslint clean; `live_home_check.py` **23/23** incl. **end-to-end targeting via a
+  real publish** (country ZZ hidden for others/shown for ZZ, signed-in only hidden for guests,
+  next-year schedule hidden, picks with tmdb + panel id reach `get_app_config`, targeted config never
+  answered "unchanged"), then test sections removed + republished (config v13 = same content as v11);
+  direct rule checks of `config_item_visible` (platform, country incl. unknown, login, schedule);
+  renders: content manager full builder, marketing manager read-only; dev log 0 errors.
+  Note: in v12 one untargeted test section was briefly in the config (no app reads config yet);
+  the test now targets every test section.
 - [ ] 3.6 Banners (hero carousel): image, title, deep link, schedule, targeting.
 - [ ] 3.7 Top 10 lists (manual / auto from analytics / TMDB trending), per country/platform.
 - [ ] 3.8 "New" / "Recently added" rules (provider added date, TMDB release, manual).
@@ -419,6 +433,7 @@ preview using the **app's existing home look** (D17). Then 3.6 Banners, 3.7 Top 
 ## Log
 - 2026-11-14 — Phase 0 done (planning files only, no code). Untested (nothing to run).
 - 2026-11-14 — Step 1.1 done: admin scaffold + Supabase folder in `apps/admin`; build + redirect smoke test pass.
+- 2026-11-15 — Step 3.5 done: Home builder (types/sources/layouts, picks, targeting, schedule, app-style preview); 23/23 live incl. end-to-end targeting.
 - 2026-11-15 — Step 3.10 done: Versions & maintenance + generic SettingsCard; security-settings permission fix (migration 020); 15/15 live checks. Recorded D17 (keep current app UI; panel → connect → optional account).
 - 2026-11-15 — Steps 3.3 + 3.4 done: Login & panels page (sign-in policy, Choose-your-panel editor + preview, DB guard); 10/10 live checks.
 - 2026-11-15 — Step 3.1 done: Branding & theme editor with live phone/TV preview; 10/10 live checks.

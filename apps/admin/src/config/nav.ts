@@ -52,7 +52,7 @@ export const NAV: NavGroup[] = [
     label: "App customization",
     items: [
       { title: "Branding & theme", href: "/customization/theme", icon: Palette, permission: "customization.read", ready: true },
-      { title: "Home builder", href: "/customization/home", icon: LayoutTemplate, permission: "customization.read", ready: false },
+      { title: "Home builder", href: "/customization/home", icon: LayoutTemplate, permission: "customization.read", ready: true },
       { title: "Banners", href: "/customization/banners", icon: ImageIcon, permission: "customization.read", ready: false },
       { title: "Top 10", href: "/customization/top10", icon: ListOrdered, permission: "customization.read", ready: false },
       { title: "Feature flags", href: "/customization/flags", icon: Flag, permission: "customization.read", ready: true },
