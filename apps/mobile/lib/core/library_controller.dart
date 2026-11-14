@@ -482,12 +482,11 @@ class LibraryController extends StateNotifier<LibraryState> {
     return null;
   }
 
-  /// "APP 4K" is the player's placeholder when the lookup missed; it was
-  /// saved to the server as the title (17 Oct: Continue Watching showed
-  /// "APP 4K" under In Bruges).
+  /// The app name is the player's placeholder title when the lookup missed;
+  /// never save it as a real title.
   static bool isPlaceholderTitle(String? title) {
     final t = (title ?? '').trim();
-    return t.isEmpty || t == 'APP 4K';
+    return t.isEmpty || t == AppBrand.name;
   }
 
   Future<void> setProgress(

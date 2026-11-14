@@ -29,7 +29,7 @@ class AppDots extends StatelessWidget {
   }
 }
 
-/// Locked APP 4K loader map (app standard — do not change casually):
+/// Locked the app loader map (app standard — do not change casually):
 /// - Buttons → [AppLoader.button] (`progressiveDots`)
 /// - Player / video buffering → [AppLoader.player] (`staggeredDotsWave`)
 /// - Poster cards (home rails, two-column grids) → [AppLoader.cardPlaceholder]

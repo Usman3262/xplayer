@@ -12,7 +12,7 @@ enum AppUpdateOutcome {
   /// APK downloaded and verified; the system installer is showing.
   installerOpened,
 
-  /// Android asked the user to allow installs from APP 4K first.
+  /// Android asked the user to allow installs from the app first.
   needsPermission,
 
   /// Not possible in-app (iOS, no channel, download/verify failed).

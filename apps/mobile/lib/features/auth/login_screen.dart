@@ -11,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/session_controller.dart';
 
-/// Figma: APP 4K Mobile Login (14:4569)
+/// Figma: the app Mobile Login (14:4569)
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 

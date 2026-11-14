@@ -14,7 +14,7 @@ void _log(String msg) {
   if (kDebugMode || kProfileMode) debugPrint('[LaunchSound] $msg');
 }
 
-/// Plays the APP 4K splash chime. Prefer app-local asset (reliable on
+/// Plays the the app splash chime. Prefer app-local asset (reliable on
 /// Android); fall back to package bytes via temp file / BytesSource.
 Future<AudioPlayer?> playAppLaunchSting() async {
   await _disposeLaunchPlayer();

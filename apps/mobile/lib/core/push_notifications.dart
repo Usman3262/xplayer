@@ -52,9 +52,14 @@ class PushNotifications {
     }
     _started = true;
 
-    await _initLocalNotifications();
-    await _createAndroidChannels();
-    await _requestTrayPermission();
+    try {
+      await _initLocalNotifications();
+      await _createAndroidChannels();
+      await _requestTrayPermission();
+    } catch (e) {
+      // No notification support here (tests, unusual devices): keep going.
+      debugPrint('[Push] local notifications unavailable: $e');
+    }
     unawaited(refreshUnread());
   }
 

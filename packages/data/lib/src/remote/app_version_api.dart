@@ -50,6 +50,8 @@ class AppReleaseBuildDto {
     final v = raw?.trim();
     if (v == null || v.isEmpty) return null;
     if (v.contains('://')) return v;
+    // No download host configured: a relative path cannot be resolved.
+    if (AppReleaseUrls.installPage.isEmpty) return null;
     return '${AppReleaseUrls.installPage}/${v.replaceAll(RegExp(r'^/+'), '')}';
   }
 

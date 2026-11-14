@@ -65,9 +65,15 @@ class _MobileRootAppState extends ConsumerState<MobileRootApp>
 
   late final CatalogSync _catalogSync = CatalogSync(ref);
 
+  void _onThemeChanged() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
+    // Global theme (AppThemeConfig): a new theme rebuilds the whole app.
+    AppThemeConfig.revision.addListener(_onThemeChanged);
     WidgetsBinding.instance.addObserver(this);
     _catalogSync.start();
     // Start the downloads controller with the app, not when a screen first
@@ -108,6 +114,7 @@ class _MobileRootAppState extends ConsumerState<MobileRootApp>
     _unreadPollTimer?.cancel();
     _catalogSync.dispose();
     WidgetsBinding.instance.removeObserver(this);
+    AppThemeConfig.revision.removeListener(_onThemeChanged);
     super.dispose();
   }
 
@@ -189,7 +196,7 @@ class _MobileRootAppState extends ConsumerState<MobileRootApp>
         lang == AppLang.ar ? const Locale('ar') : const Locale('en');
 
     return MaterialApp.router(
-      key: ValueKey('lang-$language-rtl-$rtl'),
+      key: ValueKey('lang-$language-rtl-$rtl-theme-${AppThemeConfig.revision.value}'),
       title: AppBrand.name,
       debugShowCheckedModeBanner: false,
       theme: themed,

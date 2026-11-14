@@ -66,13 +66,13 @@ class AppearanceState {
         return (
           AppColors.cyan,
           AppColors.magenta,
-          const Color(0xFF000000),
+          AppColors.background,
         );
-      default: // APP Cinematic
+      default: // Cinematic (follows the global theme)
         return (
           AppColors.cyan,
           AppColors.magenta,
-          const Color(0xFF000000),
+          AppColors.background,
         );
     }
   }

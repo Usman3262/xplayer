@@ -1,1 +1,11 @@
-{"t0":1792411200000,"kid":"test1","publicKey":"qlRoQo52zFiyKf1SShBHTBEB3eemQfnpmTkAnkU+GAk=","mirror":{"alg":"Ed25519","kid":"test1","payload":"eyJ0eXAiOiJjcnVuY2g0ay5hcHAtY29uZmlnIiwic2NoZW1hIjoyLCJzZXEiOjE3OTI0MTEyMDAsIm1pblNlcSI6MCwiaWF0IjoxNzkyNDExMjAwLCJleHAiOjE3OTMwMTYwMDAsImFwaUJhc2VVcmxzIjpbImh0dHBzOi8vYXBpLmV4YW1wbGUuY29tIiwiaHR0cHM6Ly9iYWNrdXAuZXhhbXBsZS5uZXQiXSwiZmVhdHVyZXMiOnsiZG93bmxvYWRzIjp0cnVlLCJkZXZpY2VQb3AiOmZhbHNlfX0","sig":"P9e-xd87H0kkPBvu6EoPHVAcA73tteCrjJlfI656T7iVOt-SK5va__VsPpTnMsu2Clr223HqjizobbJ0uB8FCQ"}}
+{
+  "t0": 1792411200000,
+  "kid": "test1",
+  "publicKey": "ebVWLo/mVPlAeLES6KmLp5AfhTrmlb7X4OORC60ElmQ=",
+  "mirror": {
+    "alg": "Ed25519",
+    "kid": "test1",
+    "payload": "eyJ0eXAiOiJhcHAuYXBwLWNvbmZpZyIsInNjaGVtYSI6Miwic2VxIjoxNzkyNDExMjAwLCJtaW5TZXEiOjAsImlhdCI6MTc5MjQxMTIwMCwiZXhwIjoxNzkzMDE2MDAwLCJhcGlCYXNlVXJscyI6WyJodHRwczovL2FwaS5leGFtcGxlLmNvbSIsImh0dHBzOi8vYmFja3VwLmV4YW1wbGUubmV0Il0sImZlYXR1cmVzIjp7ImRvd25sb2FkcyI6dHJ1ZSwiZGV2aWNlUG9wIjpmYWxzZX19",
+    "sig": "lSgYeaAdKQKG83qzd7AXICPmKC3WIEsoxZlZ2AoC8dkLQOvNqWZWa4j1tiHDQRmyt1T9UYBoFYu8oyJH0bmpCQ"
+  }
+}

@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:domain/domain.dart' show AppBrand;
-// Shared UI language helpers for APP 4K (mobile + TV).
+// Shared UI language helpers for the app (mobile + TV).
 // Prefs key matches the old APK convention: `app.lang` → `en` | `ar` | `ur`.
 import '../utils/display_name.dart';
 
@@ -879,7 +879,7 @@ class AppCopy {
     'اس ڈاؤن لوڈ کے لیے اس ڈیوائس پر کافی جگہ نہیں۔',
   );
   // Client 18 Oct #3: two different limits, labelled so they are not
-  // confused. The allowance is APP 4K's; free space is the device's own.
+  // confused. The allowance is the app's; free space is the device's own.
   String downloadQuotaLine(String used, String limit) => _t(
     '${AppBrand.name} download allowance: $used of $limit used (shared by all your devices)',
     'حصة تنزيلات ${AppBrand.name}: $used من $limit مستخدمة (مشتركة بين كل أجهزتك)',
@@ -2094,7 +2094,7 @@ class AppCopy {
       case 'Top 10 in Your Region':
         return _t('Weekly Picks', 'اختيارات الأسبوع', 'ہفتے کے انتخاب');
       case 'Arabic Originals':
-        // Not "Originals": APP 4K produces no content (client 6 Nov #6).
+        // Not "Originals": the app produces no content (client 6 Nov #6).
         return _t('Arabic Movies & Series', 'أفلام ومسلسلات عربية', 'عربی فلمیں اور سیریز');
       case 'Live TV & Channels':
         return _t(

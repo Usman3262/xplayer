@@ -15,7 +15,7 @@ import '../remote/api_exception.dart';
 /// The server keeps one verdict per device (the last check), so a direct
 /// install is never sent to Play Integrity (it would always say "not from Play").
 ///
-/// Proves to the server that this is the real APP 4K app on real Android
+/// Proves to the server that this is the real the app app on real Android
 /// hardware: the server sends a challenge, the Android Keystore makes a fresh
 /// key with that challenge baked into a Google-signed certificate chain, and
 /// the app posts the chain back. See backend

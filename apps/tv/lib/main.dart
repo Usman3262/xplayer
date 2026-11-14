@@ -85,9 +85,15 @@ class _TvRootAppState extends ConsumerState<TvRootApp>
   Timer? _uiLog;
   late final TvCatalogSync _catalogSync = TvCatalogSync(ref);
 
+  void _onThemeChanged() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
+    // Global theme (AppThemeConfig): a new theme rebuilds the whole app.
+    AppThemeConfig.revision.addListener(_onThemeChanged);
     WidgetsBinding.instance.addObserver(this);
     TvInputActivity.ensureStarted();
     _catalogSync.start();
@@ -131,6 +137,7 @@ class _TvRootAppState extends ConsumerState<TvRootApp>
     _uiLog?.cancel();
     _catalogSync.dispose();
     WidgetsBinding.instance.removeObserver(this);
+    AppThemeConfig.revision.removeListener(_onThemeChanged);
     super.dispose();
   }
 
@@ -201,7 +208,7 @@ class _TvRootAppState extends ConsumerState<TvRootApp>
     final materialLocale =
         lang == AppLang.ar ? const Locale('ar') : const Locale('en');
     return MaterialApp.router(
-      key: ValueKey('tv-lang-$language-rtl-$rtl-theme-${appearance.name}'),
+      key: ValueKey('tv-lang-$language-rtl-$rtl-theme-${appearance.name}-${AppThemeConfig.revision.value}'),
       title: '${AppBrand.name} TV',
       debugShowCheckedModeBanner: false,
       locale: materialLocale,

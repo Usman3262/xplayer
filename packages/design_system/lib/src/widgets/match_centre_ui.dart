@@ -9,7 +9,7 @@ import 'match_page_ui.dart' show goalBallBadge;
 import 'remote_image.dart';
 
 /// Match Centre building blocks, following the client's supplied design
-/// ("APP 4K Sports Match Center & Lineup", 20 Oct): competition chip,
+/// ("the app Sports Match Center & Lineup", 20 Oct): competition chip,
 /// glowing score box, LIVE pill, single-team pitch with the top player
 /// highlighted, bench strip, Key Match Events cards, Head-to-Head stats.
 /// Plain inputs only, so the TV and phone apps share one look.

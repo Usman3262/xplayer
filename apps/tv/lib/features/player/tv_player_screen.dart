@@ -318,8 +318,7 @@ class _TvPlayerScreenState extends ConsumerState<TvPlayerScreen>
       );
       if (t.isEmpty) continue;
       final upper = t.toUpperCase();
-      if (upper == 'APP 4K' ||
-          upper == 'APP' ||
+      if (upper == AppBrand.name.toUpperCase() ||
           upper == 'UNTITLED' ||
           upper == 'STREAM') {
         continue;

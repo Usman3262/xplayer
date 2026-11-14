@@ -167,7 +167,7 @@ class _TvKeyboardState extends State<_TvKeyboard> {
               final k = e.logicalKey;
               // Back closes through the route (system back). Handling it
               // here too made one press also reach the screen below
-              // ("Exit APP 4K?").
+              // ("Exit the app?").
               // A real keyboard / remote with keys still types here.
               final ch = e.character;
               if (ch != null && ch.length == 1 && ch.codeUnitAt(0) >= 32) {

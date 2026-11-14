@@ -12,7 +12,7 @@ import '../theme/app_colors.dart';
 /// Horizontal lockup swaps assets by locale direction:
 /// LTR → [logoLockup] (mark then wordmark);
 /// RTL → [logoLockupRtl] (wordmark then mark).
-/// Glyphs stay `APP 4K` (never `4K APP`).
+/// Glyphs stay `the app` (never `4K APP`).
 class AppLogo extends StatelessWidget {
   const AppLogo({
     super.key,

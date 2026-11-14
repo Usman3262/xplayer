@@ -418,7 +418,7 @@ List<List<MpPlayer>> mpPitchRows(List<MpPlayer> players) {
 }
 
 /// Angled pitch: forwards at the top, goalkeeper at the bottom, formation
-/// badge bottom-start, APP 4K mark in the centre circle.
+/// badge bottom-start, the app mark in the centre circle.
 class MpPitch extends StatelessWidget {
   const MpPitch({super.key, required this.players, this.formation, this.scale = 1, this.aspectRatio = 0.92});
   final List<MpPlayer> players;

@@ -28,7 +28,7 @@ abstract final class TvPlatformProfile {
   /// and focus moves (no animations). Android TV keeps false.
   static bool lowPowerUi = false;
 
-  /// Closes the app ("Exit APP 4K?" → Exit). Null = Android's
+  /// Closes the app ("Exit the app?" → Exit). Null = Android's
   /// SystemNavigator.pop. A web app on LG cannot close itself that way; the
   /// LG build sets `window.close()` (client 26 Oct #9).
   static void Function()? exitApp;

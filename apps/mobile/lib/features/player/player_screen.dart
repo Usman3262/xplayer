@@ -4277,10 +4277,10 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Padding(
-                  padding: final EdgeInsets.fromLTRB(16, 14, 16, 8),
+                  padding: EdgeInsets.fromLTRB(16, 14, 16, 8),
                   child: Row(
                     children: [
-                      const NeonGlowIcon(Icons.live_tv_rounded, size: 22),
+                      NeonGlowIcon(Icons.live_tv_rounded, size: 22),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(

@@ -10,11 +10,15 @@ Personal Flutter test app: media player for phone and Android TV.
 Shared code: `packages/domain` (entities), `packages/data` (data layer),
 `packages/design_system` (theme, widgets, assets).
 
-## Rename the app
+## Rename the app / change its ID
 
-Edit **`app.config`** (repo root) → `APP_NAME = ...`, then `flutter clean` and rebuild.
-That one value sets the Android launcher name (phone + TV), the iPhone home-screen
-name, and in-app text (`AppBrand.name`).
+Edit **`app.config`** (repo root) → `APP_NAME`, `APP_ID`, `APP_DEVELOPMENT_TEAM`,
+then `flutter clean` and rebuild. It sets the Android launcher name and
+applicationId (phone + TV), the iPhone name and bundle id, and in-app text
+(`AppBrand.name`).
+
+Full list of what was changed and where to change everything else (logo, theme,
+backend URL…): **[XPLAYER_CHECKLIST.md](XPLAYER_CHECKLIST.md)**.
 
 ## Run
 
@@ -27,6 +31,9 @@ cd apps/tv && flutter run -d <android-tv-device>
 Release builds are signed with the debug key unless you add
 `apps/<app>/android/key.properties` (`storeFile`, `storePassword`, `keyAlias`, `keyPassword`).
 
-## Spec
+## Plan
 
-`new-platform.md` — product spec for the Supabase-based version.
+- `new-platform.md` — product spec (Supabase + admin panel + provider engine).
+- `ROADMAP_PROGRESS.md` — what is done, what is next, what remains.
+- `CLAUDE.md` — project rules (no hard-coding, security, performance).
+- `docs/PROVIDER_PROTOCOLS.md` — Xtream / M3U / Stalker-MAC notes.

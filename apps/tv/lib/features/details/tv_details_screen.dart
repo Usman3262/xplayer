@@ -18,7 +18,7 @@ import '../../widgets/focus_tile.dart';
 import '../../widgets/tv_poster.dart';
 import '../../widgets/tv_ui.dart';
 
-/// Figma: APP 4K TV Movie Details V2 / TV Series Details. Full-bleed
+/// Figma: the app TV Movie Details V2 / TV Series Details. Full-bleed
 /// backdrop hero, bilingual title, cyan match %, action row, season tabs,
 /// 16:9 episode cards and More Like This.
 class TvDetailsScreen extends ConsumerStatefulWidget {

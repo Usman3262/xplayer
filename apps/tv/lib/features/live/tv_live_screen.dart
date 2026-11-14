@@ -23,7 +23,7 @@ import '../../widgets/tv_poster.dart';
 import '../../widgets/tv_ui.dart';
 import 'tv_live_preview.dart';
 
-/// Figma: APP 4K TV Live TV & EPG V2. Preview panel for the focused
+/// Figma: the app TV Live TV & EPG V2. Preview panel for the focused
 /// channel, a category column and the channel list. Programme times are not
 /// shown: the provider feed has no guide data for these channels.
 class TvLiveScreen extends ConsumerStatefulWidget {

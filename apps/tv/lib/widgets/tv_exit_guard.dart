@@ -19,7 +19,7 @@ void resetTvExitDialogGuard() {
   _exitDialogClosedAt = null;
 }
 
-/// "Exit APP 4K?" with Cancel focused first. Closes the app on Exit.
+/// "Exit the app?" with Cancel focused first. Closes the app on Exit.
 ///
 /// TV buttons (cyan focus ring, OK/Select via ActivateIntent) instead of
 /// Material Text/FilledButton, whose focus highlight was barely visible on the

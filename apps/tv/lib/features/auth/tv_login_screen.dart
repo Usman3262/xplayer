@@ -383,7 +383,7 @@ class _TvLoginScreenState extends ConsumerState<TvLoginScreen> {
                       const SizedBox(height: 8),
                       Text(
                         copy.primaryRecoveryBody,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textSecondary,
                           height: 1.35,
                         ),
@@ -483,7 +483,7 @@ class _TvLoginScreenState extends ConsumerState<TvLoginScreen> {
                         if (deviceLimit)
                           Text(
                             copy.deviceLimitReachedTitle,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.danger,
                               fontWeight: FontWeight.w800,
                             ),
@@ -491,13 +491,13 @@ class _TvLoginScreenState extends ConsumerState<TvLoginScreen> {
                         if (deviceLimit) const SizedBox(height: 4),
                         Text(
                           dialogError!,
-                          style: const TextStyle(color: AppColors.danger),
+                          style: TextStyle(color: AppColors.danger),
                         ),
                         if (deviceLimit) ...[
                           const SizedBox(height: 6),
                           Text(
                             copy.deviceLimitReachedBody,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.textSecondary,
                               height: 1.35,
                               fontSize: 13,
@@ -686,7 +686,7 @@ class _TvLoginScreenState extends ConsumerState<TvLoginScreen> {
               Text(
                 copy.mediaPlayerOnlyNotice,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
@@ -772,7 +772,7 @@ class _TopBar extends StatelessWidget {
                 Container(
                   width: 7,
                   height: 7,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: AppColors.match,
                     shape: BoxShape.circle,
                   ),
@@ -842,13 +842,13 @@ class _FooterBar extends StatelessWidget {
                   label: copy.sslBadge,
                   iconColor: AppColors.match,
                 ),
-                final SizedBox(width: 8),
-                const _FooterChip(
+                SizedBox(width: 8),
+                _FooterChip(
                   icon: Icons.hd_outlined,
                   label: 'Ultra HD 4K HDR10+',
                 ),
-                final SizedBox(width: 8),
-                const _FooterChip(
+                SizedBox(width: 8),
+                _FooterChip(
                   icon: Icons.spatial_audio_off_outlined,
                   label: 'Dolby Atmos',
                   iconColor: AppColors.magenta,

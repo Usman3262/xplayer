@@ -108,18 +108,16 @@ void main() {
     expect(g.sha256, 'a' * 64);
   });
 
-  test('releases.json relative paths resolve to the download host', () {
+  test('releases.json relative paths are ignored without a download host', () {
     final remote = AppVersionDto.fromJson({
       'builds': [
         {'id': 'android-tv', 'platform': 'Android TV', 'version': '6.0.24+114', 'file': 'android/tv/t-114.apk', 'latestUrl': 'tv.apk'},
       ],
     });
     final b = remote.buildFor(tv: true)!;
-    expect(b.downloadUrl, 'https://dl.example/android/tv/t-114.apk');
-    expect(b.latestUrl, 'https://dl.example/tv.apk');
-    final g = resolveAppUpdateGate(installedVersion: '6.0.23', installedBuild: 112, isTv: true, remote: remote);
-    expect(g.offerUpdate, isTrue);
-    expect(g.apkUrl, 'https://dl.example/android/tv/t-114.apk');
+    expect(AppReleaseUrls.installPage, isEmpty);
+    expect(b.downloadUrl, isNull);
+    expect(b.latestUrl, isNull);
   });
 
   test('backend still on 6.0.19: no prompt for 6.0.23 installs (publish needed)', () {

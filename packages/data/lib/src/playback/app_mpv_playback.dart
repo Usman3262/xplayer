@@ -16,7 +16,7 @@ import '../device/device_capabilities.dart';
 import '../device/device_capabilities_store.dart';
 import '../diag/diag.dart';
 
-/// Shared media_kit / libmpv settings for APP 4K (mobile + TV).
+/// Shared media_kit / libmpv settings for the app (mobile + TV).
 /// Tier-based buffer sizes (brief §7). Falls back to MID before caps load.
 PlayerConfiguration appPlayerConfiguration({TierMpvConfig? tier}) {
   final cfg = tier ?? DeviceCapabilitiesStore.instance.mpv;
@@ -317,7 +317,7 @@ bool _appMpvSetAsync(Object native, String key, String value) {
   }
 }
 
-/// Client 18 Oct #10 (ANR "APP 4K isn't responding", reproduced on the
+/// Client 18 Oct #10 (ANR "the app isn't responding", reproduced on the
 /// phone emulator 18 Oct 16:41): an mpv property read is a synchronous
 /// native call on the app's main thread, and it waits for mpv's core. While
 /// mpv opens a stream or waits on a slow server, that wait ran past

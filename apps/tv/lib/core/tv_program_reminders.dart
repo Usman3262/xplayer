@@ -14,7 +14,7 @@ import 'tv_session.dart';
 /// there, and on this TV (works offline / with older backends).
 ///
 /// Limit: Android TV has no heads-up notifications for apps, so the alert is
-/// shown while APP 4K is open; reminders that start while the app is
+/// shown while the app is open; reminders that start while the app is
 /// closed are dropped after 10 minutes.
 class TvProgramReminder {
   const TvProgramReminder({

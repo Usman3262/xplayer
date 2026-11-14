@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../widgets/tv_catalog_browse.dart';
 
-/// Figma: APP 4K TV Movies Browse. Banner, category chips, one row per
+/// Figma: the app TV Movies Browse. Banner, category chips, one row per
 /// category with View All.
 class TvMoviesScreen extends StatelessWidget {
   const TvMoviesScreen({super.key});

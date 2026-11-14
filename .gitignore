@@ -41,3 +41,6 @@ build/
 .DS_Store
 .claude/
 node_modules/
+
+# Local test tools with real provider credentials (never commit)
+neo-channel-tester.html

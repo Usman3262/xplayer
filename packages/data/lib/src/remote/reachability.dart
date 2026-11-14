@@ -22,7 +22,7 @@ Future<bool> appServerReachable({
 }
 
 /// Client 5 Nov: do not say "No internet" when the customer's connection
-/// works and only the APP 4K server (or the provider behind it) fails.
+/// works and only the the app server (or the provider behind it) fails.
 /// A TCP connect to public DNS hosts answers in about a second either way.
 Future<bool> deviceHasInternet({
   Duration timeout = const Duration(seconds: 3),

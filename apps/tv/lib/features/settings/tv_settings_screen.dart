@@ -308,13 +308,13 @@ class _TvSettingsScreenState extends ConsumerState<TvSettingsScreen> {
       case 'Carbon':
         return const [Color(0xFF1A1A1A), Color(0xFFE91E8C), Color(0xFFFF6B9D)];
       case 'Cinematic':
-        return final [
+        return [
           Color(0xFF050505),
           AppColors.cyan,
           AppColors.magenta,
         ];
       default:
-        return final [Color(0xFF0A0A0A), AppColors.textSecondary, Colors.white70];
+        return [Color(0xFF0A0A0A), AppColors.textSecondary, Colors.white70];
     }
   }
 

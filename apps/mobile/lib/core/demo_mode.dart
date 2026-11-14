@@ -16,7 +16,7 @@ final demoCatalogRepositoryProvider = Provider<DemoCatalogRepository>(
 const demoSignInRoute = '/demo/sign-in';
 const demoCreditsRoute = '/demo/credits';
 
-/// Pages that need a APP 4K account; in demo they open [demoSignInRoute].
+/// Pages that need a the app account; in demo they open [demoSignInRoute].
 const _accountOnlyPrefixes = <String>[
   '/profiles',
   '/downloads',

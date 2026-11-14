@@ -23,7 +23,7 @@ import '../../widgets/tv_ui.dart';
 import '../browse/tv_view_all_screen.dart';
 import '../sports/tv_match_centre_screen.dart' show TvHomeMatchesRail;
 
-/// Figma: APP 4K TV Home (UHD Master Hero)
+/// Figma: the app TV Home (UHD Master Hero)
 /// The first Top 10 row on Home (Friday Top 10 notification target).
 final tvTop10Key = GlobalKey(debugLabel: 'tvTop10');
 

@@ -1,17 +1,17 @@
 {
   "t0": 1792440000000,
   "kid": "test1",
-  "publicKey": "LA/vBtvEP5L9e285K15yrfapoE6ucUqatf8If8TI7ZQ=",
+  "publicKey": "ebVWLo/mVPlAeLES6KmLp5AfhTrmlb7X4OORC60ElmQ=",
   "older": {
     "alg": "Ed25519",
     "kid": "test1",
-    "payload": "eyJ0eXAiOiJjcnVuY2g0ay5hcHAtY29uZmlnIiwic2NoZW1hIjoyLCJzZXEiOjE3OTI0NDAwMDAsIm1pblNlcSI6MCwiaWF0IjoxNzkyNDQwMDAwLCJleHAiOjE3OTI0NjE2MDAsImFwaUJhc2VVcmxzIjpbImh0dHBzOi8vYXBpLmV4YW1wbGUuY29tIiwiaHR0cHM6Ly9iYWNrdXAuZXhhbXBsZS5uZXQiLCJodHRwOi8vaW5zZWN1cmUuZXhhbXBsZS5vcmciXSwiZmVhdHVyZXMiOnsiZG93bmxvYWRzIjp0cnVlLCJkZXZpY2VQb3AiOmZhbHNlfX0",
-    "sig": "uyNWOXMgRNnV86d5AeS9zequbjeO96s8Y4RxJnJuHfk5XBHDHFjF0qNLHNIOug0BLiqoduB58Ut6E8ae_fuLBg"
+    "payload": "eyJ0eXAiOiJhcHAuYXBwLWNvbmZpZyIsInNjaGVtYSI6Miwic2VxIjoxNzkyNDQwMDAwLCJtaW5TZXEiOjAsImlhdCI6MTc5MjQ0MDAwMCwiZXhwIjoxNzkyNDYxNjAwLCJhcGlCYXNlVXJscyI6WyJodHRwczovL2FwaS5leGFtcGxlLmNvbSIsImh0dHBzOi8vYmFja3VwLmV4YW1wbGUubmV0IiwiaHR0cDovL2luc2VjdXJlLmV4YW1wbGUub3JnIl0sImZlYXR1cmVzIjp7ImRvd25sb2FkcyI6dHJ1ZSwiZGV2aWNlUG9wIjpmYWxzZX19",
+    "sig": "MQB-akBIbT8Wk1CJnLw2s6mj6z5t-53l0GZKOvnlLlnEYk81Gv9e9EnS8XnHuXtAJ5Sdt3OBGGmSahubXCNxDQ"
   },
   "newer": {
     "alg": "Ed25519",
     "kid": "test1",
-    "payload": "eyJ0eXAiOiJjcnVuY2g0ay5hcHAtY29uZmlnIiwic2NoZW1hIjoyLCJzZXEiOjE3OTI0NDM2MDAsIm1pblNlcSI6MCwiaWF0IjoxNzkyNDQzNjAwLCJleHAiOjE3OTI0NjUyMDAsImFwaUJhc2VVcmxzIjpbImh0dHBzOi8vYXBpLmV4YW1wbGUuY29tIiwiaHR0cHM6Ly9iYWNrdXAuZXhhbXBsZS5uZXQiLCJodHRwOi8vaW5zZWN1cmUuZXhhbXBsZS5vcmciXSwiZmVhdHVyZXMiOnsiZG93bmxvYWRzIjp0cnVlLCJkZXZpY2VQb3AiOmZhbHNlfX0",
-    "sig": "x42uF83nQHAv5MtTaTdIjKYLen4zw_PmCJhXIiG97BCx6TfaXuBqXGD0NNS042cIQ8oXlICRXP6HXzMTz0aDDQ"
+    "payload": "eyJ0eXAiOiJhcHAuYXBwLWNvbmZpZyIsInNjaGVtYSI6Miwic2VxIjoxNzkyNDQzNjAwLCJtaW5TZXEiOjAsImlhdCI6MTc5MjQ0MzYwMCwiZXhwIjoxNzkyNDY1MjAwLCJhcGlCYXNlVXJscyI6WyJodHRwczovL2FwaS5leGFtcGxlLmNvbSIsImh0dHBzOi8vYmFja3VwLmV4YW1wbGUubmV0IiwiaHR0cDovL2luc2VjdXJlLmV4YW1wbGUub3JnIl0sImZlYXR1cmVzIjp7ImRvd25sb2FkcyI6dHJ1ZSwiZGV2aWNlUG9wIjpmYWxzZX19",
+    "sig": "ca1EX6jZeuY5LEFeZKpyFTDsHwWUIVf3JoTSm65LU5OPh2Yl3myUSEKPbJJn9N3C3u0besSeHX5qS7HGlgyUAA"
   }
 }

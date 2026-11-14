@@ -6,7 +6,7 @@ import 'app_logo.dart';
 import '../assets/app_assets.dart';
 import '../theme/app_colors.dart';
 
-/// Brand wordmark asset. Always LTR (`APP 4K`) — never mirrors in RTL locales.
+/// Brand wordmark asset. Always LTR (`the app`) — never mirrors in RTL locales.
 class AppWordmark extends StatelessWidget {
   const AppWordmark({
     super.key,

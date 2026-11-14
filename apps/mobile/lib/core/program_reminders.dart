@@ -13,7 +13,7 @@ import 'session_controller.dart';
 /// with Watch. Saved on the backend per profile when the reminders API is
 /// there, and on this TV (works offline / with older backends).
 ///
-/// Limit: the alert is an in-app banner while APP 4K is open (no system
+/// Limit: the alert is an in-app banner while the app is open (no system
 /// notification plugin yet); reminders that start while the app is closed
 /// are dropped after 10 minutes.
 class ProgramReminder {

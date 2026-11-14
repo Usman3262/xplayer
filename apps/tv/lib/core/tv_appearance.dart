@@ -34,14 +34,14 @@ class TvAppearanceState {
         return (
           AppColors.cyan,
           AppColors.magenta,
-          const Color(0xFF000000),
+          AppColors.background,
         );
       case 'Cinematic':
       default:
         return (
           AppColors.cyan,
           AppColors.magenta,
-          const Color(0xFF000000),
+          AppColors.background,
         );
     }
   }

@@ -1,7 +1,7 @@
 import '../locale/app_locale.dart';
 import 'package:domain/domain.dart' show AppBrand;
 
-/// Client-provided legal copy for APP 4K (EN · AR · UR).
+/// Client-provided legal copy for the app (EN · AR · UR).
 class AppLegalCopy {
   AppLegalCopy._();
 

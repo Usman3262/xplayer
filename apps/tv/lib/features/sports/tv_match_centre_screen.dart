@@ -1133,7 +1133,7 @@ class _LeagueLogo extends StatelessWidget {
           : RemoteImage(
               url: url,
               fit: BoxFit.contain,
-              fallbackColors: final [AppColors.textSecondary, Color(0xFF6B7487)],
+              fallbackColors: [AppColors.textSecondary, Color(0xFF6B7487)],
             ),
     );
   }
