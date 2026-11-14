@@ -1,0 +1,54 @@
+name: design_system
+description: XPlayer design tokens, shared UI, and brand/media assets.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.13.2
+  flutter: ">=1.17.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  domain:
+    path: ../domain
+  cached_network_image: ^3.4.1
+  flutter_cache_manager: ^3.4.1
+  flutter_svg: ^2.0.17
+  loading_animation_widget: ^1.3.0
+  shimmer: ^4.0.0
+  vector_graphics: ^1.1.18
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  assets:
+    - assets/branding/
+    - assets/audio/
+    - assets/avatars/
+  fonts:
+    # Arabic interface font (client 17 Oct). SIL Open Font License, see
+    # assets/fonts/ibm_plex_sans_arabic/OFL.txt.
+    - family: IBMPlexSansArabic
+      fonts:
+        - asset: assets/fonts/ibm_plex_sans_arabic/IBMPlexSansArabic-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/ibm_plex_sans_arabic/IBMPlexSansArabic-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/ibm_plex_sans_arabic/IBMPlexSansArabic-SemiBold.ttf
+          weight: 600
+    # Ranked-row numbers as on LG (client 4 Nov). SIL OFL.
+    - family: BebasNeue
+      fonts:
+        - asset: assets/fonts/bebas_neue/BebasNeue-Regular.ttf
+    # Weekly-picks rank digits (client mockup 20 Oct): serif Black + cyan
+    # exterior outline. SIL OFL — see playfair_display/OFL.txt.
+    - family: PlayfairDisplay
+      fonts:
+        - asset: assets/fonts/playfair_display/PlayfairDisplaySC-Black.ttf
+          weight: 900

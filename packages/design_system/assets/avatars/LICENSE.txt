@@ -1,0 +1,8 @@
+Profile avatars face01–face30
+
+Art: "Lorelei" by Lisa Wischofsky (https://www.figma.com/community/file/1198749693280469639),
+remixed by DiceBear (https://www.dicebear.com/styles/lorelei/).
+License: CC0 1.0 (public domain dedication, https://creativecommons.org/publicdomain/zero/1.0/).
+Free for commercial use; no attribution required.
+
+Generated 12 Nov 2026 with @dicebear/core 9.2.2 + @dicebear/collection 9.2.2

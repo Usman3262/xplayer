@@ -1,0 +1,87 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Android TV / Fire TV -->
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="false"/>
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false"/>
+    <uses-permission
+        android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- Self-update for APKs installed outside Play (Downloader, Fire TV); removed in Play builds (src/play). -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+    <application
+        android:label="${appName}"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher"
+        android:banner="@drawable/tv_banner"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:usesCleartextTraffic="true"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:enableOnBackInvokedCallback="false">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <meta-data
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme"/>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category
+                    android:name="android.intent.category.LEANBACK_LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2"/>
+        <!-- OpenGL ES renderer: the SurfaceTexture video path (green bar fix
+             in MainActivity) is native to GL. -->
+        <meta-data
+            android:name="io.flutter.embedding.android.ImpellerBackend"
+            android:value="opengles"/>
+        <!-- Skia instead of Impeller (client 21 Oct "severe lag"). Measured on
+             the client's TCL (Realtek RTD288O, Mali-G31, 2 GB), same Home
+             remote run: Impeller 26-27% slow frames, build spikes 224-318 ms;
+             Skia 15% cold / 3% warm, max raster 29 ms warm. Live and VOD
+             playback (native SurfaceTexture path) checked on the TCL. -->
+        <meta-data
+            android:name="io.flutter.embedding.android.EnableImpeller"
+            android:value="false"/>
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.appupdate"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/app_update_paths"/>
+        </provider>
+    </application>
+    <queries>
+        <intent>
+            <action
+                android:name="android.intent.action.PROCESS_TEXT"/>
+            <data
+                android:mimeType="text/plain"/>
+        </intent>
+        <!-- C12: open YouTube / browser for trailers (Android 11+ visibility). -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="http"/>
+        </intent>
+    </queries>
+</manifest>

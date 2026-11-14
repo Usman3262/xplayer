@@ -1,0 +1,17 @@
+{
+  "t0": 1792440000000,
+  "kid": "test1",
+  "publicKey": "LA/vBtvEP5L9e285K15yrfapoE6ucUqatf8If8TI7ZQ=",
+  "older": {
+    "alg": "Ed25519",
+    "kid": "test1",
+    "payload": "eyJ0eXAiOiJjcnVuY2g0ay5hcHAtY29uZmlnIiwic2NoZW1hIjoyLCJzZXEiOjE3OTI0NDAwMDAsIm1pblNlcSI6MCwiaWF0IjoxNzkyNDQwMDAwLCJleHAiOjE3OTI0NjE2MDAsImFwaUJhc2VVcmxzIjpbImh0dHBzOi8vYXBpLmV4YW1wbGUuY29tIiwiaHR0cHM6Ly9iYWNrdXAuZXhhbXBsZS5uZXQiLCJodHRwOi8vaW5zZWN1cmUuZXhhbXBsZS5vcmciXSwiZmVhdHVyZXMiOnsiZG93bmxvYWRzIjp0cnVlLCJkZXZpY2VQb3AiOmZhbHNlfX0",
+    "sig": "uyNWOXMgRNnV86d5AeS9zequbjeO96s8Y4RxJnJuHfk5XBHDHFjF0qNLHNIOug0BLiqoduB58Ut6E8ae_fuLBg"
+  },
+  "newer": {
+    "alg": "Ed25519",
+    "kid": "test1",
+    "payload": "eyJ0eXAiOiJjcnVuY2g0ay5hcHAtY29uZmlnIiwic2NoZW1hIjoyLCJzZXEiOjE3OTI0NDM2MDAsIm1pblNlcSI6MCwiaWF0IjoxNzkyNDQzNjAwLCJleHAiOjE3OTI0NjUyMDAsImFwaUJhc2VVcmxzIjpbImh0dHBzOi8vYXBpLmV4YW1wbGUuY29tIiwiaHR0cHM6Ly9iYWNrdXAuZXhhbXBsZS5uZXQiLCJodHRwOi8vaW5zZWN1cmUuZXhhbXBsZS5vcmciXSwiZmVhdHVyZXMiOnsiZG93bmxvYWRzIjp0cnVlLCJkZXZpY2VQb3AiOmZhbHNlfX0",
+    "sig": "x42uF83nQHAv5MtTaTdIjKYLen4zw_PmCJhXIiG97BCx6TfaXuBqXGD0NNS042cIQ8oXlICRXP6HXzMTz0aDDQ"
+  }
+}

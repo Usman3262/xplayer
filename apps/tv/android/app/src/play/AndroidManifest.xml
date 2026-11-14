@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Play Store builds (-PplayStore): Play updates the app, so no self-install permission.
+     The Android TV track requires leanback; main keeps it optional for Fire TV / sideload APKs. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" tools:node="remove" />
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="true"
+        tools:replace="android:required" />
+</manifest>

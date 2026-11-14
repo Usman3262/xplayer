@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Client 4 Nov: no static logo before the opening animation. Android 12+
+     must show an icon, so it shows this empty one on black; the Flutter
+     splash then draws the animated mark as the first thing seen. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@android:color/transparent" />
+    <size android:width="1dp" android:height="1dp" />
+</shape>

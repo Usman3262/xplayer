@@ -1,0 +1,14 @@
+name: xplayer_workspace
+description: XPlayer monorepo workspace (mobile + TV).
+publish_to: none
+
+environment:
+  sdk: ^3.13.2
+
+workspace:
+  - apps/mobile
+  - apps/tv
+  - packages/design_system
+  - packages/domain
+  - packages/data
+

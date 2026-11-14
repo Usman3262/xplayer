@@ -1,0 +1,43 @@
+# Flutter / Dart
+.dart_tool/
+**/.dart_tool/
+build/
+**/build/
+.packages
+.pub-cache/
+.pub/
+.flutter-plugins
+.flutter-plugins-dependencies
+**/doc/api/
+**/Generated.xcconfig
+**/flutter_export_environment.sh
+**/Flutter.podspec
+
+# Android / iOS build state
+**/android/.gradle/
+**/android/local.properties
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+**/ios/Pods/
+**/ios/.symlinks/
+*.apk
+*.aab
+*.ipa
+
+# Secrets and signing (never commit)
+.env
+.env.*
+**/secrets/
+**/android/key.properties
+*.jks
+*.keystore
+*.p12
+*.pem
+
+# IDE / OS / tools
+.idea/
+*.iml
+.DS_Store
+.claude/
+node_modules/

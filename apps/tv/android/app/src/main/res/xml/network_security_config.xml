@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Playback CDNs often redirect HTTPS playUrl → plain HTTP (IP host). -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+    <!-- Our own hosts (API, signed config, downloads, panel) are HTTPS only, even
+         if a wrong http:// address ever reached the app (client 5 Nov, F2).
+         Media from the provider keeps the base rule above. -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">sksj.online</domain>
+    </domain-config>
+</network-security-config>
