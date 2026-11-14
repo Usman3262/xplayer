@@ -12,9 +12,9 @@ import { cn } from "@/lib/utils";
 
 import { deleteSection, moveSection, setSectionEnabled } from "./actions";
 import { HomePreview } from "./home-preview";
-import { SectionDialog, type SectionRow } from "./section-dialog";
+import { SectionDialog, type SectionRow, type Top10Option } from "./section-dialog";
 
-export function HomeBuilder({ sections, canWrite }: { sections: SectionRow[]; canWrite: boolean }) {
+export function HomeBuilder({ sections, canWrite, top10Lists }: { sections: SectionRow[]; canWrite: boolean; top10Lists: Top10Option[] }) {
   const [pending, start] = useTransition();
   const [editing, setEditing] = useState<SectionRow | null>(null);
   const [creating, setCreating] = useState(false);
@@ -127,8 +127,8 @@ export function HomeBuilder({ sections, canWrite }: { sections: SectionRow[]; ca
         <p className="text-muted-foreground max-w-[260px] text-center text-xs">Approximate preview of the app&apos;s home. Real titles come from each user&apos;s panel.</p>
       </aside>
 
-      {creating ? <SectionDialog open onOpenChange={(o) => !o && setCreating(false)} row={null} /> : null}
-      {editing ? <SectionDialog key={editing.id} open onOpenChange={(o) => !o && setEditing(null)} row={editing} /> : null}
+      {creating ? <SectionDialog open onOpenChange={(o) => !o && setCreating(false)} row={null} top10Lists={top10Lists} /> : null}
+      {editing ? <SectionDialog key={editing.id} open onOpenChange={(o) => !o && setEditing(null)} row={editing} top10Lists={top10Lists} /> : null}
     </div>
   );
 }

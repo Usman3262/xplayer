@@ -31,8 +31,10 @@ const sectionSchema = z
     requires_login: z.boolean(),
     starts_at: z.string(),
     ends_at: z.string(),
+    top10_list_id: z.uuid().nullable(),
   })
   .superRefine((v, ctx) => {
+    if (v.section_type === "top10" && !v.top10_list_id) ctx.addIssue({ code: "custom", message: "Pick which Top 10 list this section shows." });
     const def = SECTION_TYPES[v.section_type];
     if (!def.sources.includes(v.source as never)) ctx.addIssue({ code: "custom", message: `“${SOURCES[v.source as keyof typeof SOURCES].label}” doesn't fit a ${def.label} section.` });
     if (!def.layouts.includes(v.layout as never)) ctx.addIssue({ code: "custom", message: `That layout doesn't fit a ${def.label} section.` });
@@ -63,6 +65,7 @@ function toRow(v: z.output<typeof sectionSchema>) {
     requires_login: v.requires_login,
     starts_at: v.starts_at ? new Date(v.starts_at).toISOString() : null,
     ends_at: v.ends_at ? new Date(v.ends_at).toISOString() : null,
+    top10_list_id: v.section_type === "top10" ? v.top10_list_id : null,
   };
 }
 

@@ -10,9 +10,10 @@ Spec: `new-platform.md` · Rules: `CLAUDE.md` · App "where to change": `XPLAYER
 ---
 
 ## ▶ NEXT
-**Phase 3 · Step 3.6 — Banners** (hero carousel: phone + TV images via upload, title, button,
-action: open title / category / screen / link, targeting + schedule, order) then **3.7 Top 10**
-(lists: source panel rating / newest / admin picks, country, items editor).
+**Phase 4 · Step 4.1 — Flutter ↔ Supabase:** add `supabase_flutter` to the apps (URL + publishable
+key via `--dart-define`, no secrets in code), `RemoteConfigRepository` (cached last-good config →
+`get_app_config` with known version → validate → apply theme via `AppThemeConfig.applyJson`, flags,
+branding, home layout), keeping the **current app UI** (D17). Phone + TV.
 
 ## Waiting on you
 - [ ] Add **`TMDB_API_KEY`** as a Supabase Edge Function secret (needed at step 1.7).
@@ -312,10 +313,37 @@ action: open title / category / screen / link, targeting + schedule, order) then
   renders: content manager full builder, marketing manager read-only; dev log 0 errors.
   Note: in v12 one untargeted test section was briefly in the config (no app reads config yet);
   the test now targets every test section.
-- [ ] 3.6 Banners (hero carousel): image, title, deep link, schedule, targeting.
-- [ ] 3.7 Top 10 lists (manual / auto from analytics / TMDB trending), per country/platform.
-- [ ] 3.8 "New" / "Recently added" rules (provider added date, TMDB release, manual).
-- [ ] 3.9 Sports: matches, lineups, competitions, which channel shows a match.
+- [x] 3.6 Banners `/customization/banners`: cards with image preview, on/off, up/down, edit, delete;
+  dialog with phone (16:9) + TV (21:9) image upload, title, subtitle, button text, action (image only /
+  open a title by TMDB id or panel id + panel key / category / app screen / https link), shared
+  **TargetingFields** (platforms, countries, signed-in only, from/until — `lib/targeting.ts` schema).
+- [x] 3.7 Top 10 `/customization/top10`: lists with source (panel best-rated / panel newest / your
+  ranking / most watched later), days + min rating, country, active; ranked 1–10 editor with reorder;
+  "on home (n)" usage badge; Home builder Top 10 sections must pick a list (`top10_list_id`).
+- [x] 3.8 "New / Recently added" rules — covered by Home builder sources (panel newest + "last N days")
+  and Top 10 "panel newest".
+- [x] 3.9 Sports `/sports` (manual until a sports API is chosen): match list (Live now / Today /
+  Upcoming / Last 7 days, team search, pagination), match dialog (teams + competition by name — created
+  if new, kickoff, status, score, minute, round, venue, featured, hidden, where-to-watch channel names,
+  lineups as text "9 Name FW" + "subs", events "45+2 goal home Player (assist)"), competitions shown /
+  featured toggles. Parsers in `lib/sports-parse.ts` with unit tests (`npm test`).
+- [x] 3.11 Publish flow: draft → publish bar (3.0) + **Publish history** `/customization/history`
+  (versions, notes, who, size, Live badge) + **emergency rollback** (`admin_republish_version`:
+  republishes an old snapshot as a new version, drafts untouched; `_restored_from` ignored when
+  comparing).
+- [x] 3.2b Feature flag **exceptions** (per country / per signed-in user by email, optional schedule;
+  user beats country) on the flags page (`admin_flag_overrides`, `admin_user_id_by_email`).
+- [ ] 3.12 (later) "Pick from the reference panel": browse Neo in admin (credentials in Vault, server
+  side) to choose banner/rail/Top 10 titles by panel id instead of typing ids.
+- [ ] 3.13 (when chosen) Sports API sync job (Edge Function + cron) filling the same tables.
+
+**Phase 3 complete (2026-11-15).** Milestone checks: `npm run lint` ✓, `typecheck` ✓, `npm test` ✓,
+`npm run build` ✓ (17 routes); all 10 live suites **144 passed / 0 failed** (rls 20, admin mgmt 13,
+mfa 12, security settings 5, customization 16, theme 10, access 10, versions 10, home 22, phase3 26);
+renders by role for every page; dev log 0 errors. Migration 021 (`…20_phase3_completion`).
+Live config content unchanged by tests (only hidden/identical test publishes, then republished).
+*Not tested:* clicking through in a real browser (please try); `/sports` read-only view (no current
+role has sports.read without sports.write).
 - [x] 3.10 Versions & maintenance `/customization/versions`: version card per platform (minimum /
   recommended / latest, https update link, what's new; recommended ≥ minimum, latest ≥ recommended),
   maintenance list (Now / Scheduled / Finished / Off badges, on/off switch, delete) + "Schedule
@@ -433,6 +461,7 @@ action: open title / category / screen / link, targeting + schedule, order) then
 ## Log
 - 2026-11-14 — Phase 0 done (planning files only, no code). Untested (nothing to run).
 - 2026-11-14 — Step 1.1 done: admin scaffold + Supabase folder in `apps/admin`; build + redirect smoke test pass.
+- 2026-11-15 — **Phase 3 complete**: Banners, Top 10, flag exceptions, Sports, publish history + rollback; full milestone checks green (build + 144/144 live).
 - 2026-11-15 — Step 3.5 done: Home builder (types/sources/layouts, picks, targeting, schedule, app-style preview); 23/23 live incl. end-to-end targeting.
 - 2026-11-15 — Step 3.10 done: Versions & maintenance + generic SettingsCard; security-settings permission fix (migration 020); 15/15 live checks. Recorded D17 (keep current app UI; panel → connect → optional account).
 - 2026-11-15 — Steps 3.3 + 3.4 done: Login & panels page (sign-in policy, Choose-your-panel editor + preview, DB guard); 10/10 live checks.

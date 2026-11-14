@@ -1718,9 +1718,33 @@ export type Database = {
           meta: Json
         }[]
       }
+      admin_config_history: {
+        Args: { p_limit?: number }
+        Returns: {
+          notes: string
+          published_at: string
+          published_by: string
+          restored_from: number
+          size_bytes: number
+          version: number
+        }[]
+      }
       admin_config_status: { Args: never; Returns: Json }
       admin_dashboard_stats: { Args: never; Returns: Json }
       admin_find_user: { Args: { p_email: string }; Returns: string }
+      admin_flag_overrides: {
+        Args: never
+        Returns: {
+          enabled: boolean
+          ends_at: string
+          flag_key: string
+          id: string
+          starts_at: string
+          target_label: string
+          target_type: string
+          target_value: string
+        }[]
+      }
       admin_list_admins: {
         Args: never
         Returns: {
@@ -1734,6 +1758,10 @@ export type Database = {
         }[]
       }
       admin_remove: { Args: { p_user: string }; Returns: undefined }
+      admin_republish_version: {
+        Args: { p_notes?: string; p_version: number }
+        Returns: number
+      }
       admin_security_state: { Args: never; Returns: Json }
       admin_session: { Args: never; Returns: Json }
       admin_set_active: {
@@ -1744,6 +1772,7 @@ export type Database = {
         Args: { p_role_key: string; p_user: string }
         Returns: undefined
       }
+      admin_user_id_by_email: { Args: { p_email: string }; Returns: string }
       bootstrap_super_admin: { Args: { p_email: string }; Returns: string }
       build_app_config_snapshot: { Args: never; Returns: Json }
       build_home_snapshot: { Args: never; Returns: Json }

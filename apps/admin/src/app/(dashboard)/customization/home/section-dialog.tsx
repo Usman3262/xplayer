@@ -40,8 +40,11 @@ export type SectionRow = {
   starts_at: string | null;
   ends_at: string | null;
   is_enabled: boolean;
+  top10_list_id: string | null;
   home_section_items: SectionItem[];
 };
+
+export type Top10Option = { id: string; title: string };
 
 const selectCls = "bg-secondary/70 focus:ring-primary/40 h-10 w-full rounded-full px-4 text-sm outline-none focus:ring-2";
 
@@ -68,6 +71,7 @@ const emptyDraft = (type = "custom"): SectionInput => {
     requires_login: false,
     starts_at: "",
     ends_at: "",
+    top10_list_id: null,
   };
 };
 
@@ -85,12 +89,13 @@ const fromRow = (r: SectionRow): SectionInput => ({
   requires_login: r.requires_login,
   starts_at: toLocalInput(r.starts_at),
   ends_at: toLocalInput(r.ends_at),
+  top10_list_id: r.top10_list_id,
 });
 
 const emptyItem = (): SectionItem => ({ item_kind: "movie", tmdb_id: null, match_title: "", panel_item_id: "", panel_key: "", title: "", image_url: "", deep_link: "" });
 
 /** Create (row = null) or edit a section, including manual picks. */
-export function SectionDialog({ open, onOpenChange, row }: { open: boolean; onOpenChange: (o: boolean) => void; row: SectionRow | null }) {
+export function SectionDialog({ open, onOpenChange, row, top10Lists }: { open: boolean; onOpenChange: (o: boolean) => void; row: SectionRow | null; top10Lists: Top10Option[] }) {
   const [d, setD] = useState<SectionInput>(row ? fromRow(row) : emptyDraft());
   const [items, setItems] = useState<SectionItem[]>(row?.home_section_items ?? []);
   const [error, setError] = useState<string | null>(null);
@@ -194,6 +199,20 @@ export function SectionDialog({ open, onOpenChange, row }: { open: boolean; onOp
             <Label>Max items</Label>
             <Input type="number" min={1} max={100} value={d.item_limit} onChange={(e) => setD({ ...d, item_limit: Number(e.target.value) })} />
           </div>
+          {d.section_type === "top10" ? (
+            <div className="space-y-2 sm:col-span-2">
+              <Label>Top 10 list</Label>
+              <select className={selectCls} value={d.top10_list_id ?? ""} onChange={(e) => setD({ ...d, top10_list_id: e.target.value || null })}>
+                <option value="">Choose a list…</option>
+                {top10Lists.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.title}
+                  </option>
+                ))}
+              </select>
+              <p className="text-muted-foreground text-xs">Manage lists under App customization → Top 10.</p>
+            </div>
+          ) : null}
           {paramKeys.includes("days") ? (
             <div className="space-y-2">
               <Label>Only titles from the last … days</Label>

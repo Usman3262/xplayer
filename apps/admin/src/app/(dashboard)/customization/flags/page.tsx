@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { parseTableParams, type SearchParamsRecord } from "@/lib/table-params";
 
 import { FlagEditDialog, FlagSwitch, type FlagRow } from "./flag-controls";
+import { OverridesPanel, type OverrideRow } from "./overrides-panel";
 
 export const metadata = { title: "Feature flags" };
 
@@ -39,12 +40,17 @@ async function FlagsContent({ searchParams }: { searchParams: Promise<SearchPara
   if (filters.state === "on") query = query.eq("enabled", true);
   if (filters.state === "off") query = query.eq("enabled", false);
   if (q) query = query.or(`name.ilike.%${q.replace(/[%,()]/g, "")}%,key.ilike.%${q.replace(/[%,()]/g, "")}%`);
-  const { data, error } = await query;
+  const [{ data, error }, overrides, allFlags] = await Promise.all([
+    query,
+    supabase.rpc("admin_flag_overrides"),
+    supabase.from("feature_flags").select("key,name").order("name"),
+  ]);
   if (error) return <ErrorState description="Feature flags could not be loaded." />;
   const flags = (data ?? []) as FlagRow[];
 
   return (
     <div className="flex flex-col gap-5">
+      <OverridesPanel rows={(overrides.data ?? []) as OverrideRow[]} flags={allFlags.data ?? []} canWrite={canWrite} />
       <TableToolbar
         searchPlaceholder="Search features"
         filters={[{ key: "state", label: "State", options: [{ value: "on", label: "On" }, { value: "off", label: "Off" }] }]}

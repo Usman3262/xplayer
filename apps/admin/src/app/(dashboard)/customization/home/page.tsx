@@ -24,15 +24,17 @@ export default function HomeBuilderPage() {
 async function HomeContent() {
   const admin = await requirePermission("customization.read", "/customization/home");
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const [{ data, error }, lists] = await Promise.all([supabase
     .from("home_sections")
     .select(
-      "id,title,subtitle,section_type,content_kind,source,layout,item_limit,params,platforms,countries,requires_login,starts_at,ends_at,is_enabled," +
+      "id,title,subtitle,section_type,content_kind,source,layout,item_limit,params,platforms,countries,requires_login,starts_at,ends_at,is_enabled,top10_list_id," +
         "home_section_items(item_kind,tmdb_id,match_title,panel_item_id,panel_key,title,image_url,deep_link,sort_order)",
     )
     .order("sort_order")
     .order("created_at")
-    .order("sort_order", { referencedTable: "home_section_items" });
+    .order("sort_order", { referencedTable: "home_section_items" }),
+    supabase.from("top10_lists").select("id,title").order("created_at"),
+  ]);
   if (error) return <ErrorState description="Home sections could not be loaded." />;
-  return <HomeBuilder sections={(data ?? []) as unknown as SectionRow[]} canWrite={admin.can("customization.write")} />;
+  return <HomeBuilder sections={(data ?? []) as unknown as SectionRow[]} canWrite={admin.can("customization.write")} top10Lists={lists.data ?? []} />;
 }

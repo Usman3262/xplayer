@@ -6,6 +6,7 @@ import {
   CreditCard,
   Flag,
   Gauge,
+  History,
   Image as ImageIcon,
   KeyRound,
   LayoutDashboard,
@@ -53,11 +54,12 @@ export const NAV: NavGroup[] = [
     items: [
       { title: "Branding & theme", href: "/customization/theme", icon: Palette, permission: "customization.read", ready: true },
       { title: "Home builder", href: "/customization/home", icon: LayoutTemplate, permission: "customization.read", ready: true },
-      { title: "Banners", href: "/customization/banners", icon: ImageIcon, permission: "customization.read", ready: false },
-      { title: "Top 10", href: "/customization/top10", icon: ListOrdered, permission: "customization.read", ready: false },
+      { title: "Banners", href: "/customization/banners", icon: ImageIcon, permission: "customization.read", ready: true },
+      { title: "Top 10", href: "/customization/top10", icon: ListOrdered, permission: "customization.read", ready: true },
       { title: "Feature flags", href: "/customization/flags", icon: Flag, permission: "customization.read", ready: true },
       { title: "Login & panels", href: "/customization/access", icon: KeyRound, permission: "customization.read", ready: true },
       { title: "Versions & maintenance", href: "/customization/versions", icon: Smartphone, permission: "customization.read", ready: true },
+      { title: "Publish history", href: "/customization/history", icon: History, permission: "customization.read", ready: true },
     ],
   },
   {
@@ -65,7 +67,7 @@ export const NAV: NavGroup[] = [
     items: [
       { title: "Catalog", href: "/catalog", icon: Clapperboard, permission: "catalog.read", ready: false },
       { title: "Live channels", href: "/channels", icon: Tv, permission: "catalog.read", ready: false },
-      { title: "Sports", href: "/sports", icon: Trophy, permission: "sports.read", ready: false },
+      { title: "Sports", href: "/sports", icon: Trophy, permission: "sports.read", ready: true },
       { title: "Providers", href: "/providers", icon: Activity, permission: "providers.read", ready: false },
     ],
   },

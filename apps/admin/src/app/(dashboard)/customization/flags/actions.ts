@@ -86,3 +86,57 @@ export async function updateFlag(input: FlagEdit): Promise<ActionResult> {
   revalidatePath("/customization", "layout");
   return { ok: true };
 }
+
+const overrideSchema = z
+  .object({
+    flag_key: flagKey,
+    target_type: z.enum(["country", "user"]),
+    target: z.string().trim().min(1).max(200),
+    enabled: z.boolean(),
+    starts_at: dateTime,
+    ends_at: dateTime,
+  })
+  .refine((v) => !v.starts_at || !v.ends_at || v.ends_at > v.starts_at, { message: "End must be after start." });
+export type OverrideInput = z.input<typeof overrideSchema>;
+
+/** Force a flag on/off for one country or one user (by email). */
+export async function addOverride(input: OverrideInput): Promise<ActionResult> {
+  const guard = await actionGuard("customization.write");
+  if ("error" in guard) return guard.error;
+  const parsed = overrideSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Check the form." };
+  const v = parsed.data;
+  const supabase = await createClient();
+
+  let target = v.target.toUpperCase();
+  if (v.target_type === "country") {
+    if (!/^[A-Z]{2}$/.test(target)) return { ok: false, error: "Country is a 2-letter code like PK." };
+  } else {
+    const { data, error } = await supabase.rpc("admin_user_id_by_email", { p_email: v.target });
+    if (error) return { ok: false, error: dbMessage(error) };
+    if (!data) return { ok: false, error: "No user with that email." };
+    target = String(data);
+  }
+  const { error } = await supabase.from("feature_overrides").insert({
+    flag_key: v.flag_key,
+    target_type: v.target_type,
+    target_value: target,
+    enabled: v.enabled,
+    starts_at: v.starts_at?.toISOString() ?? null,
+    ends_at: v.ends_at?.toISOString() ?? null,
+    created_by: guard.admin.userId,
+  });
+  if (error) return { ok: false, error: dbMessage(error) };
+  revalidatePath("/customization", "layout");
+  return { ok: true };
+}
+
+export async function deleteOverride(id: string): Promise<ActionResult> {
+  const guard = await actionGuard("customization.write");
+  if ("error" in guard) return guard.error;
+  if (!z.uuid().safeParse(id).success) return { ok: false, error: "Invalid override." };
+  const { error } = await (await createClient()).from("feature_overrides").delete().eq("id", id);
+  if (error) return { ok: false, error: dbMessage(error) };
+  revalidatePath("/customization", "layout");
+  return { ok: true };
+}
