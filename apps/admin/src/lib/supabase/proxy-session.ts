@@ -5,7 +5,7 @@ import { publicEnv } from "@/lib/env";
 
 /**
  * Refreshes the Supabase auth cookie on every request so Server Components see
- * a valid session. Returns the response plus the verified user (or null).
+ * a valid session. Returns the response plus the verified user id (or null).
  * Optimistic only — real authorization happens in pages/actions and in RLS.
  */
 export async function updateSession(request: NextRequest) {
@@ -32,9 +32,10 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Verifies the JWT locally (asymmetric keys) and refreshes it when expired —
+  // no Auth-server round trip on every request.
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims?.sub ? { id: data.claims.sub } : null;
 
   return { response, user };
 }

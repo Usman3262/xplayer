@@ -53,6 +53,10 @@ try:
     s, d = req("POST", "/rest/v1/rpc/admin_security_state", {}, tok=tok1)
     check("aal1: state says has_2fa + aal1", d and d["has_2fa"] and d["aal"] == "aal1", d)
     check("aal2 session: permission granted", perm(tok2) is True, perm(tok2))
+    s, d = req("POST", "/rest/v1/rpc/admin_session", {}, tok=tok1)
+    check("admin_session aal1: no permissions", d and d["permissions"] == [] and d["has_2fa"], d)
+    s, d = req("POST", "/rest/v1/rpc/admin_session", {}, tok=tok2)
+    check("admin_session aal2: all permissions", d and "users.read" in d["permissions"] and len(d["permissions"]) >= 28, d and len(d.get("permissions", [])))
 
     tok3 = req("POST", "/auth/v1/token?grant_type=password", {"email": email, "password": pw})[1]["access_token"]
     check("new sign-in with password only (stolen password): DENIED", perm(tok3) is False)

@@ -1734,6 +1734,7 @@ export type Database = {
       }
       admin_remove: { Args: { p_user: string }; Returns: undefined }
       admin_security_state: { Args: never; Returns: Json }
+      admin_session: { Args: never; Returns: Json }
       admin_set_active: {
         Args: { p_active: boolean; p_user: string }
         Returns: undefined

@@ -12,9 +12,11 @@ export type AdminSession = {
   can: (perm: string) => boolean;
   /** Admin has a verified authenticator (TOTP). */
   has2fa: boolean;
+  /** Platform policy: every admin must use 2FA. */
+  require2fa: boolean;
 };
 
-type SecurityState = { require_2fa: boolean; has_2fa: boolean; aal: string } | null;
+type SessionInfo = { require_2fa: boolean; has_2fa: boolean; aal: string; permissions: string[] } | null;
 
 /**
  * Where the current visitor stands. The DB enforces the same rules: with a
@@ -27,32 +29,36 @@ export type AdminGate =
   | { status: "setup_2fa"; admin: AdminSession } // policy requires 2FA, none set up
   | { status: "ok"; admin: AdminSession };
 
+/**
+ * Fast path: the JWT is verified locally (`getClaims`, asymmetric signing keys —
+ * no Auth-server round trip), then ONE DB call (`admin_session`) returns 2FA state
+ * + permissions. Revoked/deactivated admins are still blocked: permissions are
+ * read fresh from the DB on every request.
+ */
 export const getAdminGate = cache(async (): Promise<AdminGate> => {
   // Session checks use the current time (token expiry) → always request-time.
   await connection();
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { status: "signed_out" };
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+  const claims = claimsData?.claims;
+  if (claimsError || !claims?.sub) return { status: "signed_out" };
 
-  const { data: secData } = await supabase.rpc("admin_security_state");
-  const sec = secData as SecurityState;
-  if (!sec) return { status: "not_admin" };
-  if (sec.has_2fa && sec.aal !== "aal2") return { status: "mfa_required" };
+  const { data } = await supabase.rpc("admin_session");
+  const info = data as SessionInfo;
+  if (!info) return { status: "not_admin" };
+  if (info.has_2fa && info.aal !== "aal2") return { status: "mfa_required" };
+  if (!info.permissions?.length) return { status: "not_admin" };
 
-  const { data, error } = await supabase.rpc("my_permissions");
-  if (error || !data || data.length === 0) return { status: "not_admin" };
-
-  const permissions = new Set<string>(data as string[]);
+  const permissions = new Set<string>(info.permissions);
   const admin: AdminSession = {
-    userId: user.id,
-    email: user.email ?? null,
+    userId: claims.sub,
+    email: typeof claims.email === "string" ? claims.email : null,
     permissions,
     can: (perm) => permissions.has(perm),
-    has2fa: sec.has_2fa,
+    has2fa: info.has_2fa,
+    require2fa: info.require_2fa,
   };
-  if (sec.require_2fa && !sec.has_2fa) return { status: "setup_2fa", admin };
+  if (info.require_2fa && !info.has_2fa) return { status: "setup_2fa", admin };
   return { status: "ok", admin };
 });
 
