@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/app_log.dart';
 import '../core/demo_mode.dart';
+import '../core/remote_config.dart';
 import '../core/session_controller.dart';
 import '../features/sports/match_centre_screen.dart';
 import '../features/account/my_account_screen.dart';
@@ -90,6 +91,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isProfiles = loc.startsWith('/profiles');
 
       if (isSplash || isUpdate) return null;
+
+      // Admin feature switches: a switched-off feature's page goes Home.
+      final featureOff = featureOffRedirect(loc);
+      if (featureOff != null) return featureOff;
 
       if (!session.onboardingDone) {
         return isOnboarding ? null : '/onboarding';

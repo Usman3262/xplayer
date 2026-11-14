@@ -1,7 +1,7 @@
-import 'dart:io' show Platform;
 
 import 'package:data/data.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'remote_config.dart';
 
 /// In-app update gate (force via minVersion, optional via builds[].version).
 class AppUpdateInfo {
@@ -37,36 +37,25 @@ class AppUpdateInfo {
 }
 
 Future<AppUpdateInfo> checkAppUpdate({bool isTv = false}) async {
+  // Rules come from the admin panel (App customization → Versions), via the
+  // published app config. A short wait lets a just-published rule apply.
   final info = await PackageInfo.fromPlatform();
   final currentBuild = int.tryParse(info.buildNumber) ?? 0;
-  final api = AppVersionApi();
-  try {
-    final remote = await api.fetch();
-    final ios = !isTv && Platform.isIOS;
-    final gate = resolveAppUpdateGate(
-      installedVersion: info.version,
-      installedBuild: currentBuild,
-      isTv: isTv,
-      isIos: ios,
-      remote: remote,
-    );
-    return AppUpdateInfo(
-      currentVersion: gate.currentVersion,
-      currentBuild: gate.currentBuild,
-      minBuild: gate.required ? currentBuild + 1 : 0,
-      latestVersion: gate.latestVersion,
-      message: gate.message,
-      updateUrl: gate.updateUrl ??
-          (ios ? null : isTv ? AppReleaseUrls.tvApk : AppReleaseUrls.mobileApk),
-      // iPhone without its own store link: never send it to an APK.
-      required: gate.required && (!ios || (gate.updateUrl ?? '').isNotEmpty),
-      offerUpdate: gate.offerUpdate,
-      apkUrl: gate.apkUrl,
-      sha256: gate.sha256,
-    );
-  } finally {
-    api.close();
-  }
+  await RemoteConfigService.refresh().timeout(const Duration(seconds: 3), onTimeout: () => false);
+  final policy = RemoteConfigService.current.versionPolicy;
+  final need = policy?.check(info.version) ?? UpdateRequirement.none;
+  final url = (policy?.updateUrl ?? '').trim();
+  return AppUpdateInfo(
+    currentVersion: info.version,
+    currentBuild: currentBuild,
+    minBuild: need == UpdateRequirement.required ? currentBuild + 1 : 0,
+    latestVersion: policy?.latest ?? policy?.recommended ?? policy?.min ?? info.version,
+    message: policy?.notes ?? '',
+    updateUrl: url.isEmpty ? null : url,
+    required: need == UpdateRequirement.required,
+    offerUpdate: need == UpdateRequirement.recommended && url.isNotEmpty,
+    apkUrl: url.toLowerCase().endsWith('.apk') ? url : null,
+  );
 }
 
 /// Permanent APK link for this app (TV Downloader / update button).

@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/providers.dart';
+import '../core/remote_config.dart';
 import '../core/push_notifications.dart';
 import '../features/search/tv_search_screen.dart';
 import '../core/tv_live_zap.dart';
@@ -147,13 +148,15 @@ class _TvShellState extends ConsumerState<TvShell> {
 
   List<(String label, int branch)> _navItems(AppCopy copy) {
     final sportsOn = ref.watch(sportsEnabledProvider).valueOrNull ?? false;
+    // Admin feature switches (remote config); the nav's design stays the same.
+    bool on(String flag) => ref.watch(featureEnabledProvider(flag));
     return [
       (copy.home, 0),
-      (copy.movies, 1),
-      (copy.series, 2),
-      (copy.liveTv, 3),
+      if (on('movies')) (copy.movies, 1),
+      if (on('series')) (copy.series, 2),
+      if (on('live_tv')) (copy.liveTv, 3),
       if (sportsOn) (copy.sports, 4),
-      (copy.kids, 5),
+      if (on('kids')) (copy.kids, 5),
     ];
   }
 

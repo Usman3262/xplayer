@@ -10,10 +10,9 @@ Spec: `new-platform.md` · Rules: `CLAUDE.md` · App "where to change": `XPLAYER
 ---
 
 ## ▶ NEXT
-**Phase 4 · Step 4.1 — Flutter ↔ Supabase:** add `supabase_flutter` to the apps (URL + publishable
-key via `--dart-define`, no secrets in code), `RemoteConfigRepository` (cached last-good config →
-`get_app_config` with known version → validate → apply theme via `AppThemeConfig.applyJson`, flags,
-branding, home layout), keeping the **current app UI** (D17). Phone + TV.
+**Phase 5 · Step 5.1 — Provider engine:** `ProviderAdapter` interface + unified models + connection
+status/error model (spec §3.5) in `packages/data`, mapping into the existing domain entities (D5/D17).
+Then 5.2 Xtream (Neo), 5.3 M3U, 5.4 Stalker, 5.5 connection manager, 5.6 "Choose your panel" flow.
 
 ## Waiting on you
 - [ ] Add **`TMDB_API_KEY`** as a Supabase Edge Function secret (needed at step 1.7).
@@ -360,11 +359,37 @@ role has sports.read without sports.write).
 - [ ] 3.11 Publish flow: draft → preview → publish (bumps config version, app refreshes).
 
 ## Phase 4 — Flutter: Supabase + remote config
-- [ ] 4.1 Add `supabase_flutter`; config from `--dart-define` / `app.config`-style env (no keys in code).
-- [ ] 4.2 `RemoteConfigRepository`: load cached → fetch `get_app_config` if version
-  changed → validate → apply (theme via `AppThemeConfig.applyJson`, flags, home layout).
-- [ ] 4.3 Guest mode default; optional sign-in/up screens (Supabase Auth); policy from config.
-- [ ] 4.4 Maintenance / min-version gate from config.
+- [x] 4.1 `supabase_flutter ^2.18.3` in mobile + TV; `core/backend.dart` (URL + **publishable** key from
+  `--dart-define-from-file=../../env/app.json`; `env/app.json` git-ignored, `env/app.example.json`
+  committed; not configured → app runs on built-in defaults; init never throws).
+- [x] 4.2 `RemoteConfigRepository` (`packages/data`, backend-agnostic via injected fetcher): cached
+  last-valid config applied **before the first frame**, background refresh with known version
+  ("unchanged" = tiny reply), invalid/timeout/offline → keep last config, never goes backwards, one
+  request at a time, auto-refresh every `config.refresh_interval_s` + on app resume. App side
+  `core/remote_config.dart` (phone reports android/ios, TV reports tv; device country hint): applies
+  theme (`AppThemeConfig.applyJson`) + `branding.display_name` (`AppBrand.setDisplayOverride`, launcher
+  name unchanged); `remoteConfigProvider` + `featureEnabledProvider(flag)` for screens (unknown flags
+  default on); root rebuilds on new config. Wired into both `main()`s. **No screen redesign.**
+  *Tested:* analyze clean for new files (phone + TV); `remote_config_repository_test.dart` **7/7** incl.
+  **LIVE** call to the real `get_app_config` (v15 config, panel types, home, auth mode; second call →
+  unchanged). *Not tested:* running on a device/emulator; APK build with the new plugin (do at Phase 4
+  milestone).
+- [x] 4.3 Feature switches applied in the **existing** screens (no redesign): phone bottom bar + TV nav
+  hide Movies / Series / Live TV / Sports / Kids when off (`sportsEnabledProvider` now = admin flag);
+  router guard `featureOffRedirect` (phone + TV) sends any page of a switched-off feature Home
+  (movies, series, live, sports, match centre, kids, clips, downloads/offline, search, inbox, my list,
+  diagnostics, appearance, parental — exact prefix match); top-bar search + inbox icons, settings
+  tiles (diagnostics, appearance, parental), trailer buttons (phone + TV) and picture-in-picture
+  follow their flags; admin logo (`branding.logo_url`) replaces the built-in logo in the same spot
+  (`AppLogo.remoteUrl`, built-in art as placeholder/fallback).
+- [x] 4.4 Gates: `checkAppUpdate()` (phone + TV, used by the existing splash/update screens) now reads
+  the admin **version policy** (minimum → must update, recommended → suggested; link + notes) instead
+  of the old server; **MaintenanceGate** (phone + TV) shows the admin's maintenance title/message in
+  the app's own colours with "Try again", lifts itself when the window ends.
+  *Tested:* analyze clean for changed files (no new errors in either app); phone **26/26**, TV **51/51**
+  tests (incl. 3 maintenance-gate widget tests + 3 route-guard tests per app).
+- [→] Sign-in (old 4.3 "optional sign-in/up with Supabase Auth") **moved to Phase 5.7**, right after
+  the panel connection, matching the flow "choose panel → connect → optional account" (D17).
 
 ## Phase 5 — Provider engine ("Choose your panel")
 - [ ] 5.1 `ProviderAdapter` interface + unified models + error/status model (spec §3.5).
@@ -376,7 +401,9 @@ role has sports.read without sports.write).
 - [ ] 5.5 Connection manager: multiple panels, secure storage, test connection, status,
   expiry, primary, enable/disable, last sync.
 - [ ] 5.6 Onboarding UI (phone + TV): choose panel → form → test → connect in seconds
-  (account check first, catalog in background, cache-first).
+  (account check first, catalog in background, cache-first) — using the app's existing look.
+- [ ] 5.7 Optional XPlayer account after connecting (Supabase Auth: sign up / sign in, policy from
+  `auth.mode`, guest data kept on device and synced after sign-up).
 
 ## Phase 6 — Catalog, cache, sync
 - [ ] 6.1 Drift local DB: categories, channels, movies, series, episodes, EPG window, sync cursors.
@@ -461,6 +488,8 @@ role has sports.read without sports.write).
 ## Log
 - 2026-11-14 — Phase 0 done (planning files only, no code). Untested (nothing to run).
 - 2026-11-14 — Step 1.1 done: admin scaffold + Supabase folder in `apps/admin`; build + redirect smoke test pass.
+- 2026-11-15 — Steps 4.3 + 4.4 done: feature switches, route guard, update + maintenance gates, remote logo; phone 26 / TV 51 tests.
+- 2026-11-15 — Steps 4.1 + 4.2 done: Supabase client + cache-first remote config in both apps; 7/7 tests incl. live server.
 - 2026-11-15 — **Phase 3 complete**: Banners, Top 10, flag exceptions, Sports, publish history + rollback; full milestone checks green (build + 144/144 live).
 - 2026-11-15 — Step 3.5 done: Home builder (types/sources/layouts, picks, targeting, schedule, app-style preview); 23/23 live incl. end-to-end targeting.
 - 2026-11-15 — Step 3.10 done: Versions & maintenance + generic SettingsCard; security-settings permission fix (migration 020); 15/15 live checks. Recorded D17 (keep current app UI; panel → connect → optional account).

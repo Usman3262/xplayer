@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../auth/login_screen.dart' show showSupportHelpSheet;
 
 import '../../core/demo_mode.dart';
+import '../../core/remote_config.dart';
 import '../../core/providers.dart';
 import '../../core/session_controller.dart';
 import '../../core/app_log.dart';
@@ -141,10 +142,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         style: const TextStyle(fontWeight: FontWeight.w800),
                       ),
                     ),
-                    Icon(
-                      Icons.chevron_right,
-                      color: AppColors.textSecondary,
-                    ),
+                    Icon(Icons.chevron_right, color: AppColors.textSecondary),
                   ],
                 ),
               ),
@@ -247,22 +245,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               // Screen capture protection: owner-only in the Control Panel (client 27 Oct).
             ]),
             _section(copy.sectionLookSound, [
-              _nav(
-                context,
-                ref,
-                Icons.speed_rounded,
-                copy.connectionDiagnostic,
-                subtitle: copy.connectionDiagnosticHint,
-                route: '/settings/diagnostic',
-              ),
-              _nav(
-                context,
-                ref,
-                Icons.palette_rounded,
-                copy.appearanceThemes,
-                subtitle: copy.appliesAcross,
-                route: '/settings/appearance',
-              ),
+              if (ref.watch(featureEnabledProvider('diagnostics')))
+                _nav(
+                  context,
+                  ref,
+                  Icons.speed_rounded,
+                  copy.connectionDiagnostic,
+                  subtitle: copy.connectionDiagnosticHint,
+                  route: '/settings/diagnostic',
+                ),
+              if (ref.watch(featureEnabledProvider('theme_presets')))
+                _nav(
+                  context,
+                  ref,
+                  Icons.palette_rounded,
+                  copy.appearanceThemes,
+                  subtitle: copy.appliesAcross,
+                  route: '/settings/appearance',
+                ),
               _switchRow(
                 icon: Icons.volume_up_rounded,
                 iconColor: AppColors.magenta,
@@ -363,14 +363,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 value: session.notificationsEnabled ? copy.enabled : copy.off,
                 route: '/settings/notifications',
               ),
-              _nav(
-                context,
-                ref,
-                Icons.lock_rounded,
-                copy.parental,
-                value: session.parentalPinEnabled ? copy.pinSet : copy.off,
-                route: '/settings/parental',
-              ),
+              if (ref.watch(featureEnabledProvider('parental_controls')))
+                _nav(
+                  context,
+                  ref,
+                  Icons.lock_rounded,
+                  copy.parental,
+                  value: session.parentalPinEnabled ? copy.pinSet : copy.off,
+                  route: '/settings/parental',
+                ),
             ]),
             _section(copy.support, [
               _SettingsRow(

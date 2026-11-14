@@ -3,6 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:data/data.dart';
 import 'package:domain/domain.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'remote_config.dart';
 
 import 'demo_mode.dart';
 import 'library_controller.dart';
@@ -492,15 +493,10 @@ final matchStandingsProvider =
   return ref.watch(mediaRepositoryProvider).sports.standings(league);
 });
 
-final sportsEnabledProvider = FutureProvider<bool>((ref) async {
-  final session = ref.watch(sessionProvider);
-  if (!session.isLoggedIn) return false;
-  try {
-    return await ref.watch(mediaRepositoryProvider).sportsEnabled();
-  } catch (_) {
-    return false;
-  }
-});
+/// Sports tab/sections: the admin's "sports" feature flag (remote config).
+final sportsEnabledProvider = FutureProvider<bool>(
+  (ref) async => ref.watch(featureEnabledProvider('sports')),
+);
 
 /// Watch history for the active profile (deduped: one row per title).
 final historyProvider = FutureProvider<List<MediaItem>>((ref) async {

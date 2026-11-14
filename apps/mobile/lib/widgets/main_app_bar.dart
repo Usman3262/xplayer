@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../core/app_log.dart';
 import '../core/demo_mode.dart';
 import '../core/push_notifications.dart';
+import '../core/remote_config.dart';
 import '../core/session_controller.dart';
 import '../core/ui_sound.dart';
 
@@ -36,7 +37,7 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
     final profile = session.activeProfile;
     final initials = profile?.initials ?? 'CK';
     final isVip = session.user?.isVip ?? true;
-    // Demo: the same pill reads DEMO instead of VIP 
+    // Demo: the same pill reads DEMO instead of VIP
     final demo = ref.watch(demoModeProvider);
 
     return AppBar(
@@ -65,7 +66,8 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
         child: AppLogo(height: 32, alignToStart: true),
       ),
       actions: [
-        if (session.isLoggedIn)
+        if (session.isLoggedIn &&
+            ref.watch(featureEnabledProvider('notification_inbox')))
           IconButton(
             tooltip: copy.notifications,
             onPressed: () {
@@ -82,25 +84,30 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
               child: const Icon(Icons.notifications_none_rounded),
             ),
           ),
-        IconButton(
-          tooltip: copy.search,
-          onPressed: () {
-            playUiTap(ref);
-            AppLog.tap('app_bar.search');
-            // Search stays inside the section it is opened from; Home and
-            // pages outside the tabs search everything.
-            final tab = StatefulNavigationShell.maybeOf(context)?.currentIndex;
-            final scope = switch (tab) {
-              1 => 'movie',
-              2 => 'series',
-              3 => 'live',
-              4 => 'sports',
-              _ => null,
-            };
-            _goOnce(context, scope == null ? '/search' : '/search?scope=$scope');
-          },
-          icon: const Icon(Icons.search_rounded),
-        ),
+        if (ref.watch(featureEnabledProvider('search')))
+          IconButton(
+            tooltip: copy.search,
+            onPressed: () {
+              playUiTap(ref);
+              AppLog.tap('app_bar.search');
+              // Search stays inside the section it is opened from; Home and
+              // pages outside the tabs search everything.
+              final tab = StatefulNavigationShell.maybeOf(context)
+                  ?.currentIndex;
+              final scope = switch (tab) {
+                1 => 'movie',
+                2 => 'series',
+                3 => 'live',
+                4 => 'sports',
+                _ => null,
+              };
+              _goOnce(
+                context,
+                scope == null ? '/search' : '/search?scope=$scope',
+              );
+            },
+            icon: const Icon(Icons.search_rounded),
+          ),
         Padding(
           padding: const EdgeInsetsDirectional.symmetric(horizontal: 2),
           child: Center(
@@ -142,54 +149,63 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 alignment: Alignment.topCenter,
                 clipBehavior: Clip.none,
                 children: [
-                // Chosen avatar shows on Home too (client 21 Oct A11);
-                // no avatar keeps the gold initials badge.
-                if (avatarStyleFor(profile?.avatar) != null)
-                  ProfileAvatar(initials: initials, token: profile?.avatar, size: 34)
-                else
-                Container(
-                  width: 34,
-                  height: 34,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.gold, width: 1.4),
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF3A2A10), Color(0xFF1A1408)],
-                    ),
-                  ),
-                  child: Text(
-                    initials,
-                    style: TextStyle(
-                      color: AppColors.gold,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                if (isVip)
-                  Positioned(
-                    bottom: 0,
-                    child: Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                  // Chosen avatar shows on Home too (client 21 Oct A11);
+                  // no avatar keeps the gold initials badge.
+                  if (avatarStyleFor(profile?.avatar) != null)
+                    ProfileAvatar(
+                      initials: initials,
+                      token: profile?.avatar,
+                      size: 34,
+                    )
+                  else
+                    Container(
+                      width: 34,
+                      height: 34,
+                      alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: AppColors.gold,
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: const Color(0xFF0A1018), width: 1),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.gold, width: 1.4),
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF3A2A10), Color(0xFF1A1408)],
+                        ),
                       ),
                       child: Text(
-                        demo ? 'DEMO' : 'VIP',
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 7.5,
-                          fontWeight: FontWeight.w900,
-                          height: 1.1,
-                          letterSpacing: 0.3,
+                        initials,
+                        style: TextStyle(
+                          color: AppColors.gold,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
-                  ),
+                  if (isVip)
+                    Positioned(
+                      bottom: 0,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 5,
+                          vertical: 1,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.gold,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: const Color(0xFF0A1018),
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          demo ? 'DEMO' : 'VIP',
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 7.5,
+                            fontWeight: FontWeight.w900,
+                            height: 1.1,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/remote_config.dart';
 import '../core/tv_session.dart';
 import '../features/sports/tv_match_centre_screen.dart';
 import '../features/account/tv_my_account_screen.dart';
@@ -59,6 +60,10 @@ final tvRouterProvider = Provider<GoRouter>((ref) {
       // Splash owns its exit (anim + bootstrap). Keep it until the screen
       // navigates; do not bounce other routes back here after bootstrap.
       if (loc == '/splash') return null;
+
+      // Admin feature switches: a switched-off feature's page goes Home.
+      final featureOff = featureOffRedirect(loc);
+      if (featureOff != null) return featureOff;
 
       // Force-update gate (minVersion.tv) — reachable before login.
       if (loc == '/update') return null;

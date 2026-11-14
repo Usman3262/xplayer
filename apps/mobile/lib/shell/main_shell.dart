@@ -15,6 +15,7 @@ import '../core/in_app_update.dart';
 import '../core/appearance_controller.dart';
 import '../core/demo_mode.dart';
 import '../core/providers.dart';
+import '../core/remote_config.dart';
 import '../core/session_controller.dart';
 
 class MainShell extends ConsumerStatefulWidget {
@@ -124,6 +125,11 @@ class _MainShellState extends ConsumerState<MainShell> {
   @override
   Widget build(BuildContext context) {
     final sportsOn = ref.watch(sportsEnabledProvider).valueOrNull ?? false;
+    // Admin feature switches (remote config); the bar's design stays the same.
+    final moviesOn = ref.watch(featureEnabledProvider('movies'));
+    final seriesOn = ref.watch(featureEnabledProvider('series'));
+    final liveOn = ref.watch(featureEnabledProvider('live_tv'));
+    final kidsOn = ref.watch(featureEnabledProvider('kids'));
     final idx = widget.navigationShell.currentIndex;
     final copy = AppCopy.ofLanguage(
       ref.watch(sessionProvider.select((s) => s.language)),
@@ -170,6 +176,7 @@ class _MainShellState extends ConsumerState<MainShell> {
                           widget.navigationShell.goBranch(0);
                         },
                       ),
+                      if (moviesOn)
                       _NavItem(
                         icon: Icons.movie_outlined,
                         activeIcon: Icons.movie_filter_rounded,
@@ -180,6 +187,7 @@ class _MainShellState extends ConsumerState<MainShell> {
                           widget.navigationShell.goBranch(1);
                         },
                       ),
+                      if (seriesOn)
                       _NavItem(
                         icon: Icons.live_tv_outlined,
                         activeIcon: Icons.live_tv_rounded,
@@ -190,6 +198,7 @@ class _MainShellState extends ConsumerState<MainShell> {
                           widget.navigationShell.goBranch(2);
                         },
                       ),
+                      if (liveOn)
                       _NavItem(
                         icon: Icons.tv_outlined,
                         activeIcon: Icons.tv_rounded,
@@ -202,6 +211,7 @@ class _MainShellState extends ConsumerState<MainShell> {
                       ),
                       // Sports when entitled; otherwise Kids in that slot
                       // (client 20 Oct).
+                      if (sportsOn || kidsOn)
                       _NavItem(
                         icon: sportsOn
                             ? Icons.sports_soccer_outlined

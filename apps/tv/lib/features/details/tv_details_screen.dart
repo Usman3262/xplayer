@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/library_controller.dart';
+import '../../core/remote_config.dart';
 import '../../core/providers.dart';
 import '../../core/tv_downloads.dart';
 import '../../core/tv_locale.dart';
@@ -514,7 +515,8 @@ class _DetailsBody extends ConsumerWidget {
                           ),
                           // C12: YouTube only; hidden when info has no trailer.
                           if (!isSeries &&
-                              youtubeTrailerUri(info?.trailer) != null)
+                              youtubeTrailerUri(info?.trailer) != null &&
+                              ref.watch(featureEnabledProvider('trailers')))
                             TvButton(
                               icon: Icons.movie_filter_outlined,
                               label: copy.trailer,

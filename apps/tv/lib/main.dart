@@ -1,4 +1,5 @@
 import 'package:data/data.dart' show FavoriteCategories;
+
 import 'dart:async';
 
 import 'package:data/data.dart';
@@ -16,13 +17,16 @@ import 'core/library_controller.dart';
 import 'core/tv_catalog_sync.dart';
 import 'core/tv_frame_stats.dart';
 import 'core/tv_input_activity.dart';
+import 'core/backend.dart';
 import 'core/providers.dart';
+import 'core/remote_config.dart';
 import 'core/screen_record_protect.dart';
 import 'core/tv_appearance.dart';
 import 'core/tv_session.dart';
 import 'core/tv_text_input.dart';
 import 'core/tv_locale.dart';
 import 'core/push_notifications.dart';
+import 'widgets/maintenance_gate.dart';
 import 'router/tv_router.dart';
 import 'widgets/tv_reminder_banner.dart';
 import 'widgets/focus_tile.dart';
@@ -36,7 +40,9 @@ Future<void> main() async {
   MediaKit.ensureInitialized();
   final mkMs = DateTime.now().difference(mkStart).inMilliseconds;
   if (kDebugMode || kProfileMode) {
-    debugPrint('[DEV] t=${DateTime.now().millisecondsSinceEpoch} MediaKit.ensureInitialized ms=$mkMs');
+    debugPrint(
+      '[DEV] t=${DateTime.now().millisecondsSinceEpoch} MediaKit.ensureInitialized ms=$mkMs',
+    );
   }
   SystemChrome.setPreferredOrientations(const [
     DeviceOrientation.landscapeLeft,
@@ -56,8 +62,10 @@ Future<void> main() async {
       try {
         r = f?.rect;
       } catch (_) {}
-      debugPrint('[FOCUS] ${f?.context?.widget.runtimeType} '
-          '${r == null ? '-' : '${r.left.round()},${r.top.round()} ${r.width.round()}x${r.height.round()}'}');
+      debugPrint(
+        '[FOCUS] ${f?.context?.widget.runtimeType} '
+        '${r == null ? '-' : '${r.left.round()},${r.top.round()} ${r.width.round()}x${r.height.round()}'}',
+      );
     });
   }
   unawaited(DeviceCapabilitiesStore.instance.ensureLoaded());
@@ -65,7 +73,12 @@ Future<void> main() async {
     unawaited(logDeviceStartupDiag());
   });
   // App name comes from /app.config via the native launcher label.
-  AppBrand.init((await PackageInfo.fromPlatform()).appName);
+  final packageInfo = await PackageInfo.fromPlatform();
+  AppBrand.init(packageInfo.appName);
+  // Backend + admin config: cached config applies before the first frame
+  // (instant, no network); the fresh one arrives in the background.
+  await Backend.init();
+  await RemoteConfigService.init(appVersion: packageInfo.version);
   runApp(const ProviderScope(child: TvRootApp()));
 }
 
@@ -173,20 +186,20 @@ class _TvRootAppState extends ConsumerState<TvRootApp>
       unawaited(ref.read(libraryProvider.notifier).syncFromRemote());
       unawaited(_pulseDeviceHeartbeat());
       unawaited(PushNotifications.onAppResumed());
+      unawaited(RemoteConfigService.refresh());
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<bool>(
-      tvSessionProvider.select((s) => s.loggedIn),
-      (prev, next) {
-        if (next == true) {
-          unawaited(PushNotifications.syncToken());
-          unawaited(PushNotifications.refreshUnread());
-        }
-      },
-    );
+    // New admin config (branding/flags) → rebuild; theme has its own listener.
+    ref.watch(remoteConfigProvider);
+    ref.listen<bool>(tvSessionProvider.select((s) => s.loggedIn), (prev, next) {
+      if (next == true) {
+        unawaited(PushNotifications.syncToken());
+        unawaited(PushNotifications.refreshUnread());
+      }
+    });
     final router = ref.watch(tvRouterProvider);
     final language = ref.watch(tvLanguageProvider);
     ref.watch(screenRecordProtectProvider);
@@ -205,10 +218,13 @@ class _TvRootAppState extends ConsumerState<TvRootApp>
       textTheme: _tvTextTheme(base.textTheme),
     );
     // Task #143 #7: EN + AR only (Urdu removed).
-    final materialLocale =
-        lang == AppLang.ar ? const Locale('ar') : const Locale('en');
+    final materialLocale = lang == AppLang.ar
+        ? const Locale('ar')
+        : const Locale('en');
     return MaterialApp.router(
-      key: ValueKey('tv-lang-$language-rtl-$rtl-theme-${appearance.name}-${AppThemeConfig.revision.value}'),
+      key: ValueKey(
+        'tv-lang-$language-rtl-$rtl-theme-${appearance.name}-${AppThemeConfig.revision.value}',
+      ),
       title: '${AppBrand.name} TV',
       debugShowCheckedModeBanner: false,
       locale: materialLocale,
@@ -226,10 +242,12 @@ class _TvRootAppState extends ConsumerState<TvRootApp>
       builder: (context, child) {
         return Directionality(
           textDirection: rtl ? TextDirection.rtl : TextDirection.ltr,
-          child: ScreenRecordGuard(
-            child: TvReminderBanner(
-              onWatch: (id) => router.push('/player/$id?kind=live'),
-              child: child ?? const SizedBox.shrink(),
+          child: MaintenanceGate(
+            child: ScreenRecordGuard(
+              child: TvReminderBanner(
+                onWatch: (id) => router.push('/player/$id?kind=live'),
+                child: child ?? const SizedBox.shrink(),
+              ),
             ),
           ),
         );
@@ -294,8 +312,10 @@ TextTheme _tvTextTheme(TextTheme base) {
     // inherited by every title without its own colour (hero titles,
     // channel names) and was hard to read from the sofa (client 19 Oct).
     // Secondary text already sets textSecondary explicitly.
-    bodyMedium: sized(base.bodyMedium, 14)
-        .copyWith(color: AppColors.textPrimary),
+    bodyMedium: sized(
+      base.bodyMedium,
+      14,
+    ).copyWith(color: AppColors.textPrimary),
     labelLarge: sized(base.labelLarge, 13),
   );
 }

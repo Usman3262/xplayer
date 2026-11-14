@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:data/data.dart';
 import 'package:domain/domain.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'remote_config.dart';
 
 import 'library_controller.dart';
 import 'tv_demo_mode.dart';
@@ -105,15 +106,10 @@ final sportsProvider = FutureProvider<List<SportsMatch>>((ref) {
   return ref.watch(catalogRepositoryProvider).getSportsMatches();
 });
 
-final sportsEnabledProvider = FutureProvider<bool>((ref) async {
-  final session = ref.watch(tvSessionProvider);
-  if (!session.loggedIn) return false;
-  try {
-    return await ref.watch(tvMediaRepositoryProvider).sportsEnabled();
-  } catch (_) {
-    return false;
-  }
-});
+/// Sports tab/sections: the admin's "sports" feature flag (remote config).
+final sportsEnabledProvider = FutureProvider<bool>(
+  (ref) async => ref.watch(featureEnabledProvider('sports')),
+);
 
 /// Match centre (fixtures, lineups): hidden until the server enables it.
 final matchCentreOnProvider = FutureProvider<bool>((ref) async {

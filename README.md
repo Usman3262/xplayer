@@ -24,9 +24,13 @@ backend URL…): **[XPLAYER_CHECKLIST.md](XPLAYER_CHECKLIST.md)**.
 
 ```bash
 flutter pub get              # once, at the repo root (Dart workspace)
-cd apps/mobile && flutter run
-cd apps/tv && flutter run -d <android-tv-device>
+cp env/app.example.json env/app.json   # once; fill in Supabase URL + publishable key
+cd apps/mobile && flutter run --dart-define-from-file=../../env/app.json
+cd apps/tv && flutter run -d <android-tv-device> --dart-define-from-file=../../env/app.json
 ```
+
+Without the `--dart-define-from-file` flag the apps still run, on built-in defaults
+(no admin config). Build release APKs the same way (`flutter build apk --dart-define-from-file=…`).
 
 Release builds are signed with the debug key unless you add
 `apps/<app>/android/key.properties` (`storeFile`, `storePassword`, `keyAlias`, `keyPassword`).

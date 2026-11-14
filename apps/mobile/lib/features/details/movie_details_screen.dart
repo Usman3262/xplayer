@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/demo_mode.dart';
+import '../../core/remote_config.dart';
 import '../../core/downloads_controller.dart';
 import '../../core/library_controller.dart';
 import '../../core/providers.dart';
@@ -235,7 +236,8 @@ class MovieDetailsScreen extends ConsumerWidget {
                   ),
                   // Real YouTube trailer, else no button (client 20 Oct #3:
                   // Trailer played the movie itself).
-                  if (youtubeTrailerUri(info?.trailer) case final trailer?)
+                  if (youtubeTrailerUri(info?.trailer) case final trailer?
+                      when ref.watch(featureEnabledProvider('trailers')))
                     _Action(
                       Icons.play_circle_outline,
                       copy.trailer,

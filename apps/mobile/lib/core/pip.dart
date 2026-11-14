@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'remote_config.dart';
 
 /// Picture-in-Picture (C8).
 ///
@@ -55,6 +56,8 @@ class AppPip {
   }) async {
     if (kIsWeb) return;
     if (!Platform.isAndroid && !Platform.isIOS) return;
+    // Admin feature switch: never arm PiP when it's turned off.
+    if (enabled && !RemoteConfigService.current.isEnabled('picture_in_picture')) enabled = false;
     _wire();
     var armed = false;
     try {
@@ -74,6 +77,7 @@ class AppPip {
   /// False when iOS cannot start PiP (e.g. switched off in Settings).
   static Future<bool> startIos() async {
     if (kIsWeb || !Platform.isIOS || !iosArmed) return false;
+    if (!RemoteConfigService.current.isEnabled('picture_in_picture')) return false;
     try {
       return await _channel.invokeMethod<bool>('startPip') == true;
     } catch (_) {

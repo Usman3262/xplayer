@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:domain/domain.dart' show AppBrand;
 
@@ -48,6 +49,11 @@ class AppLogo extends StatelessWidget {
   /// and Windows logos are unchanged.
   static bool decodeNearDisplaySize = false;
 
+  /// Logo uploaded in the admin panel (Branding & theme). When set, it is shown
+  /// in the same place and size as the built-in logo (no layout change); the
+  /// built-in artwork is the fallback while loading or on error.
+  static String? remoteUrl;
+
   @override
   Widget build(BuildContext context) {
     final rtl = Directionality.of(context) == TextDirection.rtl;
@@ -78,6 +84,20 @@ class AppLogo extends StatelessWidget {
   }
 
   Widget _buildBrand({required bool rtl}) {
+    final url = remoteUrl;
+    if (url == null || url.isEmpty) return _buildAsset(rtl: rtl);
+    return CachedNetworkImage(
+      imageUrl: url,
+      height: height,
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.high,
+      fadeInDuration: Duration.zero,
+      placeholder: (_, _) => _buildAsset(rtl: rtl),
+      errorWidget: (_, _, _) => _buildAsset(rtl: rtl),
+    );
+  }
+
+  Widget _buildAsset({required bool rtl}) {
     if (!showWordmark) {
       // Decode the 2048 px mark near its on-screen size: drawing the full
       // image at 15-40 dp looked jagged / low quality (client 21 Oct,

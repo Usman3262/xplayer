@@ -1,4 +1,5 @@
 import 'package:data/data.dart' show FavoriteCategories;
+
 import 'dart:async';
 
 import 'package:data/data.dart';
@@ -18,9 +19,12 @@ import 'core/catalog_sync.dart';
 import 'core/demo_mode.dart';
 import 'core/library_controller.dart';
 import 'core/downloads_controller.dart';
+import 'core/backend.dart';
 import 'core/providers.dart';
+import 'core/remote_config.dart';
 import 'core/screen_record_protect.dart';
 import 'core/session_controller.dart';
+import 'widgets/maintenance_gate.dart';
 import 'router/app_router.dart';
 import 'core/orientation_policy.dart';
 import 'core/push_notifications.dart';
@@ -36,7 +40,9 @@ Future<void> main() async {
   MediaKit.ensureInitialized();
   final mkMs = DateTime.now().difference(mkStart).inMilliseconds;
   if (kDebugMode || kProfileMode) {
-    debugPrint('[DEV] t=${DateTime.now().millisecondsSinceEpoch} MediaKit.ensureInitialized ms=$mkMs');
+    debugPrint(
+      '[DEV] t=${DateTime.now().millisecondsSinceEpoch} MediaKit.ensureInitialized ms=$mkMs',
+    );
   }
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   applyAppOrientations();
@@ -46,7 +52,12 @@ Future<void> main() async {
     unawaited(logDeviceStartupDiag());
   });
   // App name comes from /app.config via the native launcher label.
-  AppBrand.init((await PackageInfo.fromPlatform()).appName);
+  final packageInfo = await PackageInfo.fromPlatform();
+  AppBrand.init(packageInfo.appName);
+  // Backend + admin config: cached config applies before the first frame
+  // (instant, no network); the fresh one arrives in the background.
+  await Backend.init();
+  await RemoteConfigService.init(appVersion: packageInfo.version);
   runApp(const ProviderScope(child: MobileRootApp()));
 }
 
@@ -160,20 +171,20 @@ class _MobileRootAppState extends ConsumerState<MobileRootApp>
       unawaited(ref.read(libraryProvider.notifier).syncFromRemote());
       unawaited(_pulseDeviceHeartbeat());
       unawaited(PushNotifications.onAppResumed());
+      unawaited(RemoteConfigService.refresh());
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<bool>(
-      sessionProvider.select((s) => s.isLoggedIn),
-      (prev, next) {
-        if (next == true) {
-          unawaited(PushNotifications.syncToken());
-          unawaited(PushNotifications.refreshUnread());
-        }
-      },
-    );
+    // New admin config (branding/flags) → rebuild; theme has its own listener.
+    ref.watch(remoteConfigProvider);
+    ref.listen<bool>(sessionProvider.select((s) => s.isLoggedIn), (prev, next) {
+      if (next == true) {
+        unawaited(PushNotifications.syncToken());
+        unawaited(PushNotifications.refreshUnread());
+      }
+    });
     final router = ref.watch(routerProvider);
     final language = ref.watch(sessionProvider.select((s) => s.language));
     final lang = AppLocale.resolve(language);
@@ -192,19 +203,19 @@ class _MobileRootAppState extends ConsumerState<MobileRootApp>
     );
 
     // Task #143 #7: EN + AR only (Urdu removed).
-    final materialLocale =
-        lang == AppLang.ar ? const Locale('ar') : const Locale('en');
+    final materialLocale = lang == AppLang.ar
+        ? const Locale('ar')
+        : const Locale('en');
 
     return MaterialApp.router(
-      key: ValueKey('lang-$language-rtl-$rtl-theme-${AppThemeConfig.revision.value}'),
+      key: ValueKey(
+        'lang-$language-rtl-$rtl-theme-${AppThemeConfig.revision.value}',
+      ),
       title: AppBrand.name,
       debugShowCheckedModeBanner: false,
       theme: themed,
       locale: materialLocale,
-      supportedLocales: const [
-        Locale('en'),
-        Locale('ar'),
-      ],
+      supportedLocales: const [Locale('en'), Locale('ar')],
       localeResolutionCallback: (device, supported) {
         if (lang == AppLang.ar) return const Locale('ar');
         return const Locale('en');
@@ -217,13 +228,15 @@ class _MobileRootAppState extends ConsumerState<MobileRootApp>
       builder: (context, child) {
         return Directionality(
           textDirection: rtl ? TextDirection.rtl : TextDirection.ltr,
-          child: ScreenRecordGuard(
-            // Keep Allow/Deny polling alive on every route (profiles, settings…).
-            child: LoginChallengeHost(
-              child: ReminderBanner(
-                onWatch: (id) => router.push('/player/$id?kind=live'),
-                child: ContentUpdateBanner(
-                  child: child ?? const SizedBox.shrink(),
+          child: MaintenanceGate(
+            child: ScreenRecordGuard(
+              // Keep Allow/Deny polling alive on every route (profiles, settings…).
+              child: LoginChallengeHost(
+                child: ReminderBanner(
+                  onWatch: (id) => router.push('/player/$id?kind=live'),
+                  child: ContentUpdateBanner(
+                    child: child ?? const SizedBox.shrink(),
+                  ),
                 ),
               ),
             ),

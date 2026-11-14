@@ -44,3 +44,6 @@ node_modules/
 
 # Local test tools with real provider credentials (never commit)
 neo-channel-tester.html
+
+# Flutter app backend settings (public URL + publishable key; still local-only)
+env/app.json
