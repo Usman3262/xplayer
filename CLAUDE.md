@@ -49,6 +49,13 @@ Never import an app from a package. Mobile and TV share logic through packages.
   fields, keep the last valid config.
 
 ## 3. Architecture rules
+- **Keep the app's current UI design and architecture.** The existing Flutter screens, layouts
+  and navigation stay as they are (the user likes them). Remote control changes only colours
+  (theme tokens), feature on/off, texts/images, home rails content, settings — never the screen
+  design. New data sources plug into the existing screens/entities; no redesigns.
+- **App flow:** open app → splash → *Choose your panel* → enter panel credentials → **Connect** →
+  home. Creating an XPlayer account is **optional and offered after connecting** (to save/sync
+  favorites, history, continue-watching, settings across devices); guests keep data on the device.
 - Supabase is the only backend: Postgres, Auth, RLS, Storage, Edge Functions, Cron.
   No separate Node/Python server.
 - **Video never goes through our backend.** The app plays directly from the user's

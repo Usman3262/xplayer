@@ -56,8 +56,8 @@ export const NAV: NavGroup[] = [
       { title: "Banners", href: "/customization/banners", icon: ImageIcon, permission: "customization.read", ready: false },
       { title: "Top 10", href: "/customization/top10", icon: ListOrdered, permission: "customization.read", ready: false },
       { title: "Feature flags", href: "/customization/flags", icon: Flag, permission: "customization.read", ready: true },
-      { title: "Login & panels", href: "/customization/access", icon: KeyRound, permission: "customization.read", ready: false },
-      { title: "Versions & maintenance", href: "/customization/versions", icon: Smartphone, permission: "customization.read", ready: false },
+      { title: "Login & panels", href: "/customization/access", icon: KeyRound, permission: "customization.read", ready: true },
+      { title: "Versions & maintenance", href: "/customization/versions", icon: Smartphone, permission: "customization.read", ready: true },
     ],
   },
   {

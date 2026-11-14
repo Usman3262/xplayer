@@ -10,9 +10,10 @@ Spec: `new-platform.md` · Rules: `CLAUDE.md` · App "where to change": `XPLAYER
 ---
 
 ## ▶ NEXT
-**Phase 3 · Step 3.3 — Login & panels:** sign-in policy (optional / required / disabled),
-registration + guest switches, and the "Choose your panel" types (enable, order, labels,
-help text, form fields) with a phone preview. Publish to apply.
+**Phase 3 · Step 3.5 — Home builder** (the big one): sections list (drag/up-down order, on/off,
+rename, type, layout, source: auto / panel newest / panel rating / panel category / manual picks /
+random / watch stats, params like days, limit, targeting platform/country/login, schedule) with a
+preview using the **app's existing home look** (D17). Then 3.6 Banners, 3.7 Top 10.
 
 ## Waiting on you
 - [ ] Add **`TMDB_API_KEY`** as a Supabase Edge Function secret (needed at step 1.7).
@@ -47,6 +48,7 @@ help text, form fields) with a phone preview. Publish to apply.
 | D14 | **No bulk import of panel catalogs** (Neo ≈ 60k movies + 70k series): app caches the panel catalog locally; TMDB metadata fetched on demand (visible/opened titles, batched ≤25, tmdb id first) and cached once for all users | User decision 2026-11-15; cost + speed |
 | D15 | **Default theme black & red** (apps + admin), still changeable from admin; admin layout follows the user's reference dashboard (screenshot 2026-11-15; Figma links not readable by the connected Figma account) | User decision 2026-11-15 |
 | D16 | Vercel functions pinned to **Tokyo `hnd1`** (Supabase region ap-northeast-1); auth = local JWT verification (`getClaims`) + one `admin_session()` DB call per request | Speed: was 5–6 trans-Pacific round trips per page |
+| D17 | **Keep the current app UI design + architecture**; admin changes colours, flags, texts/images, rails, settings only. Flow: choose panel → credentials → Connect → home; account creation **optional, offered after connecting** (sync favorites/history/progress/settings) | User decision 2026-11-15 |
 | D10 | Provider credentials on device in secure storage; cloud sync of them only encrypted + opt-in | Spec §15.4 |
 
 ---
@@ -283,16 +285,36 @@ help text, form fields) with a phone preview. Publish to apply.
   *Tested:* tsc + eslint clean; renders: content manager sees bar + switches + Publish, admin sees
   edit buttons, analyst → /forbidden; dev log 0 errors. *Not tested:* clicking in a browser.
 - [ ] 3.2b Feature overrides UI (per user / country / plan) — DB + app config already support it.
-- [ ] 3.3 Login policy (optional/required/disabled), guest limits, registration on/off.
-- [ ] 3.4 Onboarding "Choose your panel": enable/disable/order Xtream, M3U, Stalker-MAC,
-  custom labels/help text, default ports, connect timeout.
+- [x] 3.3 + 3.4 Login & panels `/customization/access`. Sign-in card: mode Optional / Required / Off
+  (cards), guest use + new sign-ups switches with enforced combinations (required → no guest; off →
+  guest only, no sign-ups; optional needs guest), panels per user, connect timeout (s → ms).
+  "Choose your panel": list with on/off switch, move up/down (renumbers 10, 20, …), edit dialog
+  (name, description, help text, platforms, per-field label/placeholder/required — field **keys and
+  types are locked** because the app's provider code reads them), phone preview of the screen + the
+  selected connect form. Migration 019: DB trigger keeps **at least one panel type enabled**.
+  *Tested:* tsc + eslint clean; `live_access_check.py` **10/10** (disable one → dirty 'onboarding';
+  disabling all refused by DB; read-only role can't edit; label/field edit; non-list fields refused;
+  auth.mode accepted; >50 panels refused; all restored → clean); renders for content manager /
+  marketing manager (no edit buttons) / analyst (forbidden); dev log 0 errors.
 - [ ] 3.5 Home builder: add/remove/reorder/rename sections, source = auto / manual pick /
   random / TMDB trending, targeting, schedule, preview (phone + TV), publish.
 - [ ] 3.6 Banners (hero carousel): image, title, deep link, schedule, targeting.
 - [ ] 3.7 Top 10 lists (manual / auto from analytics / TMDB trending), per country/platform.
 - [ ] 3.8 "New" / "Recently added" rules (provider added date, TMDB release, manual).
 - [ ] 3.9 Sports: matches, lineups, competitions, which channel shows a match.
-- [ ] 3.10 Player defaults, cache policy, min/recommended app version, maintenance mode.
+- [x] 3.10 Versions & maintenance `/customization/versions`: version card per platform (minimum /
+  recommended / latest, https update link, what's new; recommended ≥ minimum, latest ≥ recommended),
+  maintenance list (Now / Scheduled / Finished / Off badges, on/off switch, delete) + "Schedule
+  maintenance" dialog (title, message, start/end, platforms), Player + Cache & refresh cards built
+  with the new generic **`SettingsCard`** (control chosen from the setting's type; min/max/options
+  from the DB) + generic `saveSettings` action.
+  **Security fix (migration 020):** settings in category `security` (e.g. `admin.require_two_factor`)
+  now need `settings.write` (Admin/Super Admin), not just `customization.write`; adding/removing
+  settings needs `settings.write`; key/category/type can't be changed via the API.
+  *Tested:* tsc + eslint clean; `live_security_settings_check.py` **5/5**; `live_versions_check.py`
+  **10/10** (versions → dirty, non-https link / end-before-start / retry>10 / bad live format
+  rejected by DB, read-only role can't edit, restored → clean; nothing published); renders for
+  content manager and marketing manager (no edit controls); dev log 0 errors.
 - [ ] 3.11 Publish flow: draft → preview → publish (bumps config version, app refreshes).
 
 ## Phase 4 — Flutter: Supabase + remote config
@@ -397,6 +419,8 @@ help text, form fields) with a phone preview. Publish to apply.
 ## Log
 - 2026-11-14 — Phase 0 done (planning files only, no code). Untested (nothing to run).
 - 2026-11-14 — Step 1.1 done: admin scaffold + Supabase folder in `apps/admin`; build + redirect smoke test pass.
+- 2026-11-15 — Step 3.10 done: Versions & maintenance + generic SettingsCard; security-settings permission fix (migration 020); 15/15 live checks. Recorded D17 (keep current app UI; panel → connect → optional account).
+- 2026-11-15 — Steps 3.3 + 3.4 done: Login & panels page (sign-in policy, Choose-your-panel editor + preview, DB guard); 10/10 live checks.
 - 2026-11-15 — Step 3.1 done: Branding & theme editor with live phone/TV preview; 10/10 live checks.
 - 2026-11-15 — Steps 3.0 + 3.2 done: publish bar + image storage + feature flags page; 16/16 live checks.
 - 2026-11-15 — Speed fix (live site slow): measured 1.6–2.8 s per signed-in page on Vercel. Causes: Supabase in Tokyo (ap-northeast-1) while Vercel functions run in the US by default, and 5–6 sequential Supabase round trips per page. Fixes: `apps/admin/vercel.json` regions `hnd1` (Tokyo, same as Supabase); `getClaims()` (local ES256 JWT verification, no Auth round trip) in proxy + `getAdminGate`; migration 016 `admin_session()` = 2FA state + permissions in ONE call (was 2). Now ~2 round trips per page. Verified: tsc/eslint clean, MFA live check 12/12, page renders for 3 roles. **Deployed by you (pushed to main); live re-measure with a temporary 2FA admin: 0.60–0.77 s total, TTFB ≈0.25 s (was 1.6–2.8 s).** Render check now enrolls TOTP (you enabled `admin.require_two_factor`). Further option if ever needed: Supabase project in Mumbai (ap-south-1) + functions in bom1 (requires a new project + migration).
