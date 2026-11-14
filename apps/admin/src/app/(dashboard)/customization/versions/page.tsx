@@ -22,6 +22,7 @@ export default function VersionsPage() {
 }
 
 const PLAYER_KEYS = ["player.live_format", "player.retry_count", "player.buffer_seconds", "player.progress_save_s"];
+const PANEL_KEYS = ["providers.request_timeout_ms", "providers.request_concurrency"];
 const CACHE_KEYS = ["cache.catalog_ttl_hours", "cache.epg_retention_hours", "cache.image_cache_mb", "config.refresh_interval_s", "search.min_chars"];
 
 const LABELS: Record<string, string> = {
@@ -34,6 +35,8 @@ const LABELS: Record<string, string> = {
   "cache.image_cache_mb": "Image cache on device",
   "config.refresh_interval_s": "Apps check for new settings every",
   "search.min_chars": "Start searching after",
+  "providers.request_timeout_ms": "Catalog request timeout",
+  "providers.request_concurrency": "Parallel requests per panel",
 };
 const UNITS: Record<string, string> = {
   "player.buffer_seconds": "s",
@@ -43,6 +46,7 @@ const UNITS: Record<string, string> = {
   "cache.image_cache_mb": "MB",
   "config.refresh_interval_s": "s",
   "search.min_chars": "chars",
+  "providers.request_timeout_ms": "ms",
 };
 
 async function VersionsContent() {
@@ -56,7 +60,7 @@ async function VersionsContent() {
       .select("id,title,message,platforms,starts_at,ends_at,is_active")
       .order("starts_at", { ascending: false })
       .limit(20),
-    supabase.from("app_settings").select("key,value_type,value,validation,description").in("key", [...PLAYER_KEYS, ...CACHE_KEYS]),
+    supabase.from("app_settings").select("key,value_type,value,validation,description").in("key", [...PLAYER_KEYS, ...CACHE_KEYS, ...PANEL_KEYS]),
   ]);
   if (versions.error || maintenance.error || settings.error) {
     return <ErrorState description="These settings could not be loaded." />;
@@ -82,6 +86,7 @@ async function VersionsContent() {
       <div className="grid gap-6 2xl:grid-cols-2">
         <SettingsCard title="Player" description="Defaults for every user; users can change some in their settings." rows={pick(PLAYER_KEYS)} labels={LABELS} units={UNITS} canWrite={canWrite} />
         <SettingsCard title="Cache & refresh" description="How long the apps keep data before refreshing." rows={pick(CACHE_KEYS)} labels={LABELS} units={UNITS} canWrite={canWrite} />
+        <SettingsCard title="Panel connections" description="How the apps talk to users' panels (login timeout and panel limit are under Access)." rows={pick(PANEL_KEYS)} labels={LABELS} units={UNITS} canWrite={canWrite} />
       </div>
     </div>
   );

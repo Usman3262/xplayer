@@ -73,3 +73,7 @@ export 'src/security/device_attestation.dart' show DeviceAttestation;
 export 'src/playback/decoder_mode.dart';
 export 'src/playback/decoder_preferences.dart';
 export 'src/demo/demo_catalog.dart';
+export 'src/providers/provider_models.dart';
+export 'src/providers/provider_adapter.dart';
+export 'src/providers/provider_http.dart';
+export 'src/providers/provider_mappers.dart';

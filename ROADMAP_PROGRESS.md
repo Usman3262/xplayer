@@ -10,15 +10,19 @@ Spec: `new-platform.md` · Rules: `CLAUDE.md` · App "where to change": `XPLAYER
 ---
 
 ## ▶ NEXT
-**Phase 5 · Step 5.1 — Provider engine:** `ProviderAdapter` interface + unified models + connection
-status/error model (spec §3.5) in `packages/data`, mapping into the existing domain entities (D5/D17).
-Then 5.2 Xtream (Neo), 5.3 M3U, 5.4 Stalker, 5.5 connection manager, 5.6 "Choose your panel" flow.
+**Phase 5 · Step 5.2 — Xtream adapter (Neo):** `XtreamAdapter implements ProviderAdapter` in
+`packages/data/lib/src/providers/xtream/` — login/account → `ProviderAccount`, categories, live/vod/series
+lists, vod/series info, short EPG (base64), stream URL builder (output format from `player.live_format` +
+`allowed_output_formats`), registered in `ProviderAdapterFactory`. Tests with recorded JSON fixtures.
 
 ## Waiting on you
 - [ ] **Android build setup on this PC** (to run on your phone/TV): free ~10 GB, install Android Studio
   (SDK + adb), then I enable Android in Flutter, set the SDK path, fix `JAVA_HOME`, accept licences,
   build + install. Allow "USB debugging" on the phone when asked.
-- [ ] Add **`TMDB_API_KEY`** as a Supabase Edge Function secret (needed at step 1.7).
+  Meanwhile: **browser preview** works — `cd apps/mobile; flutter run -d chrome --web-port 5555
+  --dart-define-from-file=../../env/app.json`, then F12 → Ctrl+Shift+M (phone size). Screens only; IPTV
+  video won't play in a browser (http streams). `apps/mobile/web/` exists only for this preview.
+- [x] `TMDB_API_KEY` set as a Supabase secret (done by you; metadata-tmdb verified live).
 - [ ] **Sports API**: which provider? (e.g. API-Football / football-data.org / TheSportsDB)
   — needed at step 3.9; key goes in Supabase secrets.
 - [x] Super admin created by you (2026-11-15). Secret key added to `.env.local`. Root `supabase/` folder deleted.
@@ -399,7 +403,27 @@ role has sports.read without sports.write).
   the panel connection, matching the flow "choose panel → connect → optional account" (D17).
 
 ## Phase 5 — Provider engine ("Choose your panel")
-- [ ] 5.1 `ProviderAdapter` interface + unified models + error/status model (spec §3.5).
+- [x] 5.1 `ProviderAdapter` interface + unified models + error/status model (spec §3.5).
+  *Implemented* in `packages/data/lib/src/providers/`:
+  - `provider_models.dart`: `ProviderKind` (keys match admin panel types), `ConnectionStatus` (all 11
+    §3.5 states), `ProviderFailure`(+kind → status, retryable), credentials (Xtream / M3U / Stalker) with
+    instant local validation, URL normaliser (`parsePanelUrl`), MAC normaliser, storage map, `toString`
+    without secrets; `ProviderAccount` (expiry, max connections, formats), `ProviderCapabilities`,
+    `StreamRef` → `ResolvedStream` (URLs with credentials built only at play time), channel/movie/series/
+    episode/details/EPG models.
+  - `provider_adapter.dart`: the interface + `ProviderAdapterFactory` (validates, `unsupported` for kinds
+    not registered yet).
+  - `provider_http.dart`: `ProviderLimits.fromConfig` (admin settings `providers.connect_timeout_ms`,
+    `providers.request_timeout_ms`, `providers.request_concurrency`, clamped), `ProviderHttp` (timeout on
+    every call, short login timeout, retries + backoff only for network/timeout/5xx/429, per-panel
+    concurrency cap, JSON ≥256 KB decoded in an isolate, HTTP codes → failure kinds incl. 884/512 banned,
+    errors never contain URLs).
+  - `provider_mappers.dart`: → existing `CatalogCategory`, `LiveChannel` (EPG now/next/progress),
+    `MediaItem`, `Episode` (same label helpers as before; no stream URLs stored).
+  - Admin: Versions page → new **Panel connections** card (request timeout, parallel requests). Login
+    timeout + panel limit were already under Access.
+  *Tested:* `flutter test test/providers` 21/21 + mpv tests (split check) 7/7; `flutter analyze` on touched
+  files: no errors. Admin `tsc` **not run** (`apps/admin/node_modules` missing — run `npm install` later).
 - [ ] 5.2 Xtream adapter (auth/account info, categories, live/vod/series, series info,
   vod info, short EPG / xmltv, URL builder, output format choice). Tests with recorded JSON.
 - [ ] 5.3 M3U adapter (URL/file, EXTINF attrs, groups, tvg-id, isolate parser, dedupe).
@@ -493,6 +517,8 @@ role has sports.read without sports.write).
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-15 — Step 5.1 done: provider engine interface/models/HTTP/mappers + 21 tests; admin Panel connections card (tsc not run).
+- 2026-11-15 — Browser preview of the mobile app: added `apps/mobile/web/`; split mpv FFI code into `mpv_native_ffi.dart` + web stub (conditional import); browser HTTP client in `api_client.dart`; web guard in `network_diag.dart`. Tested: app starts in Chrome (user ran it). Not a device result.
 - 2026-11-14 — Phase 0 done (planning files only, no code). Untested (nothing to run).
 - 2026-11-14 — Step 1.1 done: admin scaffold + Supabase folder in `apps/admin`; build + redirect smoke test pass.
 - 2026-11-15 — Steps 4.3 + 4.4 done: feature switches, route guard, update + maintenance gates, remote logo; phone 26 / TV 51 tests.
