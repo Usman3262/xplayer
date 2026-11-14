@@ -75,7 +75,7 @@ errors; **untested** = not run on a phone/TV yet.
 - [x] New provider-neutral `PushMessage` (`packages/data/lib/src/notifications/push_message.dart`) + `PushNotifications.show(msg)` for a future source (Supabase realtime, etc.).
 
 ### 2.5 All CRUNCH branding removed
-- [x] New XPlayer artwork (original): violet→cyan "X" with a white play triangle; wordmark in Bebas Neue.
+- [x] New XPlayer artwork (original): red gradient "X" (#B3121F → #FF3B4A) with a white play triangle on near-black #0D0607; wordmark in Bebas Neue. (Was violet→cyan until 2026-11-15.)
 - [x] Generator: `tool/branding/make_xplayer_brand.py` (Pillow). Re-run to regenerate everything.
 - [x] `packages/design_system/assets/branding/`: old 15 files deleted; new `xplayer_mark.png/.svg`, `xplayer_wordmark.png`, `xplayer_lockup(.png|_rtl.png)`, `xplayer_launcher.png`, `xplayer_launcher_fg.png`, `xplayer_splash.png`.
 - [x] Android (phone + TV, same names/sizes): launcher mipmaps, adaptive foregrounds, Android 12 splash (+ night), status-bar icon (white), notification badge, splash background, TV banners (4 sizes).
@@ -89,7 +89,7 @@ errors; **untested** = not run on a phone/TV yet.
 - [x] iOS native PiP (`CrunchPip.swift`, needed the deleted fork) removed; Dart side already ignores a missing channel → PiP simply off on iPhone. Android PiP unchanged.
 
 ### 2.6 Global theme (ready for the admin panel)
-- [x] `AppThemeConfig` (`packages/design_system/lib/src/theme/app_theme_config.dart`): all colours in one object, `defaults` = XPlayer palette, `applyJson(map)` / `apply(config)` / `reset()`, `toJson()`, partial JSON allowed.
+- [x] `AppThemeConfig` (`packages/design_system/lib/src/theme/app_theme_config.dart`): all colours in one object, `defaults` = XPlayer black & red palette (primary #E11D2E on #0D0607), `applyJson(map)` / `apply(config)` / `reset()`, `toJson()`, partial JSON allowed.
 - [x] `AppColors.*` are now getters reading the current theme (names kept, plus `primary` / `secondary`).
 - [x] Both app roots listen to `AppThemeConfig.revision` and rebuild the whole UI when the theme changes.
 - [x] Default "Cinematic" appearance preset (phone + TV) follows the global theme; other presets (Midnight, Carbon, Deep Cinema) unchanged.

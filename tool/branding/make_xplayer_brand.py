@@ -24,9 +24,10 @@ BRAND_DIR = os.path.join(ROOT, "packages", "design_system", "assets", "branding"
 FONT = os.path.join(ROOT, "packages", "design_system", "assets", "fonts", "bebas_neue",
                     "BebasNeue-Regular.ttf")
 
-VIOLET = (0x7C, 0x3A, 0xED)
-CYAN = (0x22, 0xD3, 0xEE)
-BG = (0x0B, 0x0B, 0x12)
+# Brand gradient (start → end) and icon background. Default theme: black + red.
+VIOLET = (0xB3, 0x12, 0x1F)   # deep red (gradient start; name kept for the code below)
+CYAN = (0xFF, 0x3B, 0x4A)     # bright red (gradient end)
+BG = (0x0D, 0x06, 0x07)       # near-black with a red tint
 SILVER = (0xF1, 0xF5, 0xF9)
 WHITE = (255, 255, 255)
 
@@ -290,8 +291,8 @@ def write_svg(path: str):
         '<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">\n'
         '  <defs>\n'
         '    <linearGradient id="xp" x1="0" y1="0" x2="1024" y2="1024" gradientUnits="userSpaceOnUse">\n'
-        '      <stop offset="0" stop-color="#7C3AED"/>\n'
-        '      <stop offset="1" stop-color="#22D3EE"/>\n'
+        '      <stop offset="0" stop-color="#B3121F"/>\n'
+        '      <stop offset="1" stop-color="#FF3B4A"/>\n'
         '    </linearGradient>\n'
         '  </defs>\n'
         + "\n".join(paths) + "\n"

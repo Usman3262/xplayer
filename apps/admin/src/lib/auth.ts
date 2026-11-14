@@ -1,5 +1,6 @@
 import "server-only";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { cache } from "react";
 
 import { createClient } from "@/lib/supabase/server";
@@ -17,6 +18,8 @@ export type AdminSession = {
  * Permissions come from the DB (`my_permissions()`), the same source RLS uses.
  */
 export const getAdmin = cache(async (): Promise<AdminSession | null> => {
+  // Session checks use the current time (token expiry) → always request-time.
+  await connection();
   const supabase = await createClient();
   const {
     data: { user },

@@ -10,10 +10,8 @@ Spec: `new-platform.md` · Rules: `CLAUDE.md` · App "where to change": `XPLAYER
 ---
 
 ## ▶ NEXT
-**Phase 2 · Step 2.2 — Admin layout & building blocks.** Sidebar with modules (shown by
-permission), top bar (user menu, sign out), dark theme, breadcrumbs, toasts, skeletons,
-empty/error states, shared server-paginated DataTable, zod form kit, image upload to Storage.
-Dashboard page with first real numbers.
+**Phase 2 · Step 2.3 — Audit log viewer + shared DataTable** (server-side pagination,
+filters, search; reused by every list page), then 2.4 admins & roles.
 
 ## Waiting on you
 - [ ] Add **`TMDB_API_KEY`** as a Supabase Edge Function secret (needed at step 1.7).
@@ -46,6 +44,7 @@ Dashboard page with first real numbers.
 | D12 | Next.js 16.4 with Cache Components + Partial Prefetching; session reads inside `<Suspense>` | Next 16 defaults |
 | D13 | **Rails/Top 10 from the user's panel** (provider_added / provider_rating / provider_category / manual picks by panel id / random / watch_stats) — never TMDB lists | User decision 2026-11-15 |
 | D14 | **No bulk import of panel catalogs** (Neo ≈ 60k movies + 70k series): app caches the panel catalog locally; TMDB metadata fetched on demand (visible/opened titles, batched ≤25, tmdb id first) and cached once for all users | User decision 2026-11-15; cost + speed |
+| D15 | **Default theme black & red** (apps + admin), still changeable from admin; admin layout follows the user's reference dashboard (screenshot 2026-11-15; Figma links not readable by the connected Figma account) | User decision 2026-11-15 |
 | D10 | Provider credentials on device in secure storage; cloud sync of them only encrypted + opt-in | Spec §15.4 |
 
 ---
@@ -183,9 +182,22 @@ Dashboard page with first real numbers.
   apps see new value, no audit read, audit rows written, can't create roles; restored + temp
   users deleted). *Not tested:* signing in through the browser UI with your account — please try.
 - [ ] 2.1b Admin 2FA (Supabase TOTP MFA): enroll screen, require AAL2 for admin pages.
-- [ ] 2.2 Layout: sidebar modules, top bar, theme (dark-first), breadcrumbs, command
-  palette, toasts, skeletons, empty/error states. Shared DataTable (server pagination,
-  filters, search), Form kit (zod + react-hook-form), image upload to Storage.
+- [x] 2.2 Admin layout + dashboard, styled after the user's reference (Payd-style dashboard:
+  plain sidebar with collapsible groups, big search pill, bell, profile chip, greeting line +
+  headline, very rounded cards, bar chart, donut, coloured mini-bars with legend, right rail with
+  tabs + message cards) in **black & red**. Files: `src/config/nav.ts` (all 23 modules + permission,
+  `ready` flag → "soon"), `components/layout/{app-sidebar,nav-search,user-menu,page-header}.tsx`,
+  `components/states.tsx` (Empty/Error/Skeleton), `components/dashboard/rail.tsx`,
+  `app/(dashboard)/{layout,page}.tsx`, `lib/dashboard-types.ts`; Toaster + TooltipProvider in root.
+  DB: `admin_dashboard_stats()` (one call, `dashboard.read`, aggregates only, activity only with
+  `audit.read`; migrations 010 + 012 weekly sign-ups). `getAdmin()` now calls `connection()`
+  (fixes Next 16 "Date.now during prerender"). `use-mobile` hook rewritten with
+  `useSyncExternalStore` (lint). `NEXT_PUBLIC_APP_NAME` env (no hard-coded brand).
+  *Tested:* tsc + eslint clean; dev server: `/` → 307 signed out, `/login` 200, logo 200;
+  **signed-in render** via `scripts/render_check.py` (temporary admin, deleted after): 200, greeting,
+  chart, donut, catalog card, sidebar groups, "soon" items, activity tab present; dev log 0 errors.
+  *Not tested:* how it looks in your browser (please check), mobile widths.
+  *Moved to 2.3:* DataTable. *Later steps:* form kit + image upload (with the first forms, Phase 3).
 - [ ] 2.3 Audit log viewer + every server action writes `audit_logs`.
 - [ ] 2.4 Admin users & roles screen (Super Admin, Admin, Content Manager,
   Subscription Manager, Marketing Manager, Support Agent, Analyst).
@@ -307,6 +319,7 @@ Dashboard page with first real numbers.
 ## Log
 - 2026-11-14 — Phase 0 done (planning files only, no code). Untested (nothing to run).
 - 2026-11-14 — Step 1.1 done: admin scaffold + Supabase folder in `apps/admin`; build + redirect smoke test pass.
+- 2026-11-15 — Black & red default theme (Flutter defaults, published config v9, admin CSS, regenerated red icons). Step 2.2 done: admin layout + dashboard in the reference style; signed-in render verified with a temporary admin.
 - 2026-11-15 — Step 2.1 done: admin sign-in + guards; 20/20 live signed-in RLS checks pass.
 - 2026-11-15 — Step 1.8 done: Dart contract models + 12 tests (real config fixture). Phase 1 complete.
 - 2026-11-15 — Step 1.7 revised: Top 10/rails from the panel, TMDB on demand only (migrations 007–009, function redeployed, config v6).

@@ -11,11 +11,11 @@ import 'package:flutter/painting.dart';
 /// JSON format (all optional, colours as "#RRGGBB" or "#AARRGGBB"):
 /// ```json
 /// {
-///   "background": "#0B0B12", "surface": "#14141F", "surfaceElevated": "#1C1C2B",
-///   "primary": "#22D3EE", "primaryDim": "#06B6D4", "secondary": "#7C3AED",
-///   "gold": "#FBBF24", "live": "#F43F5E", "success": "#34D399",
-///   "textPrimary": "#F1F5F9", "textSecondary": "#94A3B8",
-///   "border": "#2A2A3D", "danger": "#EF4444"
+///   "background": "#0D0607", "surface": "#1A0B0D", "surfaceElevated": "#2A1013",
+///   "primary": "#E11D2E", "primaryDim": "#A3111D", "secondary": "#7A0C14",
+///   "gold": "#F5B301", "live": "#FF3B30", "success": "#22C55E",
+///   "textPrimary": "#FFFFFF", "textSecondary": "#BFAFB1",
+///   "border": "#3A1A1E", "danger": "#FF6B6B"
 /// }
 /// ```
 @immutable
@@ -59,21 +59,21 @@ class AppThemeConfig {
   final Color border;
   final Color danger;
 
-  /// Built-in XPlayer palette (violet + cyan on near-black).
+  /// Built-in XPlayer palette: black + red (admin can change it remotely).
   static const defaults = AppThemeConfig(
-    background: Color(0xFF0B0B12),
-    surface: Color(0xFF14141F),
-    surfaceElevated: Color(0xFF1C1C2B),
-    primary: Color(0xFF22D3EE),
-    primaryDim: Color(0xFF06B6D4),
-    secondary: Color(0xFF7C3AED),
-    gold: Color(0xFFFBBF24),
-    live: Color(0xFFF43F5E),
-    success: Color(0xFF34D399),
-    textPrimary: Color(0xFFF1F5F9),
-    textSecondary: Color(0xFF94A3B8),
-    border: Color(0xFF2A2A3D),
-    danger: Color(0xFFEF4444),
+    background: Color(0xFF0D0607),
+    surface: Color(0xFF1A0B0D),
+    surfaceElevated: Color(0xFF2A1013),
+    primary: Color(0xFFE11D2E),
+    primaryDim: Color(0xFFA3111D),
+    secondary: Color(0xFF7A0C14),
+    gold: Color(0xFFF5B301),
+    live: Color(0xFFFF3B30),
+    success: Color(0xFF22C55E),
+    textPrimary: Color(0xFFFFFFFF),
+    textSecondary: Color(0xFFBFAFB1),
+    border: Color(0xFF3A1A1E),
+    danger: Color(0xFFFF6B6B),
   );
 
   static AppThemeConfig _current = defaults;

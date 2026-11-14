@@ -72,7 +72,7 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+  --radius: 0.875rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -83,38 +83,43 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+/* XPlayer admin — default dark theme: black + red (same palette as the apps'
+   AppThemeConfig defaults). Soft, rounded "clean & fluffy" surfaces. */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #0b0708;
+  --foreground: #f7f2f2;
+  --card: #151012;
+  --card-foreground: #f7f2f2;
+  --popover: #1a1214;
+  --popover-foreground: #f7f2f2;
+  --primary: #e11d2e;
+  --primary-foreground: #ffffff;
+  --secondary: #24181a;
+  --secondary-foreground: #f7f2f2;
+  --muted: #1e1517;
+  --muted-foreground: #a8979a;
+  --accent: #2a1b1e;
+  --accent-foreground: #ffffff;
+  --destructive: #ff6b6b;
+  --border: #2a1d20;
+  --input: #2f2124;
+  --ring: #e11d2e;
+  --chart-1: #e11d2e;
+  --chart-2: #ff6b74;
+  --chart-3: #f5b301;
+  --chart-4: #8b8b93;
+  --chart-5: #7a0c14;
+  --sidebar: #100b0c;
+  --sidebar-foreground: #e9dfe0;
+  --sidebar-primary: #e11d2e;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #23171a;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #221719;
+  --sidebar-ring: #e11d2e;
+  /* Brand extras */
+  --brand-gold: #f5b301;
+  --brand-gradient: linear-gradient(135deg, #b3121f 0%, #e11d2e 60%, #ff3b4a 100%);
 }
 
 @layer base {
@@ -124,7 +129,20 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Soft red glow behind the app (like the reference designs). */
+  .dark body {
+    background-image: radial-gradient(1200px 600px at 85% -10%, rgb(225 29 46 / 0.10), transparent 60%);
+    background-attachment: fixed;
+  }
   html {
     @apply font-sans;
+  }
+}
+@layer utilities {
+  .bg-brand-gradient {
+    background-image: var(--brand-gradient);
+  }
+  .text-brand-gold {
+    color: var(--brand-gold);
   }
 }

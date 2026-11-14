@@ -1694,6 +1694,30 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_audit_entities: { Args: never; Returns: string[] }
+      admin_audit_logs: {
+        Args: {
+          p_action?: string
+          p_entity?: string
+          p_limit?: number
+          p_offset?: number
+          p_q?: string
+          p_since?: string
+        }
+        Returns: {
+          action: string
+          actor_email: string
+          actor_id: string
+          after: Json
+          before: Json
+          created_at: string
+          entity: string
+          entity_id: string
+          id: number
+          meta: Json
+        }[]
+      }
+      admin_dashboard_stats: { Args: never; Returns: Json }
       bootstrap_super_admin: { Args: { p_email: string }; Returns: string }
       build_app_config_snapshot: { Args: never; Returns: Json }
       build_home_snapshot: { Args: never; Returns: Json }
