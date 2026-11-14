@@ -1,0 +1,329 @@
+{
+ "home": {
+  "top10": [
+   {
+    "id": "00000000-0000-0000-0000-00000000a010",
+    "kind": "mixed",
+    "items": [],
+    "title": "Top 10 this week",
+    "params": {
+     "days": 90
+    },
+    "source": "provider_rating",
+    "country": null
+   }
+  ],
+  "banners": [],
+  "sections": [
+   {
+    "id": "00d0809a-d13d-457d-8e2b-6c8095e66af3",
+    "kind": "mixed",
+    "type": "hero_banners",
+    "items": [],
+    "limit": 8,
+    "login": false,
+    "title": "Featured",
+    "top10": null,
+    "layout": "hero",
+    "params": {},
+    "source": "manual",
+    "subtitle": null
+   },
+   {
+    "id": "77beba91-c759-41a4-9bd3-735f44cf14f9",
+    "kind": "mixed",
+    "type": "continue_watching",
+    "items": [],
+    "limit": 20,
+    "login": false,
+    "title": "Continue watching",
+    "top10": null,
+    "layout": "wide_rail",
+    "params": {},
+    "source": "auto",
+    "subtitle": null
+   },
+   {
+    "id": "22d0e6a2-a92c-46c4-9e19-f4aeb07c7c91",
+    "kind": "mixed",
+    "type": "top10",
+    "items": [],
+    "limit": 10,
+    "login": false,
+    "title": "Top 10 this week",
+    "top10": "00000000-0000-0000-0000-00000000a010",
+    "layout": "ranked",
+    "params": {
+     "days": 90
+    },
+    "source": "provider_rating",
+    "subtitle": null
+   },
+   {
+    "id": "3f1149b1-3872-4a07-9c46-4ccea0077a34",
+    "kind": "live",
+    "type": "live_now",
+    "items": [],
+    "limit": 20,
+    "login": false,
+    "title": "Live now",
+    "top10": null,
+    "layout": "rail",
+    "params": {},
+    "source": "auto",
+    "subtitle": null
+   },
+   {
+    "id": "d83f3e3d-cef1-4535-b02f-a37629bd78e5",
+    "kind": "movie",
+    "type": "new_releases",
+    "items": [],
+    "limit": 20,
+    "login": false,
+    "title": "New movies",
+    "top10": null,
+    "layout": "rail",
+    "params": {
+     "days": 30
+    },
+    "source": "provider_added",
+    "subtitle": null
+   },
+   {
+    "id": "7314edaf-ad39-4670-b696-7ac42216da88",
+    "kind": "mixed",
+    "type": "recently_added",
+    "items": [],
+    "limit": 20,
+    "login": false,
+    "title": "Recently added",
+    "top10": null,
+    "layout": "rail",
+    "params": {},
+    "source": "provider_added",
+    "subtitle": null
+   },
+   {
+    "id": "06c454a5-54d5-4ccf-8c09-53d54eed1518",
+    "kind": "series",
+    "type": "new_releases",
+    "items": [],
+    "limit": 20,
+    "login": false,
+    "title": "New series",
+    "top10": null,
+    "layout": "rail",
+    "params": {
+     "days": 30
+    },
+    "source": "provider_added",
+    "subtitle": null
+   },
+   {
+    "id": "36248c16-6dec-458e-97e0-ee4dc26beec6",
+    "kind": "live",
+    "type": "matches_upcoming",
+    "items": [],
+    "limit": 10,
+    "login": false,
+    "title": "Matches",
+    "top10": null,
+    "layout": "cards",
+    "params": {},
+    "source": "auto",
+    "subtitle": null
+   },
+   {
+    "id": "5722fdd8-8e60-468c-b4fc-b8f28d8cfaea",
+    "kind": "mixed",
+    "type": "recommended",
+    "items": [],
+    "limit": 20,
+    "login": false,
+    "title": "Picked for you",
+    "top10": null,
+    "layout": "rail",
+    "params": {},
+    "source": "random",
+    "subtitle": null
+   },
+   {
+    "id": "05f067b3-fd7c-4e61-aa16-fe47520a9093",
+    "kind": "mixed",
+    "type": "favorites",
+    "items": [],
+    "limit": 20,
+    "login": false,
+    "title": "My favorites",
+    "top10": null,
+    "layout": "rail",
+    "params": {},
+    "source": "auto",
+    "subtitle": null
+   }
+  ]
+ },
+ "flags": {
+  "epg": true,
+  "kids": true,
+  "clips": false,
+  "movies": true,
+  "search": true,
+  "series": true,
+  "sports": true,
+  "catchup": true,
+  "live_tv": true,
+  "profiles": true,
+  "trailers": true,
+  "downloads": false,
+  "favorites": true,
+  "chromecast": false,
+  "guest_mode": true,
+  "speed_test": true,
+  "diagnostics": true,
+  "theme_presets": true,
+  "tmdb_metadata": true,
+  "watch_history": true,
+  "multi_provider": true,
+  "parental_controls": true,
+  "notification_inbox": true,
+  "picture_in_picture": true,
+  "push_notifications": false
+ },
+ "theme": {
+  "gold": "#FBBF24",
+  "live": "#F43F5E",
+  "border": "#2A2A3D",
+  "danger": "#EF4444",
+  "primary": "#22D3EE",
+  "success": "#34D399",
+  "surface": "#14141F",
+  "secondary": "#7C3AED",
+  "background": "#0B0B12",
+  "primaryDim": "#06B6D4",
+  "textPrimary": "#F1F5F9",
+  "textSecondary": "#94A3B8",
+  "surfaceElevated": "#1C1C2B"
+ },
+ "version": 6,
+ "settings": {
+  "auth.mode": "optional",
+  "app.terms_url": "",
+  "app.privacy_url": "",
+  "search.min_chars": 2,
+  "app.support_email": "",
+  "metadata.language": "en-US",
+  "auth.guest_enabled": true,
+  "player.live_format": "ts",
+  "player.retry_count": 3,
+  "app.default_language": "en",
+  "cache.image_cache_mb": 200,
+  "metadata.poster_size": "w342",
+  "player.buffer_seconds": 10,
+  "metadata.backdrop_size": "w1280",
+  "player.progress_save_s": 30,
+  "app.supported_languages": [
+   "en",
+   "ar",
+   "ur"
+  ],
+  "auth.allow_registration": true,
+  "cache.catalog_ttl_hours": 24,
+  "metadata.image_base_url": "https://image.tmdb.org/t/p",
+  "cache.epg_retention_hours": 48,
+  "config.refresh_interval_s": 900,
+  "providers.max_connections": 5,
+  "notifications.inbox_enabled": true,
+  "providers.connect_timeout_ms": 8000,
+  "providers.request_timeout_ms": 20000,
+  "providers.request_concurrency": 4
+ },
+ "unchanged": false,
+ "onboarding": [
+  {
+   "key": "xtream",
+   "help": "Use the details your provider sent you (often called \"Xtream\" or \"API\" login).",
+   "icon": "dns",
+   "label": "Xtream Codes",
+   "fields": [
+    {
+     "key": "host",
+     "type": "url",
+     "label": "Server URL",
+     "required": true,
+     "placeholder": "http://example.com:8080"
+    },
+    {
+     "key": "username",
+     "type": "text",
+     "label": "Username",
+     "required": true
+    },
+    {
+     "key": "password",
+     "type": "password",
+     "label": "Password",
+     "required": true
+    }
+   ],
+   "platforms": null,
+   "description": "Server URL, username and password"
+  },
+  {
+   "key": "m3u",
+   "help": "Paste the M3U/M3U8 link from your provider.",
+   "icon": "playlist_play",
+   "label": "M3U playlist",
+   "fields": [
+    {
+     "key": "url",
+     "type": "url",
+     "label": "Playlist URL",
+     "required": true,
+     "placeholder": "http://example.com/get.php?\u00e2\u20ac\u00a6"
+    },
+    {
+     "key": "epg_url",
+     "type": "url",
+     "label": "EPG URL (optional)",
+     "required": false
+    }
+   ],
+   "platforms": null,
+   "description": "Playlist link or file"
+  },
+  {
+   "key": "stalker",
+   "help": "Use the portal link and the MAC address registered with your provider.",
+   "icon": "router",
+   "label": "Stalker portal (MAC)",
+   "fields": [
+    {
+     "key": "portal",
+     "type": "url",
+     "label": "Portal URL",
+     "required": true,
+     "placeholder": "http://example.com/c/"
+    },
+    {
+     "key": "mac",
+     "type": "mac",
+     "label": "MAC address",
+     "required": true,
+     "placeholder": "00:1A:79:00:00:00"
+    }
+   ],
+   "platforms": null,
+   "description": "Portal URL and MAC address"
+  }
+ ],
+ "maintenance": null,
+ "published_at": "2026-11-14T19:34:22.264345+00:00",
+ "version_policy": {
+  "min": "0.0.0",
+  "url": null,
+  "notes": null,
+  "latest": null,
+  "recommended": null
+ }
+}

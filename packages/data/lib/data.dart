@@ -1,4 +1,9 @@
 export 'src/notifications/push_message.dart';
+export 'src/backend/catalog_models.dart';
+export 'src/backend/home_layout.dart';
+export 'src/backend/json_util.dart';
+export 'src/backend/remote_config.dart';
+export 'src/backend/sports_models.dart';
 export 'src/diag/diag.dart';
 export 'src/diag/device_startup_diag.dart';
 export 'src/diag/network_diag.dart';

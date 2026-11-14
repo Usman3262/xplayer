@@ -10,20 +10,16 @@ Spec: `new-platform.md` · Rules: `CLAUDE.md` · App "where to change": `XPLAYER
 ---
 
 ## ▶ NEXT
-**Phase 1 · Step 1.3 — migration 002: app configuration** (`app_settings`, feature flags +
-overrides, app versions, maintenance, onboarding panel types, theme, config versions,
-RPC `get_app_config(platform, app_version)`), RLS + live checks, push, regenerate types.
+**Phase 2 · Step 2.1 — Admin sign-in.** `/login` (email + password via Supabase Auth,
+server action), admin-only guard (`is_admin()` + `my_permissions()`), sign-out, redirect to
+`next`; `requirePermission(perm)` helper for server actions/pages; first signed-in RLS checks
+with your super-admin account (setting validation, publish_app_config, audit rows).
 
 ## Waiting on you
-- [ ] Add the **secret key** to `apps/admin/.env.local` → `SUPABASE_SECRET_KEY=` (Supabase →
-  Project Settings → API keys → secret). Needed from step 2.1. Never paste it in chat.
 - [ ] Add **`TMDB_API_KEY`** as a Supabase Edge Function secret (needed at step 1.7).
 - [ ] **Sports API**: which provider? (e.g. API-Football / football-data.org / TheSportsDB)
   — needed at step 3.9; key goes in Supabase secrets.
-- [ ] You can delete the empty `supabase/` folder at the repo root (left from the first link).
-- [ ] **Make yourself super admin** (needed for step 2.1): Supabase → Authentication → Users →
-  *Add user* (your email + password, auto-confirm), then SQL editor:
-  `select public.bootstrap_super_admin('your@email');` (works only once, while no admin exists).
+- [x] Super admin created by you (2026-11-15). Secret key added to `.env.local`. Root `supabase/` folder deleted.
 
 ## Answers received (2026-11-14)
 - Q1 Supabase: hosted project `phkqmojtdyaohiixakvv` (free tier). CLI linked from `apps/admin`.
@@ -48,6 +44,8 @@ RPC `get_app_config(platform, app_version)`), RLS + live checks, push, regenerat
 | D9 | First screen after splash = **Choose your panel** (types from admin config) | User request |
 | D11 | npm (no pnpm installed); no Docker → no local Supabase, migrations pushed to the hosted project | Tools on this PC |
 | D12 | Next.js 16.4 with Cache Components + Partial Prefetching; session reads inside `<Suspense>` | Next 16 defaults |
+| D13 | **Rails/Top 10 from the user's panel** (provider_added / provider_rating / provider_category / manual picks by panel id / random / watch_stats) — never TMDB lists | User decision 2026-11-15 |
+| D14 | **No bulk import of panel catalogs** (Neo ≈ 60k movies + 70k series): app caches the panel catalog locally; TMDB metadata fetched on demand (visible/opened titles, batched ≤25, tmdb id first) and cached once for all users | User decision 2026-11-15; cost + speed |
 | D10 | Provider credentials on device in secure storage; cloud sync of them only encrypted + opt-in | Spec §15.4 |
 
 ---
@@ -80,23 +78,96 @@ RPC `get_app_config(platform, app_version)`), RLS + live checks, push, regenerat
   live REST checks as anonymous: all 5 tables and all 5 RPCs → 42501 permission denied.
   pgTAP file `supabase/tests/001_identity_rbac_test.sql` written (12 checks) but **not run**
   (needs Docker). Signed-in checks pending a real admin user (step 2.1).
-- [ ] 1.3 Migration 002 — app configuration: `app_settings` (typed key/value with
-  schema + version), `feature_flags`, `feature_overrides`, `app_versions`,
-  `maintenance_windows`, `onboarding_panel_types`, `theme` (JSON matching `AppThemeConfig`),
-  `config_versions` (publish history). RPC `get_app_config(platform, app_version)`. RLS + tests.
-- [ ] 1.4 Migration 003 — home builder & merchandising: `home_sections`
-  (type: continue_watching, top10, banners, new, recently_added, trending, live_now,
-  matches, lineups, category, custom…, source: auto/manual/random, targeting, schedule,
-  order), `home_section_items`, `banners`, `top10_lists` + items. RLS + tests.
-- [ ] 1.5 Migration 004 — global catalog: `global_movies/series/seasons/episodes/channels`,
-  `genres`, `countries`, `languages`, `content_external_ids`, `content_artwork`,
-  `content_overrides` (admin edits), search indexes (pg_trgm). RLS + tests.
-- [ ] 1.6 Migration 005 — sports: `competitions`, `teams`, `matches`, `match_lineups`,
-  `match_events`, channel links. RLS + tests.
-- [ ] 1.7 Edge Function `metadata-tmdb` (lookup by title/year/tmdb id, cache to global
-  catalog, rate-limit, key from secrets). Tests.
-- [ ] 1.8 Generate DB types for TS (`apps/admin`) ✅ via `npm run db:types` (regenerate after every
-  migration) and Dart (`packages/data`) ⏳.
+- [x] 1.3 Migration 002 `20261115000001_app_config.sql` — `app_settings` (typed + validated:
+  bool/int/number/enum/color/url/string_list, min/max/options; 22 defaults incl. `auth.mode=optional`),
+  `feature_flags` (25, platform/version/schedule; `push_notifications` **off**), `feature_overrides`
+  (user/country/plan), `app_versions` (min/recommended per platform), `maintenance_windows`,
+  `onboarding_panel_types` (xtream, m3u, stalker + form field definitions), `app_themes`
+  (tokens = Flutter `AppThemeConfig`), `config_versions` (published snapshots).
+  Functions: `publish_app_config(notes)` (needs `customization.publish`, audited),
+  `get_app_config(platform, app_version, known_version)` (anon OK; returns evaluated flags,
+  settings, version policy, active maintenance, onboarding list, theme; `{"unchanged":true}`
+  when the app already has the version), `version_cmp()`, generic `audit_row_change()`
+  trigger on all 7 config tables. Initial version 1 published.
+  *Tested (live, as anonymous app):* config v1 returned (≈3 KB, 22 settings, 25 flags, 3 panel
+  types, theme); known version → `unchanged`; bad platform → error; direct table reads and
+  `publish_app_config` → 42501. *Not tested yet:* admin writes + setting validation +
+  overrides (need a signed-in admin — step 2.1). Types regenerated.
+- [x] 1.4 Migration 003 `20261115000002_home_builder.sql` — `home_sections` (17 types incl.
+  hero_banners, continue_watching, top10, new_releases, recently_added, trending, popular,
+  live_now, matches_live/upcoming, recommended, category, genre, collection, custom; sources
+  auto / manual / random / tmdb_trending / tmdb_popular / tmdb_top_rated / provider_category;
+  layouts rail/wide_rail/grid/hero/ranked/circles/cards; platform + country + login + schedule
+  targeting), `home_section_items` (portable refs: TMDB id or title match, overrides),
+  `banners` (phone + TV images, CTA, action content/category/screen/url), `top10_lists` +
+  `top10_items`. Home is part of the published snapshot; `get_app_config` gained `p_country`
+  and returns filtered `home`. 10 default sections (today's rails) + empty "Top 10 this week"
+  list (filled by TMDB in 1.7). Published as config v2. Audit triggers on all 5 tables.
+  *Tested (live, anonymous TV app):* v2 returns 10 sections in order, 0 banners, 1 top-10 list
+  (≈5.8 KB); known version → `unchanged`; direct table reads → 42501. Types regenerated,
+  `tsc` clean. *Not tested:* targeting by country/login/schedule (no such rows yet).
+- [x] 1.5 Migration 004 `20261115000003_global_catalog.sql` — `global_movies`, `global_series`,
+  `global_seasons`, `global_episodes`, `global_channels` (aliases, EPG id, quality), `genres`,
+  `movie_genres`, `series_genres`, `countries`, `languages`. TMDB/IMDb ids, artwork paths,
+  trailer key, rating, popularity, credits JSON, `locked_fields` (admin-edited fields are never
+  overwritten by TMDB refresh), `is_published`, `metadata_source`. Trigram + popularity/date
+  indexes. RLS: anon/signed-in read published rows; `catalog.write` to edit; service role for
+  the TMDB job. RPC `search_catalog(q, kinds, max_results)` (typo-tolerant, ≤50). Audit trigger
+  now skips non-user writes (migrations / service jobs) so TMDB syncs don't flood the log.
+  *Tested (live):* service-key insert of a sample movie → generated year/title_norm OK; anon
+  search "intersteler" → Interstellar (score 0.56); anon read OK; anon insert → 42501; sample
+  deleted. Types regenerated. *Not tested:* unpublished rows hidden from anon, admin edits.
+- [x] 1.6 Migration 005 `20261115000004_sports.sql` — `sports_competitions`, `sports_teams`,
+  `sports_matches` (status/minute/score, featured, hidden), `sports_lineups` (players JSON),
+  `sports_events`, `sports_standings`, `sports_match_channels` (global channel and/or name match
+  for the user's panel), `sports_sync_state` (server only). Every synced row keeps
+  `external_source/external_id` → any sports API can fill it. RPCs for apps:
+  `get_matches(window live|upcoming|recent|today|all, competition, featured_only, limit)` and
+  `get_match(id)` (match + lineups + events + channels, external ids stripped). RLS: apps read
+  visible data; `sports.write` edits; audit on all tables.
+  *Tested (live, sample data via service key, then deleted):* anon live list shows the match
+  with score/minute/has_channels; match page returns lineup, goal event, channel; hiding the
+  match → page `null` and lineups hidden for anon; anon insert → 42501. Types regenerated.
+- [x] 1.7 Edge Function `metadata-tmdb` (`supabase/functions/metadata-tmdb/`: tmdb.ts client
+  with retry/429, titles.ts cleaner + strict matcher, catalog.ts writers, index.ts router) +
+  migration 006 `20261115000005_metadata_support.sql` (`metadata_misses`, `metadata_lists`,
+  `metadata_sync_state`, settings `metadata.image_base_url/poster_size/backdrop_size/language/
+  miss_retry_days`). Actions: `resolve` (apps, ≤25 items: tmdb id or messy panel title →
+  catalog row; DB first, then TMDB; strict title+year match; misses cached 7 days), `season`
+  (episodes, cached 7 days), `refresh` (admin), `lists` (admin/cron: trending/popular/top-rated
+  for movies+series → `metadata_lists`, fetch missing titles, Top 10 from trending, republish
+  config if Top 10 changed). Never overwrites `locked_fields`. `verify_jwt=false`; admin =
+  user with `catalog.write` or the service/secret key. Deployed with `--use-api`.
+  *Tested (live):* "EN - Interstellar (2014) 4K HEVC" → Interstellar 2014 (poster + trailer);
+  "|EN| Breaking Bad" → series 2008; tmdb 27205 → Inception; nonsense title → null; repeat
+  call 0.7 s (cached); season 1 of Breaking Bad → 7 episodes; anon `lists` → 401;
+  `lists` with secret key → 6 lists × 20, 106 titles synced, Top 10 filled, config v4.
+  *Not tested:* admin-user JWT path (needs admin login, step 2.1).
+  **Revised same day (user decision D13/D14):** removed the TMDB `lists` job and the
+  `metadata_lists` table; Top 10/rails no longer use TMDB. Migrations 007–009
+  (`…06_provider_sources`, `…07_banner_action_check`, `…08_panel_rails`): section sources are now
+  auto / provider_added / provider_rating / provider_category / manual / random / watch_stats;
+  Top 10 sources manual / provider_added / provider_rating / watch_stats (+ `params`); old TMDB
+  Top 10 items deleted; `panel_item_id` + `panel_key` on section items, Top 10 items and banners
+  (admin picks from a reference panel). Config v6 published.
+  *Tested (live):* TMDB source rejected (23514); bad banner action rejected; content banner
+  needs a ref and accepts a panel id; `lists` → unknown action; `resolve` tmdb 550 → Fight Club;
+  config v6 shows Top 10 = provider_rating, new/recent rails = provider_added.
+  Note: the ~109 titles pre-fetched by the old lists job stay in the catalog as harmless cache.
+- [x] 1.8 DB contract. TS: `npm run db:types` → `apps/admin/src/lib/supabase/database.types.ts`
+  (regenerate after every migration). Dart (`packages/data/lib/src/backend/`, exported from
+  `data.dart`): `RemoteConfig` (settings typed getters, flags `isEnabled`, `authMode`,
+  `VersionPolicy.check`, `MaintenanceNotice`, `PanelType`/`PanelField`, theme tokens, raw JSON
+  for caching), `HomeLayout`/`HomeSection`/`ContentRef`/`HomeBanner`/`Top10List` (panel sources,
+  panel ids), `FixtureSummary`/`FixtureDetail` (+ lineups, events, channels), `CatalogSearchHit`,
+  `TitleMetadata` + `MetadataQuery` (≤25, tmdb id first), `EpisodeMetadata`, `ArtworkUrls`
+  (from `metadata.*` settings), `compareAppVersion`. All lenient: bad/unknown fields dropped,
+  unknown section types skipped, never throws. Names chosen to avoid clashes with old
+  `AppConfig`/sports classes. No TMDB cron (metadata on demand).
+  *Tested:* 12 unit tests incl. a **real** `get_app_config` reply (fixture
+  `test/fixtures/app_config_tv.json`, v6) — all pass; `flutter analyze` on data lib clean;
+  mobile/tv/design_system analyze: no errors (existing infos only).
+  **Phase 1 complete.**
 
 ## Phase 2 — Admin panel base
 - [ ] 2.1 Admin auth (Supabase Auth, email/password + MFA), admin-only middleware,
@@ -198,9 +269,9 @@ RPC `get_app_config(platform, app_version)`), RLS + live checks, push, regenerat
 | Old endpoint (removed server) | New source |
 |---|---|
 | `/catalog/live|vod|series/categories`, lists, `/catalog/vod/:id/info`, `/catalog/series/:id` | Provider adapter (Xtream/M3U/Stalker) + local cache |
-| Missing metadata (posters, cast, backdrops, trailers) — app used to call TMDB | `metadata-tmdb` Edge Function → global catalog (cached) |
-| `/catalog/top10` | `top10_lists` (manual / auto / TMDB trending) via app config |
-| Home rails (new, recent, trending…) | `home_sections` + rules (auto / manual / random) |
+| Missing metadata (posters, cast, backdrops, trailers) — app used to call TMDB | `metadata-tmdb` `resolve` on demand → global catalog (cached once for all users) |
+| `/catalog/top10` | `top10_lists` via app config: panel rating / panel newest / admin picks / watch stats (no TMDB lists) |
+| Home rails (new, recent, trending…) | `home_sections` computed on device from the user's panel (provider_added / rating / category), admin picks, random |
 | `/sports/*`, `/features/sports`, match lineups | Sports tables (admin) |
 | `/catalog/version`, `/catalog/counts` | Local sync cursors + config version |
 | `/me`, `/me/subscriptions`, `/profiles…`, favorites, history, my-list, continue-watching, reminders | Supabase Auth + user tables (RLS); local-only for guests |
@@ -225,4 +296,11 @@ RPC `get_app_config(platform, app_version)`), RLS + live checks, push, regenerat
 ## Log
 - 2026-11-14 — Phase 0 done (planning files only, no code). Untested (nothing to run).
 - 2026-11-14 — Step 1.1 done: admin scaffold + Supabase folder in `apps/admin`; build + redirect smoke test pass.
+- 2026-11-15 — Step 1.8 done: Dart contract models + 12 tests (real config fixture). Phase 1 complete.
+- 2026-11-15 — Step 1.7 revised: Top 10/rails from the panel, TMDB on demand only (migrations 007–009, function redeployed, config v6).
+- 2026-11-15 — Step 1.7 done: metadata-tmdb deployed; resolve/season/lists verified live; catalog seeded (51 movies, 58 series), Top 10 live.
+- 2026-11-15 — Step 1.6 done: sports schema + get_matches/get_match live; visibility rules verified.
+- 2026-11-15 — Step 1.5 done: global catalog + trigram search live; read/deny + typo search verified.
+- 2026-11-15 — Step 1.4 done: home builder tables in the published config (v2); anon checks pass.
+- 2026-11-15 — Step 1.3 done: app config tables + publish/snapshot + `get_app_config` live; anon checks pass.
 - 2026-11-14 — Step 1.2 done: identity/RBAC/audit migration live on Supabase; anon access denied everywhere (live check); TS types generated and wired into clients.

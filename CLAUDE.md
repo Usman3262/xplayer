@@ -64,6 +64,14 @@ Never import an app from a package. Mobile and TV share logic through packages.
 - TMDB (and any metadata API) is called **only server-side** (Edge Function with the
   key in Supabase secrets). Results are cached in the global catalog; the app never
   holds the TMDB key. Admin can override any field.
+- **What to show comes from the user's panel, never from TMDB lists.** Top 10, new,
+  recently added, trending-style rails = panel data (newest by panel `added`, panel
+  rating, panel category), admin picks (from a reference panel, by panel item id), or
+  XPlayer watch stats. TMDB = metadata only (posters, cast, plot, trailer).
+- **Never bulk-import a panel catalog into Supabase** (Neo ≈ 60k movies + 70k series).
+  The app caches the panel catalog locally (incremental by `added`). Metadata is fetched
+  **on demand** — only titles a user sees/opens, batched (`resolve`, ≤25), tmdb id first
+  when the panel gives one — and cached once for all users.
 - Mobile + TV share packages; TV keeps its own D-pad UI, never a scaled phone UI.
 
 ## 4. Security rules
@@ -128,7 +136,13 @@ Never import an app from a package. Mobile and TV share logic through packages.
 - `created_at`, `updated_at` on every table; soft-delete only where history matters.
 - Retention jobs for logs/analytics. No unbounded tables.
 
-## 8. Quality gates (before saying a step is done)
+## 8. Quality gates
+Per step: only the cheapest check that proves the change (e.g. `tsc --noEmit`, migration
+push + a few live REST checks, `flutter analyze` on the touched package). **Do not run full
+builds/test suites after every step** — run them at phase milestones or before a commit.
+Always say what was and wasn't checked.
+
+At milestones:
 - `flutter analyze` + `flutter test` in each touched Dart package/app.
 - `npm run lint && npm run typecheck && npm run build` (+ `npm test` once tests exist) in `apps/admin` when touched.
 - RLS tests for every new table (`apps/admin/supabase/tests`).
