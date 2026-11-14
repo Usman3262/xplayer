@@ -1694,6 +1694,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _other_active_super_admins: { Args: { p_user: string }; Returns: number }
       admin_audit_entities: { Args: never; Returns: string[] }
       admin_audit_logs: {
         Args: {
@@ -1718,6 +1719,29 @@ export type Database = {
         }[]
       }
       admin_dashboard_stats: { Args: never; Returns: Json }
+      admin_find_user: { Args: { p_email: string }; Returns: string }
+      admin_list_admins: {
+        Args: never
+        Returns: {
+          added_at: string
+          email: string
+          is_active: boolean
+          last_sign_in_at: string
+          role_key: string
+          role_name: string
+          user_id: string
+        }[]
+      }
+      admin_remove: { Args: { p_user: string }; Returns: undefined }
+      admin_security_state: { Args: never; Returns: Json }
+      admin_set_active: {
+        Args: { p_active: boolean; p_user: string }
+        Returns: undefined
+      }
+      admin_set_role: {
+        Args: { p_role_key: string; p_user: string }
+        Returns: undefined
+      }
       bootstrap_super_admin: { Args: { p_email: string }; Returns: string }
       build_app_config_snapshot: { Args: never; Returns: Json }
       build_home_snapshot: { Args: never; Returns: Json }

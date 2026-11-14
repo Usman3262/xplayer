@@ -42,7 +42,13 @@ export async function signIn(_prev: LoginState, formData: FormData): Promise<Log
     return { error: "This account has no admin access.", email };
   }
 
-  redirect(safeNext(parsed.data.next));
+  // Admins with an authenticator must enter the code before anything else works.
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  const next = safeNext(parsed.data.next);
+  if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+    redirect(`/login/mfa?next=${encodeURIComponent(next)}`);
+  }
+  redirect(next);
 }
 
 export async function signOut() {

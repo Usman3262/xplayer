@@ -10,8 +10,10 @@ Spec: `new-platform.md` · Rules: `CLAUDE.md` · App "where to change": `XPLAYER
 ---
 
 ## ▶ NEXT
-**Phase 2 · Step 2.3 — Audit log viewer + shared DataTable** (server-side pagination,
-filters, search; reused by every list page), then 2.4 admins & roles.
+**Phase 3 · Step 3.0 — Customization basics:** shared "draft → publish" bar (shows unpublished
+changes since the last config version, Publish button with notes) + form kit (zod + server
+actions + toasts) + Storage bucket for images. Then **3.2 Feature flags** (list, toggle,
+platforms/versions/schedule, overrides).
 
 ## Waiting on you
 - [ ] Add **`TMDB_API_KEY`** as a Supabase Edge Function secret (needed at step 1.7).
@@ -181,7 +183,23 @@ filters, search; reused by every list page), then 2.4 admins & roles.
   content manager: setting max + enum validation, valid save records `updated_by`, publish →
   apps see new value, no audit read, audit rows written, can't create roles; restored + temp
   users deleted). *Not tested:* signing in through the browser UI with your account — please try.
-- [ ] 2.1b Admin 2FA (Supabase TOTP MFA): enroll screen, require AAL2 for admin pages.
+- [x] 2.1b + 2.5 My account + admin 2FA. DB (migration 015): `has_permission()` now requires an
+  **aal2** session when the admin has a verified authenticator (DB-level, so a stolen password
+  alone gets nothing); setting `admin.require_two_factor` (server-side, default off);
+  `admin_security_state()`. App: `getAdminGate()` (signed_out / not_admin / mfa_required /
+  setup_2fa / ok) → `requireAdmin({next, allowWithout2fa})`, `actionGuard` refuses until the code
+  is entered or 2FA is set up when required; sign-in sends 2FA admins to `/login/mfa` (6-digit
+  code, "use a different account"); `/account`: set up 2FA (QR + manual key + code, cleans stale
+  pending factors, turn off unless required), change password (current password verified with a
+  throw-away client, ≥12 chars, audited `change_password`); "My account" in the profile menu.
+  *Tested:* tsc + eslint clean; `supabase/tests/live_mfa_check.py` **10/10** (enroll + verify with
+  computed TOTP; aal1 session → no permissions, aal2 → granted; fresh password-only sign-in denied;
+  wrong code rejected); renders: `/account` (setup + password forms), `?setup=2fa` banner,
+  `/login/mfa`; dev log 0 errors. Run Python checks with `PYTHONIOENCODING=utf-8` on Windows.
+  *Not tested:* scanning the QR in a real app + the password change through the browser (please
+  try); the `require_two_factor` redirect (turning it on would also affect your real account).
+  **Recommended for you:** set up 2FA in My account, then turn on `admin.require_two_factor`
+  (settings UI comes in Phase 3; meanwhile SQL: `update app_settings set value='true' where key='admin.require_two_factor';`).
 - [x] 2.2 Admin layout + dashboard, styled after the user's reference (Payd-style dashboard:
   plain sidebar with collapsible groups, big search pill, bell, profile chip, greeting line +
   headline, very rounded cards, bar chart, donut, coloured mini-bars with legend, right rail with
@@ -198,9 +216,36 @@ filters, search; reused by every list page), then 2.4 admins & roles.
   chart, donut, catalog card, sidebar groups, "soon" items, activity tab present; dev log 0 errors.
   *Not tested:* how it looks in your browser (please check), mobile widths.
   *Moved to 2.3:* DataTable. *Later steps:* form kit + image upload (with the first forms, Phase 3).
-- [ ] 2.3 Audit log viewer + every server action writes `audit_logs`.
-- [ ] 2.4 Admin users & roles screen (Super Admin, Admin, Content Manager,
-  Subscription Manager, Marketing Manager, Support Agent, Analyst).
+- [x] 2.3 Audit log viewer `/audit` + shared table kit. DB (migration 013):
+  `admin_audit_logs(limit, offset, action, entity, q, since)` (needs `audit.read`, returns actor
+  email, filters, cap 101 rows) + `admin_audit_entities()`. Kit: `lib/table-params.ts` (URL state:
+  page/size/q/filters, `withParams`, `sinceDaysIso`), `components/data-table/data-table.tsx`
+  (server-rendered, exact total **or** cheap "has next page" via limit+1, empty state, pager),
+  `components/data-table/toolbar.tsx` (debounced search + select filters in the URL, Clear).
+  Page: When / Who / Action badge / What / Changes (field-level before → after diff, expandable;
+  created/deleted/published summaries). Nav item enabled. Writes are audited by DB triggers +
+  `log_audit()` (no app code needed).
+  `scripts/render_check.py <path> <role> [texts…]` now generic (temp admin with any role).
+  *Tested:* tsc + eslint clean; dev renders as temporary admins (all deleted): admin `/audit` 200
+  with rows + diffs; `?action=publish` shows only publishes; `?page=2` pager; **content manager →
+  redirect to /forbidden and no audit rows in the HTML**; dev log 0 errors.
+  Note: Git Bash rewrites `/paths` in args → run scripts with `MSYS_NO_PATHCONV=1`.
+- [x] 2.4 Admins & roles `/admins`. DB (migration 014): `admin_list_admins()`, `admin_set_role()`
+  (one role per admin), `admin_set_active()`, `admin_remove()`, `admin_find_user()`; rules in the
+  DB: can't change/deactivate/remove yourself, never remove/deactivate/demote the **last active
+  super admin**; audit triggers on `admin_user_roles`, `admin_roles`, `admin_role_permissions`
+  (audit entity id now also reads `user_id`). Server actions (`actions.ts`: zod + `actionGuard`
+  + DB permission): add admin by email (existing account → role; new email → account created,
+  **temporary password shown once**, `create_account` audited), change role, activate/deactivate,
+  remove. UI: admins table (avatar, "(you)", role select, status, last sign-in, actions with
+  confirm + toasts), Add-admin dialog with copy button, role cards with permissions by module.
+  *Tested:* tsc + eslint clean; `supabase/tests/live_admin_mgmt_check.py` **13/13 pass** (find
+  by email, one role, unknown role, no self-change/deactivate, content manager/anon refused,
+  remove, audited); renders: super admin sees Add + controls, `admin` role sees list read-only,
+  content manager → /forbidden; dev log 0 errors.
+  *Not tested:* last-super-admin rule live (can't be triggered safely while your account is a
+  super admin — logic reviewed); clicking the buttons in a browser (server actions run the same
+  DB functions that were tested).
 
 ## Phase 3 — Admin "App Customization" tab
 - [ ] 3.1 Branding & theme: logo/splash upload, colours → `AppThemeConfig` JSON, live preview.
@@ -319,6 +364,9 @@ filters, search; reused by every list page), then 2.4 admins & roles.
 ## Log
 - 2026-11-14 — Phase 0 done (planning files only, no code). Untested (nothing to run).
 - 2026-11-14 — Step 1.1 done: admin scaffold + Supabase folder in `apps/admin`; build + redirect smoke test pass.
+- 2026-11-15 — Step 2.5 done: My account (password) + admin 2FA enforced in the DB; 10/10 live MFA checks. Phase 2 complete.
+- 2026-11-15 — Step 2.4 done: admins & roles page + safety rules in DB; 13/13 live checks, 3-role render check.
+- 2026-11-15 — Step 2.3 done: audit log page + reusable DataTable/toolbar; permission + no-leak checks pass.
 - 2026-11-15 — Black & red default theme (Flutter defaults, published config v9, admin CSS, regenerated red icons). Step 2.2 done: admin layout + dashboard in the reference style; signed-in render verified with a temporary admin.
 - 2026-11-15 — Step 2.1 done: admin sign-in + guards; 20/20 live signed-in RLS checks pass.
 - 2026-11-15 — Step 1.8 done: Dart contract models + 12 tests (real config fixture). Phase 1 complete.

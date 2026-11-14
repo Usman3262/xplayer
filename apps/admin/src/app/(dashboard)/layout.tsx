@@ -20,7 +20,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 }
 
 async function Shell({ children }: { children: ReactNode }) {
-  const admin = await requireAdmin();
+  const admin = await requireAdmin({ allowWithout2fa: true });
   const roleSummary = admin.can("admins.write") ? "Super admin" : `${admin.permissions.size} permissions`;
   const permissions = [...admin.permissions];
 

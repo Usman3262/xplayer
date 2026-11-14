@@ -88,7 +88,7 @@ export const NAV: NavGroup[] = [
   {
     label: "System",
     items: [
-      { title: "Admins & roles", href: "/admins", icon: ShieldCheck, permission: "admins.read", ready: false },
+      { title: "Admins & roles", href: "/admins", icon: ShieldCheck, permission: "admins.read", ready: true },
       { title: "Audit log", href: "/audit", icon: ScrollText, permission: "audit.read", ready: true },
       { title: "Settings", href: "/settings", icon: Settings, permission: "settings.read", ready: false },
       { title: "Health", href: "/health", icon: Gauge, permission: "settings.read", ready: false },
