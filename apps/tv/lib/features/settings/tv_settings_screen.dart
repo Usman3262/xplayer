@@ -251,7 +251,7 @@ class _TvSettingsScreenState extends ConsumerState<TvSettingsScreen> {
                   ],
                 ),
               ),
-              const Divider(height: 1, color: AppColors.border),
+              Divider(height: 1, color: AppColors.border),
               Expanded(
                 // The document's list scrolls with this controller.
                 child: PrimaryScrollController(
@@ -308,13 +308,13 @@ class _TvSettingsScreenState extends ConsumerState<TvSettingsScreen> {
       case 'Carbon':
         return const [Color(0xFF1A1A1A), Color(0xFFE91E8C), Color(0xFFFF6B9D)];
       case 'Cinematic':
-        return const [
+        return final [
           Color(0xFF050505),
           AppColors.cyan,
           AppColors.magenta,
         ];
       default:
-        return const [Color(0xFF0A0A0A), AppColors.textSecondary, Colors.white70];
+        return final [Color(0xFF0A0A0A), AppColors.textSecondary, Colors.white70];
     }
   }
 
@@ -509,7 +509,7 @@ class _TvSettingsScreenState extends ConsumerState<TvSettingsScreen> {
                                     ),
                                     child: Text(
                                       g.$1,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w800,
                                         letterSpacing: 1.1,
@@ -565,7 +565,7 @@ class _TvSettingsScreenState extends ConsumerState<TvSettingsScreen> {
                             ),
                             child: Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.logout_rounded,
                                   size: 18,
                                   color: AppColors.danger,
@@ -579,7 +579,7 @@ class _TvSettingsScreenState extends ConsumerState<TvSettingsScreen> {
                                     children: [
                                       Text(
                                         copy.signOutShort,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           color: AppColors.danger,
                                           fontWeight: FontWeight.w800,
                                           fontSize: 12,

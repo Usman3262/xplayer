@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
 class SectionHeader extends StatelessWidget {
-  const SectionHeader({
+  SectionHeader({
     super.key,
     required this.title,
     this.actionLabel,
     this.onAction,
-    this.accent = AppColors.cyan,
-  });
+    Color? accent,
+  }) : accent = accent ?? AppColors.cyan;
 
   final String title;
   final String? actionLabel;
@@ -53,7 +53,7 @@ class SectionHeader extends StatelessWidget {
                 children: [
                   Text(
                     actionLabel!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.cyan,
                       fontWeight: FontWeight.w700,
                       fontSize: 12,

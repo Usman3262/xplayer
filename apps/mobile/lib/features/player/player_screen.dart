@@ -146,7 +146,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                 title: Text(_screenModeLabel(copy, m)),
                 subtitle: Text(_screenModeHint(copy, m)),
                 trailing: m == _screenMode
-                    ? const Icon(Icons.check_rounded, color: AppColors.cyan)
+                    ? Icon(Icons.check_rounded, color: AppColors.cyan)
                     : null,
                 onTap: () => Navigator.pop(ctx, m),
               ),
@@ -3665,7 +3665,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
           ListTile(
             title: Text(copy.off),
             trailing: !_subsOn
-                ? const Icon(Icons.check, color: AppColors.cyan)
+                ? Icon(Icons.check, color: AppColors.cyan)
                 : null,
             onTap: () async {
               await _player?.setSubtitleTrack(SubtitleTrack.no());
@@ -3677,7 +3677,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
             ListTile(
               title: Text(_subLabel(t)),
               trailing: t.id == _subtitleTrack?.id
-                  ? const Icon(Icons.check, color: AppColors.cyan)
+                  ? Icon(Icons.check, color: AppColors.cyan)
                   : null,
               onTap: () async {
                 await _player?.setSubtitleTrack(t);
@@ -4277,7 +4277,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+                  padding: final EdgeInsets.fromLTRB(16, 14, 16, 8),
                   child: Row(
                     children: [
                       const NeonGlowIcon(Icons.live_tv_rounded, size: 22),

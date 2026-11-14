@@ -780,7 +780,7 @@ class _TopBar extends StatelessWidget {
                 const SizedBox(width: 7),
                 Text(
                   copy.sslBadge,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textSecondary,
@@ -792,7 +792,7 @@ class _TopBar extends StatelessWidget {
           const SizedBox(width: 14),
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.schedule_rounded,
                 size: 16,
                 color: AppColors.textSecondary,
@@ -842,12 +842,12 @@ class _FooterBar extends StatelessWidget {
                   label: copy.sslBadge,
                   iconColor: AppColors.match,
                 ),
-                const SizedBox(width: 8),
+                final SizedBox(width: 8),
                 const _FooterChip(
                   icon: Icons.hd_outlined,
                   label: 'Ultra HD 4K HDR10+',
                 ),
-                const SizedBox(width: 8),
+                final SizedBox(width: 8),
                 const _FooterChip(
                   icon: Icons.spatial_audio_off_outlined,
                   label: 'Dolby Atmos',
@@ -969,7 +969,7 @@ class _QrPane extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                Icon(
                   Icons.auto_awesome,
                   size: 12,
                   color: AppColors.cyan,
@@ -977,7 +977,7 @@ class _QrPane extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   copy.activateTv.toUpperCase(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.cyan,
                     fontWeight: FontWeight.w900,
                     fontSize: 9,
@@ -998,7 +998,7 @@ class _QrPane extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             copy.tvQrLoginHint,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textSecondary,
               height: 1.4,
               fontSize: 12,
@@ -1033,7 +1033,7 @@ class _QrPane extends StatelessWidget {
                     ),
                     child: loading
                         ? AppLoader.inline(size: 28)
-                        : const Icon(
+                        : Icon(
                             Icons.qr_code_2_rounded,
                             size: 40,
                             color: AppColors.textSecondary,
@@ -1046,7 +1046,7 @@ class _QrPane extends StatelessWidget {
                     children: [
                       Text(
                         copy.tvQrLoginTitle.toUpperCase(),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 9,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.7,
@@ -1094,7 +1094,7 @@ class _QrPane extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 copy.tvQrWaiting,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: AppColors.textSecondary,
                                   fontSize: 11,
                                 ),
@@ -1106,7 +1106,7 @@ class _QrPane extends StatelessWidget {
                         const SizedBox(height: 6),
                         Text(
                           error!,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.danger,
                             fontSize: 12,
                           ),
@@ -1159,7 +1159,7 @@ class _QrPane extends StatelessWidget {
                   ),
                   child: Text(
                     copy.tvPasswordInstead,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.cyan,
                       fontWeight: FontWeight.w700,
                       fontSize: 12,
@@ -1213,7 +1213,7 @@ class _WaitPane extends StatelessWidget {
           Text(
             copy.waitingForApprovalBody,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textSecondary,
               height: 1.4,
             ),
@@ -1222,14 +1222,14 @@ class _WaitPane extends StatelessWidget {
           if (loading) AppLoader.inline(size: 40),
           if (loading) const SizedBox(height: 8),
           if (error != null) ...[
-            Text(error!, style: const TextStyle(color: AppColors.danger)),
+            Text(error!, style: TextStyle(color: AppColors.danger)),
             const SizedBox(height: 12),
           ],
           FocusTile(
             onTap: onRecovery,
             child: Text(
               copy.waitingForApprovalLostDevice,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.cyan,
                 fontWeight: FontWeight.w800,
               ),
@@ -1318,7 +1318,7 @@ class _SignInPane extends StatelessWidget {
                       ),
                       child: Text(
                         copy.tvQrInstead,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.cyan,
                           fontWeight: FontWeight.w700,
                           fontSize: 12,
@@ -1351,7 +1351,7 @@ class _SignInPane extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               copy.signInContinue,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 12,
                 height: 1.35,
@@ -1438,7 +1438,7 @@ class _SignInPane extends StatelessWidget {
               ],
             ),
             if (error != null) ...[
-              Text(error!, style: const TextStyle(color: AppColors.danger)),
+              Text(error!, style: TextStyle(color: AppColors.danger)),
               const SizedBox(height: 6),
             ],
             SizedBox(height: compact ? 10 : 14),
@@ -1504,7 +1504,7 @@ class _SignInPane extends StatelessWidget {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.cyan, width: 1.5),
+        borderSide: BorderSide(color: AppColors.cyan, width: 1.5),
       ),
     );
   }
@@ -1514,8 +1514,8 @@ class _FooterChip extends StatelessWidget {
   _FooterChip({
     required this.icon,
     required this.label,
-    this.iconColor = AppColors.cyan,
-  });
+    Color? iconColor,
+  }) : iconColor = iconColor ?? AppColors.cyan;
 
   final IconData icon;
   final String label;

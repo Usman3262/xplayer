@@ -12,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
-  # Keep the screen on during playback (client 17 Oct: screensaver at 10 min).
+  # Keep the screen on during playback.
   wakelock_plus: ^1.8.0
   flutter_localizations:
     sdk: flutter

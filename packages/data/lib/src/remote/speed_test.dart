@@ -36,11 +36,9 @@ double megabitsPerSecond(int bytes, Duration elapsed) {
 class SpeedTest {
   SpeedTest({List<Uri>? sources}) : _sources = sources ?? defaultSources;
 
-  /// Cloudflare's public speed-test endpoint first, then our own APK
-  /// download host (range request) if it is blocked.
+  /// Cloudflare's public speed-test endpoint.
   static final defaultSources = <Uri>[
     Uri.parse('https://speed.cloudflare.com/__down?bytes=50000000'),
-    Uri.parse('https://download.sksj.online/tv.apk'),
   ];
 
   final List<Uri> _sources;

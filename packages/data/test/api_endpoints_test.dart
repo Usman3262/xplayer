@@ -23,25 +23,24 @@ void main() {
   });
 
   test('built-in and signed-config backups follow the primary, no duplicates', () {
-    e.ensurePrimary(ApiConfig.defaultBaseUrl);
+    e.ensurePrimary('https://api.example/v1');
     e.addBackups(ApiConfig.builtInBackupBaseUrls);
     e.addBackups(ApiConfig.builtInBackupBaseUrls);
     e.adopt(_cfg([
-      'https://api.sksj.online',
+      'https://api.example',
       'https://backup.example',
     ]));
     expect(e.bases, [
-      'https://api.sksj.online/v1',
+      'https://api.example/v1',
       'https://backup.example/v1',
     ]);
     expect(
-      e.reportNetworkFailure('https://api.sksj.online/v1'),
+      e.reportNetworkFailure('https://api.example/v1'),
       'https://backup.example/v1',
     );
   });
 
-  test('primary is the Cloudflare address over https', () {
-    expect(ApiConfig.defaultBaseUrl, 'https://api.sksj.online/v1');
+  test('built-in backups (if any) are https /v1', () {
     for (final b in ApiConfig.builtInBackupBaseUrls) {
       expect(b.startsWith('https://'), isTrue);
       expect(b.endsWith('/v1'), isTrue);

@@ -1610,7 +1610,7 @@ class _TvPlayerScreenState extends ConsumerState<TvPlayerScreen>
                   if (idx >= 0) ...[
                     Text(
                       '${idx + 1}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.cyan,
                         fontSize: 28,
                         fontWeight: FontWeight.w900,
@@ -1638,7 +1638,7 @@ class _TvPlayerScreenState extends ConsumerState<TvPlayerScreen>
                                 _exitArmWindow)
                           Text(
                             _copy.pressBackAgainToExit,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.cyan,
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
@@ -1767,7 +1767,7 @@ class _TvPlayerScreenState extends ConsumerState<TvPlayerScreen>
                     const SizedBox(height: 10),
                     Text(
                       copy.playerExitMessage,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 16,
                       ),
@@ -3634,7 +3634,7 @@ class _TvPlayerScreenState extends ConsumerState<TvPlayerScreen>
           child: ListTile(
             title: Text(copy.off),
             trailing: !_subsOn
-                ? const Icon(Icons.check, color: AppColors.cyan)
+                ? Icon(Icons.check, color: AppColors.cyan)
                 : null,
           ),
         ),
@@ -3651,7 +3651,7 @@ class _TvPlayerScreenState extends ConsumerState<TvPlayerScreen>
             child: ListTile(
               title: Text(_subLabel(_subtitleTracks[i])),
               trailing: _subtitleTracks[i].id == _subtitleTrack?.id
-                  ? const Icon(Icons.check, color: AppColors.cyan)
+                  ? Icon(Icons.check, color: AppColors.cyan)
                   : null,
             ),
           ),

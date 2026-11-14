@@ -4,14 +4,14 @@ import '../theme/app_colors.dart';
 
 /// Pulsing neon glow on a **circle outline** only (no filled background glow).
 class NeonGlowCircle extends StatefulWidget {
-  const NeonGlowCircle({
+  NeonGlowCircle({
     super.key,
     required this.child,
     this.size = 110,
-    this.color = AppColors.cyan,
+    Color? color,
     this.strokeWidth = 2.2,
     this.enabled = true,
-  });
+  }) : color = color ?? AppColors.cyan;
 
   final Widget child;
   final double size;
@@ -108,14 +108,14 @@ class _NeonCirclePainter extends CustomPainter {
 
 /// Neon glow applied to **glyph outlines / text** only.
 class NeonGlowText extends StatefulWidget {
-  const NeonGlowText(
+  NeonGlowText(
     this.text, {
     super.key,
     this.style,
-    this.color = AppColors.cyan,
+    Color? color,
     this.textAlign,
     this.enabled = true,
-  });
+  }) : color = color ?? AppColors.cyan;
 
   final String text;
   final TextStyle? style;
@@ -195,13 +195,13 @@ class _NeonGlowTextState extends State<NeonGlowText>
 
 /// Neon glow on an **icon** (vector) - not a background box.
 class NeonGlowIcon extends StatefulWidget {
-  const NeonGlowIcon(
+  NeonGlowIcon(
     this.icon, {
     super.key,
     this.size = 48,
-    this.color = AppColors.cyan,
+    Color? color,
     this.enabled = true,
-  });
+  }) : color = color ?? AppColors.cyan;
 
   final IconData icon;
   final double size;
@@ -253,15 +253,15 @@ class _NeonGlowIconState extends State<NeonGlowIcon>
 
 /// Neon glow on a **rounded rectangle outline** only (for buttons/cards border).
 class NeonGlowBorder extends StatefulWidget {
-  const NeonGlowBorder({
+  NeonGlowBorder({
     super.key,
     required this.child,
-    this.color = AppColors.cyan,
+    Color? color,
     this.radius = 12,
     this.strokeWidth = 1.6,
     this.enabled = true,
     this.padding = EdgeInsets.zero,
-  });
+  }) : color = color ?? AppColors.cyan;
 
   final Widget child;
   final Color color;
@@ -366,10 +366,10 @@ class NeonPulse extends StatelessWidget {
   NeonPulse({
     super.key,
     required this.child,
-    this.color = AppColors.cyan,
+    Color? color,
     this.enabled = true,
     this.radius = 12,
-  });
+  }) : color = color ?? AppColors.cyan;
 
   final Widget child;
   final Color color;

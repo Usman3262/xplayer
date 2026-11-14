@@ -160,7 +160,7 @@ class AppVersionApi {
       ApiConfig.defaultBaseUrl,
       ...ApiConfig.builtInBackupBaseUrls,
     ];
-    for (final base in bases) {
+    for (final base in bases.where((b) => b.trim().isNotEmpty)) {
       final uri =
           Uri.parse('${base.replaceAll(RegExp(r'/+$'), '')}/app/version');
       try {
@@ -180,8 +180,8 @@ class AppVersionApi {
         debugPrint('[AppVersion] $uri failed: $e');
       }
     }
-    // Static mirror of the same list (also on download host).
-    try {
+    // Static copy of the same list (only when a releases URL is set).
+    if (AppReleaseUrls.releasesJson.isNotEmpty) try {
       final res = await _client
           .get(
             Uri.parse(AppReleaseUrls.releasesJson),

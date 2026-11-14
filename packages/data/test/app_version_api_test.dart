@@ -13,12 +13,11 @@ void main() {
     expect(isAppVersionNewer('6.0.23', '6.0.22'), isTrue);
   });
 
-  test('k1 and mirror are production values', () {
-    expect(kConfigPublicKeys['k1'], 'f9mW6WD8Ypg1WdgYSBuZELEGBJLzYYqkKbpsEMnlct4=');
-    expect(kConfigPublicKeys['k2'], 'eDTvMYF2vCtkNYe1G5hVf1Fgz9JuONqd9+unv2hEXcg=');
-    expect(kConfigMirrorUrls, contains('https://download.sksj.online/config.json'));
-    expect(AppReleaseUrls.tvApk, 'https://download.sksj.online/tv.apk');
-    expect(AppReleaseUrls.mobileApk, 'https://download.sksj.online/mobile.apk');
+  test('no signed-config keys, mirrors or release links are built in', () {
+    expect(kConfigPublicKeys, isEmpty);
+    expect(kConfigMirrorUrls, isEmpty);
+    expect(AppReleaseUrls.tvApk, isEmpty);
+    expect(AppReleaseUrls.mobileApk, isEmpty);
   });
 
   test('resolveAppUpdateGate forces when below minVersion.tv', () {
@@ -29,7 +28,7 @@ void main() {
           'id': 'android-tv',
           'platform': 'Android TV',
           'version': '6.0.23',
-          'latestUrl': AppReleaseUrls.tvApk,
+          'latestUrl': 'https://dl.example/tv.apk',
           'sha256': 'e9f688585ed78fcf1806783f0d80b6dd4aa06f3863fb38bf98fe1afc53f1154a',
         },
       ],
@@ -42,7 +41,7 @@ void main() {
     );
     expect(gate.required, isTrue);
     expect(gate.offerUpdate, isTrue);
-    expect(gate.updateUrl, AppReleaseUrls.tvApk);
+    expect(gate.updateUrl, 'https://dl.example/tv.apk');
     expect(gate.sha256, startsWith('e9f688'));
   });
 
@@ -97,7 +96,7 @@ void main() {
           'id': 'android-mobile',
           'platform': 'Android Mobile',
           'version': '6.0.24+113',
-          'downloadUrl': 'https://download.sksj.online/android/mobile/m-113.apk',
+          'downloadUrl': 'https://dl.example/android/mobile/m-113.apk',
           'latestUrl': 'https://play.google.com/store/apps/details?id=com.example.app',
           'sha256': 'a' * 64,
         },
@@ -105,7 +104,7 @@ void main() {
     });
     final g = resolveAppUpdateGate(installedVersion: '6.0.23', installedBuild: 110, isTv: false, remote: remote);
     expect(g.offerUpdate, isTrue);
-    expect(g.apkUrl, 'https://download.sksj.online/android/mobile/m-113.apk');
+    expect(g.apkUrl, 'https://dl.example/android/mobile/m-113.apk');
     expect(g.sha256, 'a' * 64);
   });
 
@@ -116,17 +115,17 @@ void main() {
       ],
     });
     final b = remote.buildFor(tv: true)!;
-    expect(b.downloadUrl, 'https://download.sksj.online/android/tv/t-114.apk');
-    expect(b.latestUrl, 'https://download.sksj.online/tv.apk');
+    expect(b.downloadUrl, 'https://dl.example/android/tv/t-114.apk');
+    expect(b.latestUrl, 'https://dl.example/tv.apk');
     final g = resolveAppUpdateGate(installedVersion: '6.0.23', installedBuild: 112, isTv: true, remote: remote);
     expect(g.offerUpdate, isTrue);
-    expect(g.apkUrl, 'https://download.sksj.online/android/tv/t-114.apk');
+    expect(g.apkUrl, 'https://dl.example/android/tv/t-114.apk');
   });
 
   test('backend still on 6.0.19: no prompt for 6.0.23 installs (publish needed)', () {
     final remote = AppVersionDto.fromJson({
       'builds': [
-        {'id': 'android-tv', 'platform': 'Android TV', 'version': '6.0.19', 'latestUrl': 'https://download.sksj.online/tv.apk'},
+        {'id': 'android-tv', 'platform': 'Android TV', 'version': '6.0.19', 'latestUrl': 'https://dl.example/tv.apk'},
       ],
     });
     final g = resolveAppUpdateGate(installedVersion: '6.0.23', installedBuild: 112, isTv: true, remote: remote);

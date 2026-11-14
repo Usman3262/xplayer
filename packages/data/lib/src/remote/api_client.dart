@@ -377,6 +377,10 @@ class ApiClient {
     }
 
     final base = _activeBase;
+    if (base.isEmpty) {
+      // No backend set (see ApiConfig): fail fast with a clear message.
+      throw ApiException('No server is configured yet.');
+    }
     var uri = _uri(path, base);
     if (query != null && query.isNotEmpty) {
       uri = uri.replace(queryParameters: {...uri.queryParameters, ...query});

@@ -43,12 +43,12 @@ class AppDots extends StatelessWidget {
 /// with progressiveDots inside the art area. Do not swap in shimmer bones
 /// or a different animation for these layouts.
 class AppLoader extends StatelessWidget {
-  const AppLoader._({
+  AppLoader._({
     required this.builder,
     this.size = 42,
-    this.color = AppColors.cyan,
+    Color? color,
     this.label,
-  });
+  }) : color = color ?? AppColors.cyan;
 
   factory AppLoader.button({
     Key? key,
@@ -66,14 +66,14 @@ class AppLoader extends StatelessWidget {
   factory AppLoader.page({
     Key? key,
     double size = 48,
-    Color color = AppColors.cyan,
+    Color? color,
     String? label,
   }) {
     return AppLoader._(
       builder: (c, s) =>
           AppDots(color: c, size: s),
       size: size,
-      color: color,
+      color: color ?? AppColors.cyan,
       label: label,
     );
   }
@@ -81,40 +81,40 @@ class AppLoader extends StatelessWidget {
   factory AppLoader.inline({
     Key? key,
     double size = 28,
-    Color color = AppColors.cyan,
+    Color? color,
   }) {
     return AppLoader._(
       builder: (c, s) =>
           LoadingAnimationWidget.threeRotatingDots(color: c, size: s),
       size: size,
-      color: color,
+      color: color ?? AppColors.cyan,
     );
   }
 
   factory AppLoader.player({
     Key? key,
     double size = 56,
-    Color color = AppColors.cyan,
+    Color? color,
   }) {
     return AppLoader._(
       builder: (c, s) =>
           LoadingAnimationWidget.staggeredDotsWave(color: c, size: s),
       size: size,
-      color: color,
+      color: color ?? AppColors.cyan,
     );
   }
 
   factory AppLoader.auth({
     Key? key,
     double size = 48,
-    Color color = AppColors.cyan,
+    Color? color,
     String? label,
   }) {
     return AppLoader._(
       builder: (c, s) =>
           AppDots(color: c, size: s),
       size: size,
-      color: color,
+      color: color ?? AppColors.cyan,
       label: label,
     );
   }

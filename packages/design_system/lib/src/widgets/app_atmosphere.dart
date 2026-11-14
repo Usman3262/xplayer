@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_colors.dart';
+
 /// Soft premium atmosphere behind scaffolds (not flat black).
 /// Accents come from Appearance settings when provided.
 class AppAtmosphere extends StatelessWidget {

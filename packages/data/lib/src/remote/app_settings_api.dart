@@ -44,7 +44,7 @@ class AppSettingsApi {
       ApiConfig.defaultBaseUrl,
       ...ApiConfig.builtInBackupBaseUrls,
     ];
-    for (final base in bases) {
+    for (final base in bases.where((b) => b.trim().isNotEmpty)) {
       final uri = Uri.parse('${base.replaceAll(RegExp(r'/+$'), '')}/app/settings');
       try {
         final res = await _client
