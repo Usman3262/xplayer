@@ -45,8 +45,8 @@ class PanelCatalogRepository implements CatalogRepository {
   /// adult content. The normal view (false) never shows it anywhere.
   final bool adultOnly;
 
-  /// After the PIN: the normal screens also list the 18+ categories, in
-  /// their place among the others (Home rails stay without them).
+  /// After the PIN: Movies/Series switch to [adultView] (18+ only). Home
+  /// rails stay without 18+ even when this is true.
   final bool includeAdult;
 
   /// Store filter: false = hide 18+, true = only 18+, null = everything.

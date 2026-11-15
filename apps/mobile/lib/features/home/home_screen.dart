@@ -1,12 +1,13 @@
 import 'dart:async';
 
-import 'package:data/data.dart' show matchTodayTomorrow;
+import 'package:data/data.dart' show ContentKind, HomeSection, HomeSectionType, SectionLayout, matchTodayTomorrow;
 import 'package:design_system/design_system.dart';
 import 'package:domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/account.dart';
 import '../../core/providers.dart';
 import '../../core/session_controller.dart';
 import '../../core/library_controller.dart';
@@ -221,6 +222,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ref.invalidate(homeFeedProvider);
               ref.invalidate(sportsProvider);
               ref.invalidate(continueWatchingProvider);
+              ref.invalidate(homeSectionItemsProvider);
               for (final d in matchTodayTomorrow()) {
                 ref.invalidate(matchDayProvider(d));
               }
@@ -337,6 +339,98 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  /// Home from the admin Home builder (7.1): the admin's sections, order and
+  /// titles; each drawn with the app's existing rails (design unchanged).
+  /// Empty sections are hidden. The top chips scroll to the first movie /
+  /// series / live / matches section.
+  List<Widget> _adminSectionSlivers(
+    List<HomeSection> sections, {
+    required AppCopy copy,
+    required HomeFeed data,
+    required List<MediaItem> continueItems,
+    required List<MediaItem> favorites,
+  }) {
+    final out = <Widget>[];
+    final used = <GlobalKey>{};
+    GlobalKey? anchorFor(HomeSection s) {
+      final k = switch (s.type) {
+        HomeSectionType.liveNow => _liveKey,
+        HomeSectionType.matchesLive || HomeSectionType.matchesUpcoming => _sportsKey,
+        HomeSectionType.top10 => _top10Key,
+        _ => switch (s.kind) {
+            ContentKind.movie => _moviesKey,
+            ContentKind.series => _seriesKey,
+            _ => null,
+          },
+      };
+      return k != null && used.add(k) ? k : null;
+    }
+
+    Widget header(HomeSection s, {GlobalKey? anchor, Color? accent, VoidCallback? onAction, String? action}) {
+      final h = SectionHeader(title: s.title, accent: accent, actionLabel: action, onAction: onAction);
+      return anchor == null ? h : KeyedSubtree(key: anchor, child: h);
+    }
+
+    final signedIn = AccountService.signedIn;
+    for (final s in sections) {
+      if (s.requiresLogin && !signedIn) continue;
+      switch (s.type) {
+        case HomeSectionType.heroBanners:
+          continue; // the hero carousel at the top
+        case HomeSectionType.continueWatching:
+        case HomeSectionType.recentlyWatched:
+          if (continueItems.isEmpty) continue;
+          out.add(SliverToBoxAdapter(
+            child: header(s, action: copy.seeAll, onAction: () => context.push('/library?tab=continue')),
+          ));
+          out.add(SliverToBoxAdapter(child: ContinueRow(items: continueItems)));
+        case HomeSectionType.favorites:
+          if (favorites.isEmpty) continue;
+          out.add(SliverToBoxAdapter(
+            child: header(s, action: copy.seeAll, onAction: () => context.push('/my-list')),
+          ));
+          out.add(SliverToBoxAdapter(child: _PosterRail(items: favorites)));
+        case HomeSectionType.liveNow:
+          if (data.liveChannels.isEmpty) continue;
+          out.add(SliverToBoxAdapter(
+            child: header(s,
+                anchor: anchorFor(s),
+                accent: AppColors.live,
+                action: copy.seeAll,
+                onAction: () => context.go('/live')),
+          ));
+          out.add(SliverToBoxAdapter(child: _LiveRail(channels: data.liveChannels, copy: copy)));
+        case HomeSectionType.matchesLive:
+        case HomeSectionType.matchesUpcoming:
+          if (ref.watch(matchCentreOnProvider).valueOrNull != true) continue;
+          out.add(SliverToBoxAdapter(child: HomeMatchesRail(headerKey: anchorFor(s))));
+        default:
+          final anchor = anchorFor(s);
+          final ranked = s.type == HomeSectionType.top10 || s.layout == SectionLayout.ranked;
+          final newest = s.type == HomeSectionType.newReleases || s.type == HomeSectionType.recentlyAdded;
+          final kind = switch (s.kind) {
+            ContentKind.movie => MediaKind.movie,
+            ContentKind.series => MediaKind.series,
+            _ => null,
+          };
+          out.add(SliverToBoxAdapter(
+            child: _AdminSectionRail(
+              section: s,
+              ranked: ranked,
+              header: header(
+                s,
+                anchor: anchor,
+                accent: ranked ? AppColors.magenta : null,
+                action: newest && kind != null ? copy.seeAll : null,
+                onAction: newest && kind != null ? () => context.push(catalogNewestRoute(kind, s.title)) : null,
+              ),
+            ),
+          ));
+      }
+    }
+    return out;
+  }
+
   List<Widget> _homeSectionSlivers({
     required List<String> sections,
     required AppCopy copy,
@@ -348,6 +442,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required bool sportsOn,
     required List<SportsMatch> sports,
   }) {
+    final admin = ref.watch(adminHomeSectionsProvider);
+    if (admin.isNotEmpty) {
+      return _adminSectionSlivers(
+        admin,
+        copy: copy,
+        data: data,
+        continueItems: continueItems,
+        favorites: favorites,
+      );
+    }
     final out = <Widget>[];
     final seen = <String>{};
     final weekly = ref.watch(weeklyPicksProvider).valueOrNull;
@@ -543,6 +647,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     for (final id in sections) {
       addSection(id);
     }
+    // (built-in order below is used only without an admin Home layout)
     // Ensure core rails still appear if Customize Home omitted them.
     for (final fallback in const [
       "Today's Matches",
@@ -1517,6 +1622,28 @@ class _KidsHomeSection extends ConsumerWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// One admin Home section filled from the user's panel (hidden while empty).
+class _AdminSectionRail extends ConsumerWidget {
+  const _AdminSectionRail({required this.section, required this.ranked, required this.header});
+  final HomeSection section;
+  final bool ranked;
+  final Widget header;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final items = ref.watch(homeSectionItemsProvider(section.id)).valueOrNull ?? const <MediaItem>[];
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        header,
+        if (ranked) Top10Row(items: items.take(10).toList()) else _PosterRail(items: items),
+      ],
     );
   }
 }

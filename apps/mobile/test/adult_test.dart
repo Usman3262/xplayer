@@ -118,9 +118,10 @@ void main() {
     expect((await repo.adultView().getCategories(MediaKind.series)).map((c) => c.id), ['s2']);
   });
 
-  test('after the PIN the normal view also lists 18+ in place (no separate page)', () async {
-    final repo = PanelCatalogRepository(store: store, panelId: 'p', adapter: () async => null, includeAdult: true);
-    expect((await repo.getCategories(MediaKind.series)).map((c) => c.id), ['s1', 's2']);
+  test('after the PIN the 18+ view lists only adult packages (Movies/Series use this)', () async {
+    final repo = PanelCatalogRepository(store: store, panelId: 'p', adapter: () async => null);
+    expect((await repo.adultView().getCategories(MediaKind.series)).map((c) => c.id), ['s2']);
+    expect((await repo.getCategories(MediaKind.series)).map((c) => c.id), ['s1']);
   });
 
   testWidgets('unlocked → the button says "Hide 18+" and hides again', (t) async {

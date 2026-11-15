@@ -358,12 +358,16 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
       _subtitleTrack!.id != 'no' &&
       _subtitleTrack!.id != 'auto';
 
-  static const _httpHeaders = {
+  static const _baseHeaders = {
     'User-Agent':
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 '
         '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Accept': '*/*',
   };
+
+  /// Headers the panel asks for (Stalker User-Agent, M3U #EXTVLCOPT).
+  Map<String, String> _streamHeaders = const {};
+  Map<String, String> get _httpHeaders => {..._baseHeaders, ..._streamHeaders};
 
   @override
   void initState() {
@@ -658,6 +662,20 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
         setState(() {
           _failed = true;
           _error ??= 'Playback unavailable';
+        });
+      }
+      return;
+    }
+    // The user's panel (7.6): the video comes straight from the panel, no
+    // backend lease — guests play too.
+    final catalog = ref.read(catalogRepositoryProvider);
+    if (catalog is PanelCatalogRepository) {
+      final ok = await _openPanelPlayback(catalog);
+      if (!mounted) return;
+      if (!ok && !_failed) {
+        setState(() {
+          _failed = true;
+          _error ??= _copy.playbackUnavailable;
         });
       }
       return;
@@ -1365,6 +1383,191 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
           _error = userFacingPlaybackError(e);
         });
       }
+      return false;
+    }
+  }
+
+  /// Panel playback (7.6): the title, episode or channel comes from the
+  /// on-device catalog of the user's panel; the adapter makes the play URL
+  /// (Xtream builds it, Stalker asks the portal, M3U has it) and the video
+  /// goes straight from the panel to the player. No lease, device id,
+  /// heartbeat or backend report ([_lease]/[_playbackId] stay null).
+  /// Progress / Continue Watching are saved on the device as usual.
+  Future<bool> _openPanelPlayback(PanelCatalogRepository catalog) async {
+    try {
+      final hint = widget.kindHint;
+      final seriesKey = (widget.seriesId != null && widget.seriesId!.isNotEmpty)
+          ? widget.seriesId
+          : catalog.knownSeriesIdForEpisode(widget.id);
+      MediaItem? item;
+      var playId = widget.id;
+      String? sid;
+
+      MediaItem episodeItem(MediaItem? series, String seriesId, Episode? ep, String id) => MediaItem(
+            id: id,
+            title: ep?.title ?? series?.title ?? AppBrand.name,
+            kind: MediaKind.series,
+            posterUrl: series?.posterUrl ?? ep?.stillUrl,
+            backdropUrl: series?.backdropUrl ?? ep?.stillUrl ?? series?.posterUrl,
+            synopsis: ep?.synopsis ?? series?.synopsis,
+            containerExtension: ep?.containerExtension,
+            seriesId: seriesId,
+          );
+
+      if (seriesKey != null) {
+        final series = await catalog.getById(seriesKey, kind: MediaKind.series);
+        final ep = await _episodeInSeries(catalog, seriesKey, widget.id);
+        sid = seriesKey;
+        item = episodeItem(series, seriesKey, ep, widget.id);
+        unawaited(_loadEpisodePlaylist(catalog, seriesKey, widget.id).catchError((_) {}));
+      } else {
+        final found = await catalog.getById(widget.id, kind: hint);
+        if (found != null && found.kind == MediaKind.series) {
+          // Play on a series: its first episode.
+          final seasons = await catalog.getSeasonNumbers(found.id);
+          final eps = await catalog.getEpisodes(found.id, season: seasons.isEmpty ? 1 : seasons.first);
+          if (eps.isNotEmpty) {
+            sid = found.id;
+            playId = eps.first.id;
+            item = episodeItem(found, found.id, eps.first, playId);
+            unawaited(_loadEpisodePlaylist(catalog, found.id, playId).catchError((_) {}));
+          }
+        } else {
+          item = found;
+        }
+      }
+
+      final m = item;
+      _media = m;
+      _contentType = m == null
+          ? 'vod'
+          : (m.isLive || m.kind == MediaKind.live || m.kind == MediaKind.sports)
+              ? 'live'
+              : m.kind == MediaKind.series
+                  ? 'series'
+                  : 'vod';
+      _title = cleanDisplayName(m?.title ?? AppBrand.name, keepQuality: _isLivePlayback);
+      if (mounted) setState(() {});
+      if (m == null) {
+        Diag.event('PLAY', 'panel: ${hint?.name ?? '?'} ${widget.id} not found on the device');
+        if (mounted) setState(() { _failed = true; _error = _copy.playbackNotInPanel; });
+        return false;
+      }
+
+      _diag = PlaybackDiagSession();
+      _pb.beginSession(_diag!.sid);
+      _diag!.pb('PLAY start panel type=$_contentType content=${widget.id}');
+      _pb.setPhase(PlaybackPhase.resolvingLease);
+      final stream = await catalog.resolvePlayback(
+        playId,
+        kind: _contentType == 'live' ? MediaKind.live : (sid != null ? MediaKind.series : m.kind),
+        seriesId: sid,
+      );
+      if (!mounted || _leaving) return false;
+      if (stream == null) {
+        if (mounted) setState(() { _failed = true; _error = _copy.playbackNotInPanel; });
+        return false;
+      }
+      _streamHeaders = stream.headers;
+      _recovery = AppRecoveryBudget();
+
+      // Live: no resume. Movies / episodes: the saved position.
+      if (_isLivePlayback) {
+        _liveOpenedAt = DateTime.now();
+        _userBehindLive = false;
+        _resumeStartSec = null;
+        _liveTicker?.cancel();
+        _liveTicker = Timer.periodic(const Duration(seconds: 1), (_) {
+          if (!mounted || !_isLivePlayback) return;
+          _syncLiveEdgeFromClock();
+          setState(() {});
+        });
+        if (!_screenModePicked && _screenMode != VideoScreenMode.liveDefault) {
+          setState(() => _screenMode = VideoScreenMode.liveDefault);
+        }
+      } else {
+        var resumeSec = _failoverResumeSec ?? widget.startSec;
+        _failoverResumeSec = null;
+        if (resumeSec == null || resumeSec <= 0) {
+          resumeSec = ref.read(libraryProvider).resumePositionSecFor(widget.id);
+        }
+        if (resumeSec != null && resumeSec > 5) _resumeStartSec = resumeSec;
+      }
+
+      // One stream per account on most panels: a running download goes first.
+      final pausedDownload = await PlaybackArbiter.beforePlayback();
+      if (pausedDownload != null && mounted) {
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 6),
+          content: Text(_copy.downloadPausedForPlayback(pausedDownload)),
+        ));
+      }
+      if (!await PlayerLifecycleGate.settle(const Duration(seconds: 6))) {
+        _diag?.pb('previous playback teardown still pending');
+      }
+      if (!mounted || _leaving) return false;
+
+      final url = stream.url.toString();
+      _pb.setPhase(PlaybackPhase.openingMedia);
+      final nativeFirst = _sessionNativeAfterDecoder;
+      var opened = await _openNetwork(url, label: 'PANEL', forceNative: nativeFirst);
+      if (!opened && nativeFirst && mounted && !_leaving) {
+        _sessionNativeAfterDecoder = false;
+        opened = await _openNetwork(url, label: 'PANEL');
+      }
+      if (!opened && _lastOpenFailureKind == AppFailureKind.connectionLimit) {
+        opened = await _waitForFreeLine(url);
+      }
+      final failure = _lastOpenFailureKind;
+      if (!opened && mounted && !_leaving && failure != null &&
+          failure != AppFailureKind.timeout && failure != AppFailureKind.connectionLimit &&
+          _recovery.tryConsume(failure)) {
+        await Future<void>.delayed(recoveryDelayFor(failure));
+        if (mounted && !_leaving) opened = await _openNetwork(url, label: 'PANEL');
+      }
+      final fallbackKind = _lastOpenFailureKind;
+      if (!opened && mounted && !_leaving && !nativeFirst && await _shouldTryNativeFallback(fallbackKind)) {
+        _diag?.pb('FALLBACK engine=native after kind=${fallbackKind!.name}');
+        opened = await _openNetwork(url, label: 'PANEL', forceNative: true);
+        if (opened && fallbackKind == AppFailureKind.decoder) _sessionNativeAfterDecoder = true;
+      }
+      Diag.event('PLAY', 'panel: $_contentType ${widget.id} ${opened ? 'playing' : 'failed (${_lastOpenFailureKind?.name ?? '?'})'} '
+          'after ${_diag!.msSinceTap()}ms');
+      if (!opened && mounted) {
+        setState(() {
+          _failed = true;
+          _error ??= switch (_lastOpenFailureKind) {
+            AppFailureKind.authorization || AppFailureKind.connectionLimit => _copy.playbackPanelRefused,
+            AppFailureKind.notFound => _copy.playbackNotInPanel,
+            _ => _copy.playbackUnavailable,
+          };
+        });
+      }
+      return opened;
+    } on ProviderFailure catch (e) {
+      Diag.event('PLAY', 'panel link failed: ${e.kind.name}');
+      if (mounted) {
+        setState(() {
+          _failed = true;
+          _error = switch (e.kind) {
+            ProviderFailureKind.network || ProviderFailureKind.timeout || ProviderFailureKind.server =>
+              _copy.playbackPanelNotAnswering,
+            ProviderFailureKind.unauthorized || ProviderFailureKind.expired || ProviderFailureKind.banned ||
+            ProviderFailureKind.rateLimited =>
+              _copy.playbackPanelRefused,
+            _ => _copy.playbackUnavailable,
+          };
+        });
+      }
+      return false;
+    } on TimeoutException {
+      Diag.event('PLAY', 'panel link timed out');
+      if (mounted) setState(() { _failed = true; _error = _copy.playbackPanelNotAnswering; });
+      return false;
+    } catch (e, st) {
+      Diag.err('panel playback failed', e, st);
+      if (mounted) setState(() { _failed = true; _error = _copy.playbackUnavailable; });
       return false;
     }
   }

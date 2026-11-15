@@ -500,7 +500,7 @@ class CatalogStore {
     final pattern = _like(q);
     if (pattern == null) return const [];
     final query = db.select(db.movies)
-      ..where((m) => m.panelId.equals(panelId) & m.name.like(pattern, escapeChar: r'\'));
+      ..where((m) => m.panelId.equals(panelId) & _nameLike(m.name, pattern));
     if (adult != null) query.where((m) => m.adult.equals(adult));
     if (categoryId != null) query.where((m) => m.categoryId.equals(categoryId));
     query
@@ -513,7 +513,7 @@ class CatalogStore {
     final pattern = _like(q);
     if (pattern == null) return const [];
     final query = db.select(db.seriesItems)
-      ..where((s) => s.panelId.equals(panelId) & s.name.like(pattern, escapeChar: r'\'));
+      ..where((s) => s.panelId.equals(panelId) & _nameLike(s.name, pattern));
     if (adult != null) query.where((s) => s.adult.equals(adult));
     if (categoryId != null) query.where((s) => s.categoryId.equals(categoryId));
     query
@@ -526,7 +526,7 @@ class CatalogStore {
     final pattern = _like(q);
     if (pattern == null) return const [];
     final query = db.select(db.channels)
-      ..where((c) => c.panelId.equals(panelId) & c.name.like(pattern, escapeChar: r'\'));
+      ..where((c) => c.panelId.equals(panelId) & _nameLike(c.name, pattern));
     if (adult != null) query.where((c) => c.adult.equals(adult));
     if (categoryId != null) query.where((c) => c.categoryId.equals(categoryId));
     query
@@ -545,12 +545,19 @@ class CatalogStore {
       (await searchSeries(panelId, name, limit: 20)).where((s) => s.name.toLowerCase() == name.trim().toLowerCase()).firstOrNull ??
       (await searchSeries(panelId, name, limit: 1)).firstOrNull;
 
-  static String? _like(String q) {
-    final t = q.trim();
-    if (t.isEmpty) return null;
-    final esc = t.replaceAll(r'\', r'\').replaceAll('%', r'\%').replaceAll('_', r'\_');
-    return '%$esc%';
+  /// Search words → one LIKE pattern each (all must match, any order:
+  /// "night dark" finds "The Dark Night"). At most 5 words. Plain LIKE was
+  /// measured fast enough (130k titles: ≤45 ms on a PC, decision D20).
+  static List<String>? _like(String q) {
+    final words = q.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).take(5).toList();
+    if (words.isEmpty) return null;
+    return [
+      for (final w in words) '%${w.replaceAll(r'\', r'\\').replaceAll('%', r'\%').replaceAll('_', r'\_')}%',
+    ];
   }
+
+  static Expression<bool> _nameLike(GeneratedColumn<String> name, List<String> patterns) =>
+      patterns.map((p) => name.like(p, escapeChar: r'\')).reduce((a, b) => a & b);
 
   // ── Metadata cache (global catalog via metadata-tmdb) ────────────────────
 

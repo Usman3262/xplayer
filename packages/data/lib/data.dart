@@ -34,6 +34,7 @@ export 'src/remote/downloads_api.dart';
 export 'src/remote/extras_api.dart';
 export 'src/remote/catalog_version_watcher.dart';
 export 'src/remote/sports_api.dart';
+export 'src/backend/supabase_sports.dart';
 export 'src/remote/match_view.dart';
 export 'src/remote/speed_test.dart';
 export 'src/remote/hd_alternative.dart';

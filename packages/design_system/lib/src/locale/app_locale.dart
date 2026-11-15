@@ -1948,6 +1948,27 @@ class AppCopy {
     'تم إيقاف تنزيل "$title" مؤقتاً أثناء المشاهدة: يسمح حسابك باتصال واحد في كل مرة. سيستأنف التنزيل تلقائياً عند إيقاف المشاهدة.',
     '"$title" کا ڈاؤن لوڈ دیکھنے کے دوران رکا ہوا ہے: آپ کے اکاؤنٹ میں ایک وقت میں ایک کنکشن ہے۔ دیکھنا بند کرنے پر یہ خود جاری ہو جائے گا۔',
   );
+  /// Panel playback (7.6).
+  String get playbackUnavailable => _t(
+    'This title can\'t be played right now. Tap Retry.',
+    'لا يمكن تشغيل هذا العنوان الآن. اضغط إعادة المحاولة.',
+    'یہ عنوان ابھی نہیں چل سکتا۔ دوبارہ کوشش کریں۔',
+  );
+  String get playbackNotInPanel => _t(
+    'This title is no longer in your panel.',
+    'هذا العنوان لم يعد موجوداً في لوحتك.',
+    'یہ عنوان اب آپ کے پینل میں نہیں ہے۔',
+  );
+  String get playbackPanelNotAnswering => _t(
+    'Your panel is not answering. Check your internet, then tap Retry.',
+    'لوحتك لا تستجيب. تحقق من اتصالك بالإنترنت ثم اضغط إعادة المحاولة.',
+    'آپ کا پینل جواب نہیں دے رہا۔ انٹرنیٹ چیک کریں، پھر دوبارہ کوشش کریں۔',
+  );
+  String get playbackPanelRefused => _t(
+    'Your panel refused this stream (account expired or too many connections).',
+    'رفضت لوحتك هذا البث (الحساب منتهٍ أو اتصالات كثيرة).',
+    'آپ کے پینل نے یہ اسٹریم رد کر دی (اکاؤنٹ ختم یا بہت زیادہ کنکشن)۔',
+  );
   /// Client 5 Nov: the internet works, our server does not answer.
   String get serverUnavailablePlay => _t(
     '${AppBrand.name} could not reach its server. Your internet is working; the problem is on our side. Please tap Retry in a moment.',

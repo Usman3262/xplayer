@@ -4,6 +4,7 @@ import 'package:data/data.dart';
 import 'package:domain/domain.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'adult.dart';
+import 'backend.dart';
 import 'catalog.dart';
 import 'panels.dart';
 import 'remote_config.dart';
@@ -62,6 +63,15 @@ final vodInfoProvider = FutureProvider.autoDispose.family<VodInfoDto?, String>((
   id,
 ) async {
   if (ref.watch(demoModeProvider)) return null;
+  final repo = ref.watch(catalogRepositoryProvider);
+  if (repo is PanelCatalogRepository) {
+    ref.watch(catalogRevisionProvider); // plot / backdrop arrive later
+    try {
+      return await repo.movieInfo(id);
+    } catch (_) {
+      return null;
+    }
+  }
   try {
     return await ref.read(mediaRepositoryProvider).extras.vodInfo(id);
   } catch (_) {
@@ -73,6 +83,25 @@ final vodInfoProvider = FutureProvider.autoDispose.family<VodInfoDto?, String>((
 final liveEpgProvider = FutureProvider.autoDispose
     .family<List<EpgProgramDto>, String>((ref, streamId) async {
       if (ref.watch(demoModeProvider)) return const [];
+      final repo = ref.watch(catalogRepositoryProvider);
+      if (repo is PanelCatalogRepository) {
+        // Admin switch (Feature flags → EPG).
+        if (!ref.watch(featureEnabledProvider('epg'))) return const [];
+        // The user's panel guide (7.2), stored on the device.
+        try {
+          return [
+            for (final e in await repo.liveGuide(streamId))
+              EpgProgramDto(
+                title: e.title,
+                description: e.description,
+                startAt: e.start.toLocal(),
+                endAt: e.end.toLocal(),
+              ),
+          ];
+        } catch (_) {
+          return const [];
+        }
+      }
       try {
         return await ref.read(mediaRepositoryProvider).extras.liveEpg(streamId);
       } catch (_) {
@@ -83,6 +112,25 @@ final liveEpgProvider = FutureProvider.autoDispose
 final homeFeedProvider = FutureProvider<HomeFeed>((ref) {
   ref.watch(catalogRevisionProvider); // new synced content / artwork
   return ref.watch(catalogRepositoryProvider).getHomeFeed();
+});
+
+/// Home sections from the admin Home builder (7.1), in the admin's order;
+/// empty → Home keeps its built-in rails. Only with a connected panel (the
+/// rails are computed from the user's own panel on the device).
+final adminHomeSectionsProvider = Provider<List<HomeSection>>((ref) {
+  if (ref.watch(catalogRepositoryProvider) is! PanelCatalogRepository) return const [];
+  return ref.watch(remoteConfigProvider).home.sections;
+});
+
+/// Items of one admin Home section, from the panel catalog on the device.
+/// Keeps the previous items while it reloads (no flicker).
+final homeSectionItemsProvider = FutureProvider.family<List<MediaItem>, String>((ref, id) async {
+  ref.watch(catalogRevisionProvider);
+  final repo = ref.watch(catalogRepositoryProvider);
+  if (repo is! PanelCatalogRepository) return const [];
+  final s = ref.watch(adminHomeSectionsProvider).where((s) => s.id == id).firstOrNull;
+  if (s == null) return const [];
+  return repo.homeSection(s);
 });
 
 final moviesProvider = FutureProvider<List<MediaItem>>((ref) {
@@ -475,23 +523,37 @@ final subscriptionsProvider = FutureProvider.autoDispose<List<SubscriptionDto>>(
   return ref.watch(mediaRepositoryProvider).subscriptions();
 });
 
+SupabaseSports? _supabaseSports;
+
+/// Where matches & lineups come from (7.8): Supabase (admin Sports module)
+/// when the app runs on the user's panel; the old server otherwise. One
+/// instance for the session (it remembers the match / league numbers).
+final sportsSourceProvider = Provider<MatchCentreSource>((ref) {
+  final client = Backend.client;
+  if (client != null && ref.watch(catalogRepositoryProvider) is PanelCatalogRepository) {
+    return _supabaseSports ??= SupabaseSports((fn, params) async => await client.rpc(fn, params: params));
+  }
+  return ref.watch(mediaRepositoryProvider).sports;
+});
+
 /// Sports package gate from `GET /features/sports`.
 /// Match centre (fixtures, lineups): hidden until the server enables it.
 final matchCentreOnProvider = FutureProvider<bool>((ref) async {
+  final source = ref.watch(sportsSourceProvider);
   final session = ref.watch(sessionProvider);
-  if (!session.isLoggedIn) return false;
+  if (source is! SupabaseSports && !session.isLoggedIn) return false;
   // Matches and lineups only with the Sports package (client 5 Nov: an
   // account without Sports still saw matches). The server switch alone
   // turned the match centre on for every package.
   final sportsOn = await ref.watch(sportsEnabledProvider.future);
   if (!sportsOn) return false;
-  return ref.watch(mediaRepositoryProvider).sports.enabled();
+  return source.enabled();
 });
 
 /// One day of matches; key = YYYY-MM-DD.
 final matchDayProvider =
     FutureProvider.autoDispose.family<MatchDay, String>((ref, date) async {
-  final sports = ref.watch(mediaRepositoryProvider).sports;
+  final sports = ref.watch(sportsSourceProvider);
   final days = matchThreeDays();
   if (date != days[1]) return sports.fixtures(date: date);
   // Today also lists yesterday's matches that are still live after midnight
@@ -514,13 +576,13 @@ final matchDayProvider =
 
 final matchDetailProvider =
     FutureProvider.autoDispose.family<MatchDetail, int>((ref, id) {
-  return ref.watch(mediaRepositoryProvider).sports.match(id);
+  return ref.watch(sportsSourceProvider).match(id);
 });
 
 /// League table for the match screen's Standings tab (cached 12 h server side).
 final matchStandingsProvider =
     FutureProvider.autoDispose.family<LeagueTable, int>((ref, league) {
-  return ref.watch(mediaRepositoryProvider).sports.standings(league);
+  return ref.watch(sportsSourceProvider).standings(league);
 });
 
 /// Sports tab/sections: the admin's "sports" feature flag (remote config).
@@ -636,6 +698,10 @@ final categoryOrderStoreProvider = Provider<CategoryOrderStore>((ref) {
 final seriesCastProvider = FutureProvider.autoDispose
     .family<({String? names, List<CastPhotoDto> photos}), String>((ref, id) async {
   if (ref.watch(demoModeProvider)) {
+    return (names: null, photos: const <CastPhotoDto>[]);
+  }
+  // Panels give no series cast (old server only); the row stays hidden.
+  if (ref.watch(catalogRepositoryProvider) is PanelCatalogRepository) {
     return (names: null, photos: const <CastPhotoDto>[]);
   }
   try {

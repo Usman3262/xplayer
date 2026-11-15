@@ -10,10 +10,11 @@ Spec: `new-platform.md` · Rules: `CLAUDE.md` · App "where to change": `XPLAYER
 ---
 
 ## ▶ NEXT
-**Phase 6 done → check it on the phone via remote logs** (`[SYNC]`, `[HOME]`, `[META]` lines), then
-**Phase 7.6 Player on panel streams** (today the details/player screens still call the old backend for
-playback, so content shows but doesn't play yet) → 7.1 dynamic Home sections → 7.2 Live + EPG.
-**TV still paused by the user.**
+**Phase 7 (phone) implemented, unit-tested — not yet verified on a device.** Next: the user rebuilds,
+plays a movie / episode / channel from each panel type and says "check logs" → verify `[PLAY] panel:`
+lines (link ready / playing / failed kind), `[HOME]`, Live guide. Then Phase 8 (accounts & devices on
+Supabase: cloud sync of favorites/history, devices/sessions — replaces the old-server Settings rows).
+**TV still paused by the user** (TV versions of Phase 7 wait).
 
 ## Waiting on you
 - [ ] **Build PC: create `env/app.json`** (same content as on this PC, or `env/app.example.json` filled
@@ -49,6 +50,10 @@ playback, so content shows but doesn't play yet) → 7.1 dynamic Home sections �
 - Q6 Sports (matches & lineups) from an **external API** (provider to choose).
 
 ## Decisions made (defaults — change any time)
+- **D20 Search without an FTS index:** LIKE per word over the device catalog — 130k titles: 0–11 ms
+  with hits, 43 ms worst case (no hit) on the PC; a full-text index would need a DB migration on every
+  phone. Revisit if a low-end TV box measures slow.
+- **D21 Sports ids:** Supabase UUIDs → stable 31-bit numbers (FNV-1a) for the existing match screens.
 - **D19 Adult (18+) PIN source:** Stalker/MAG portals → the panel account's parental PIN
   (`parent_password` from the portal profile), exactly like a MAG box. Xtream/M3U → the Xtream API does
   not share the panel's PIN (checked: not in `user_info`; players like TiviMate/Smarters keep their
@@ -604,11 +609,35 @@ role has sports.read without sports.write).
   continue-watching, favorites, matches, live EPG download → Phase 7.
 
 ## Phase 7 — Flutter screens on the new data
-- [ ] 7.1 Home (dynamic sections), 7.2 Live TV + EPG, 7.3 Movies, 7.4 Series,
-  7.5 Search (local FTS + global), 7.6 Player (direct URLs from adapter, resume),
-  7.7 Favorites / history / continue watching (local; cloud when signed in),
-  7.8 Sports (matches & lineups from Supabase), 7.9 Settings (panels, playback, language,
-  parental, about). TV versions of each.
+Phone done 2026-11-15 (implemented + unit tests; **untested on a device**). TV versions wait (TV paused).
+- [x] 7.6 Player on panel streams — `PanelCatalogRepository.resolvePlayback` (stored StreamRef →
+  adapter link: Xtream built on device, Stalker `create_link` right before play, M3U playlist URL +
+  its headers) → player `_openPanelPlayback`: no lease/backend, guests play, resume from the local
+  library, same recovery (busy line wait, one retry, Android-engine fallback). Panel errors in plain
+  words (not in panel / panel not answering / panel refused). Tests: 5 unit (`phase6_content_test`
+  "7.6"); Stalker live links already covered by the live adapter test.
+- [x] 7.1 Home = admin Home builder sections (order, titles, login-only), each drawn with the existing
+  rails (poster rail, Top 10 numbers, Continue Watching, Live rail, Matches) — design unchanged; empty
+  sections hidden; built-in rails only when no layout is published. `random` source = daily picks
+  (same all day). Test: unit (daily picks). Live config checked: 10 sections published.
+- [x] 7.2 Live TV + EPG — guide from the panel (`liveGuide`: stored first, ≤1 request / channel /
+  15 min, only for the channel being watched), admin flag `epg`; Live screen now reloads quietly when
+  synced data arrives (same bug Movies had). Tests: 2 unit. M3U has no guide (XMLTV = later).
+- [x] 7.3 Movies / 7.4 Series — lists from the panel (Phase 6); movie details page info (plot, cast,
+  director, runtime, trailer, backdrop) from panel details + cached global catalog (`movieInfo`), no
+  old-server call; series cast row hidden (panels give none).
+- [x] 7.5 Search — panel catalog on the device; every word must match in any order (was: exact
+  phrase), `%`/`_` literal (escape bug fixed). D20: no FTS index (measured). "Global" search = later
+  if ever needed (rule: what to show comes from the user's panel). Tests: 3 unit.
+- [x] 7.7 Favorites / history / Continue Watching — on the device for guests (LibraryStore, already);
+  cloud sync = Phase 8.
+- [x] 7.8 Sports — matches & lineups from Supabase: migration 027 (`get_matches_between`,
+  `get_standings`, security invoker, pushed + called live with the anon key), `SupabaseSports`
+  (same models as the match centre screens; UUID → stable number), shown to guests when the admin has
+  matches (Sports module) — hidden while the tables are empty. Tests: 4 unit.
+- [x] 7.9 Settings — panels, playback, language, parental, about unchanged; old-server rows (profiles,
+  package, devices, sign-in requests, security, stream session) shown only with an old-server login
+  until Phase 8 rebuilds them on Supabase.
 
 ## Phase 8 — Accounts & devices
 - [ ] Profiles, devices & sessions, cloud sync of favorites/history, guest → account migration,
@@ -677,6 +706,9 @@ role has sports.read without sports.write).
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-15 — **Phase 7 (phone)**: 7.6 panel playback, 7.1 admin Home sections, 7.2 panel EPG + Live
+  reload, 7.3 movie info from panel/global cache, 7.5 word search, 7.8 Supabase sports (migration 027
+  pushed), 7.9 Settings cleanup. Details in the Phase 7 section. Not yet run on a device.
 - 2026-11-15 — Device logs round 3: **data IS stored locally** (Home read 40/40/10 from the DB, even
   before the sync ended) — the **Movies/Series screens loaded their category list once**; opened before
   the sync saved anything they stayed empty. Fixed: browse screens reload quietly (no spinner, rows

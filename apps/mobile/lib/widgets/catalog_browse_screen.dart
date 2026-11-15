@@ -1,12 +1,13 @@
 import 'dart:async';
 
-import 'package:data/data.dart' show Diag;
+import 'package:data/data.dart' show Diag, PanelCatalogRepository;
 import 'package:design_system/design_system.dart';
 import 'package:domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/adult.dart';
 import '../core/media_nav.dart';
 import '../core/catalog.dart';
 import '../core/providers.dart';
@@ -116,21 +117,40 @@ class _CatalogBrowseScreenState extends ConsumerState<CatalogBrowseScreen> {
     }
   }
 
-  /// [quiet]: new catalog data arrived (sync / adult unlock) — reload the
-  /// category list and rows without a spinner; rows on screen stay until
-  /// their fresh copy is in.
-  Future<void> _boot({bool quiet = false}) async {
+  /// After the PIN: Movies/Series list only the 18+ packages (and fetch
+  /// their titles now). Mixing them into 400+ packages hid them off-screen
+  /// — the first 15 rows never changed, so it looked like the PIN did nothing.
+  CatalogRepository _browseRepo() {
+    final repo = ref.read(catalogRepositoryProvider);
+    if (ref.read(adultUnlockedProvider) && repo is PanelCatalogRepository) {
+      return repo.adultView();
+    }
+    return repo;
+  }
+
+  /// [quiet]: new catalog data arrived (sync) — reload the category list
+  /// and rows without a spinner; rows on screen stay until their fresh copy
+  /// is in. Adult PIN toggle uses [quiet] false so 18+ packages replace the
+  /// list at the top.
+  Future<void> _boot({bool quiet = false, bool resetForAdult = false}) async {
     if (quiet) {
       _staleCat.addAll(_itemsByCat.keys);
     } else {
       setState(() {
         _loadingCats = true;
         _error = null;
+        if (resetForAdult) {
+          _itemsByCat.clear();
+          _totalByCat.clear();
+          _failedCat.clear();
+          _queue.clear();
+          _shownCatCount = CatalogPaging.categoriesPageSize;
+        }
       });
+      if (resetForAdult && _scroll.hasClients) _scroll.jumpTo(0);
     }
     try {
-      final cats =
-          await ref.read(catalogRepositoryProvider).getCategories(widget.kind);
+      final cats = await _browseRepo().getCategories(widget.kind);
       final unique = <CatalogCategory>[];
       final seen = <String>{};
       // Unique by id: packages with the same name are still different
@@ -141,7 +161,8 @@ class _CatalogBrowseScreenState extends ConsumerState<CatalogBrowseScreen> {
       // The profile's package order (client 17 Oct), device copy first.
       var ordered = unique;
       final pid = ref.read(sessionProvider).activeProfileId;
-      if (pid != null && pid.isNotEmpty) {
+      final adultOpen = ref.read(adultUnlockedProvider);
+      if (!adultOpen && pid != null && pid.isNotEmpty) {
         final ids =
             await ref.read(categoryOrderStoreProvider).load(pid, _section);
         ordered = applyCategoryOrder(unique, ids);
@@ -178,6 +199,12 @@ class _CatalogBrowseScreenState extends ConsumerState<CatalogBrowseScreen> {
             }
           });
         }
+      }
+      if (adultOpen) {
+        Diag.event(
+          'ADULT',
+          '${widget.kind.name}: ${unique.length} 18+ categories, loading titles',
+        );
       }
       for (final c in ordered.take(_shownCatCount)) {
         unawaited(_loadCategory(c.id));
@@ -246,7 +273,7 @@ class _CatalogBrowseScreenState extends ConsumerState<CatalogBrowseScreen> {
       // The full package is paged on its own screen.
       const maxPages = 1;
       do {
-        final page = await ref.read(catalogRepositoryProvider).browse(
+        final page = await _browseRepo().browse(
               kind: widget.kind,
               categoryId: id,
               limit: _trailLimit,
@@ -310,7 +337,10 @@ class _CatalogBrowseScreenState extends ConsumerState<CatalogBrowseScreen> {
     }
   }
 
-  String get _section => widget.sectionKey ?? (widget.kind == MediaKind.series ? 'series' : 'vod');
+  String get _section {
+    final base = widget.sectionKey ?? (widget.kind == MediaKind.series ? 'series' : 'vod');
+    return ref.read(adultUnlockedProvider) ? '$base-adult' : base;
+  }
 
   void _scheduleSaveRows() {
     _saveRows?.cancel();
@@ -375,7 +405,7 @@ class _CatalogBrowseScreenState extends ConsumerState<CatalogBrowseScreen> {
       final found = <MediaItem>[];
       String? cursor;
       for (var pageNo = 0; pageNo < 8; pageNo++) {
-        final page = await ref.read(catalogRepositoryProvider).searchPage(
+        final page = await _browseRepo().searchPage(
               trimmed,
               kind: widget.kind,
               cursor: cursor,
@@ -427,6 +457,9 @@ class _CatalogBrowseScreenState extends ConsumerState<CatalogBrowseScreen> {
     });
     ref.listen(catalogRepositoryProvider, (_, _) {
       if (mounted) unawaited(_boot(quiet: true));
+    });
+    ref.listen(adultUnlockedProvider, (_, _) {
+      if (mounted) unawaited(_boot(quiet: false, resetForAdult: true));
     });
 
     final searching = _query.trim().isNotEmpty;

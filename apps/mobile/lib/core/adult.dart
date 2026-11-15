@@ -171,9 +171,9 @@ final adultAvailableProvider = FutureProvider.autoDispose.family<bool, MediaKind
   return repo.hasAdult(kind);
 });
 
-/// "Adult 18+" button (top of Movies / Series). After the PIN the 18+
-/// categories appear in this same screen with the others; the button then
-/// hides them again. Hidden when the panel has no 18+ of this kind.
+/// "Adult 18+" button (top of Movies / Series). After the PIN this screen
+/// lists only the 18+ packages (titles load then). "Hide 18+" restores the
+/// normal list. Hidden when the panel has no 18+ of this kind.
 class AdultButton extends ConsumerWidget {
   const AdultButton({super.key, required this.kind});
   final MediaKind kind;

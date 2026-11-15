@@ -34,27 +34,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Demo has no account: nothing to load from the server.
       if (ref.read(demoModeProvider)) return;
-      ref
-          .read(sessionProvider.notifier)
-          .refreshDevicesAndSessions()
-          .catchError((_) {});
+      ref.read(sessionProvider.notifier).refreshDevicesAndSessions().catchError((_) {});
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(sessionProvider);
+    final oldAccount = session.isLoggedIn; // old server login (not Supabase)
     final demo = ref.watch(demoModeProvider);
     final user = session.user;
     final profile = session.activeProfile;
     final uiSounds = ref.watch(uiSoundProvider);
     final copy = AppCopy.ofLanguage(session.language);
     final deviceLimit = user?.deviceLimit ?? 5;
-    final devicesLabel = copy.devicesOfLimit(
-      session.devices.length,
-      deviceLimit,
-      session.sessions.length,
-    );
+    final devicesLabel = copy.devicesOfLimit(session.devices.length, deviceLimit, session.sessions.length);
 
     return Scaffold(
       appBar: const MainAppBar(showBack: true),
@@ -68,13 +62,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 Expanded(
                   child: Text(
                     copy.settings,
-                    style: Theme.of(context).textTheme.headlineMedium
-                        ?.copyWith(fontWeight: FontWeight.w900),
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900),
                   ),
                 ),
-                TechBadge(
-                  'v${ref.watch(appVersionProvider).valueOrNull ?? ''}',
-                ),
+                TechBadge('v${ref.watch(appVersionProvider).valueOrNull ?? ''}'),
               ],
             ),
             const SizedBox(height: 14),
@@ -90,14 +81,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [
-                      Colors.white.withValues(alpha: 0.10),
-                      AppColors.surface.withValues(alpha: 0.94),
-                    ],
+                    colors: [Colors.white.withValues(alpha: 0.10), AppColors.surface.withValues(alpha: 0.94)],
                   ),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.12),
-                  ),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
                   boxShadow: [
                     BoxShadow(
                       color: AppColors.cyan.withValues(alpha: 0.10),
@@ -110,28 +96,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   children: [
                     Column(
                       children: [
-                        ProfileAvatar(
-                          initials: profile?.initials ?? 'CK',
-                          token: profile?.avatar,
-                          size: 40,
-                        ),
+                        ProfileAvatar(initials: profile?.initials ?? 'CK', token: profile?.avatar, size: 40),
                         const SizedBox(height: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.gold,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(color: AppColors.gold, borderRadius: BorderRadius.circular(4)),
                           child: Text(
                             ref.watch(demoModeProvider) ? 'DEMO' : 'VIP',
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 8,
-                              fontWeight: FontWeight.w900,
-                            ),
+                            style: const TextStyle(color: Colors.black, fontSize: 8, fontWeight: FontWeight.w900),
                           ),
                         ),
                       ],
@@ -151,9 +123,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
             const SizedBox(height: 18),
+            // Old-server account rows (profiles, package, devices, security):
+            // only with that login. Supabase accounts get them in Phase 8.
             _section(copy.sectionAccount, [
-              if (ref.watch(accountPolicyProvider).accountsOn)
-                _accountRow(context, ref, copy),
+              if (ref.watch(accountPolicyProvider).accountsOn) _accountRow(context, ref, copy),
               _nav(
                 context,
                 ref,
@@ -162,58 +135,59 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 value: '${ref.watch(panelsProvider).where((c) => c.enabled).length}',
                 route: '/settings/panels',
               ),
-              _nav(
-                context,
-                ref,
-                Icons.people_alt_rounded,
-                copy.profiles,
-                value: copy.profilesActive(session.profiles.length),
-                route: '/profiles/manage',
-              ),
-              _nav(
-                context,
-                ref,
-                Icons.workspace_premium_rounded,
-                copy.subscriptionPackage,
-                value: ref
-                    .watch(subscriptionsProvider)
-                    .when(
-                      data: (list) {
-                        if (list.isEmpty) return '—';
-                        final sub = list.first;
-                        final end = DateTime.tryParse(sub.renewsAt ?? '');
-                        final days = end?.difference(DateTime.now()).inDays;
-                        return [
-                          sub.packageName.isNotEmpty
-                              ? sub.packageName
-                              : sub.status.toUpperCase(),
-                          if (days != null && days >= 0)
-                            copy.daysRemaining(days),
-                        ].join(' · ');
-                      },
-                      loading: () => '…',
-                      error: (_, _) => '—',
-                    ),
-                route: '/settings/subscription',
-                badge: true,
-              ),
-              _nav(
-                context,
-                ref,
-                Icons.devices_rounded,
-                copy.devicesSessions,
-                value: devicesLabel,
-                route: '/settings/devices',
-              ),
-              _nav(
-                context,
-                ref,
-                Icons.verified_user_rounded,
-                copy.signInRequestsTitle,
-                subtitle: copy.signInRequestsSubtitle,
-                route: '/settings/sign-in-requests',
-              ),
-              if (user != null)
+              if (oldAccount)
+                _nav(
+                  context,
+                  ref,
+                  Icons.people_alt_rounded,
+                  copy.profiles,
+                  value: copy.profilesActive(session.profiles.length),
+                  route: '/profiles/manage',
+                ),
+              if (oldAccount)
+                _nav(
+                  context,
+                  ref,
+                  Icons.workspace_premium_rounded,
+                  copy.subscriptionPackage,
+                  value: ref
+                      .watch(subscriptionsProvider)
+                      .when(
+                        data: (list) {
+                          if (list.isEmpty) return '—';
+                          final sub = list.first;
+                          final end = DateTime.tryParse(sub.renewsAt ?? '');
+                          final days = end?.difference(DateTime.now()).inDays;
+                          return [
+                            sub.packageName.isNotEmpty ? sub.packageName : sub.status.toUpperCase(),
+                            if (days != null && days >= 0) copy.daysRemaining(days),
+                          ].join(' · ');
+                        },
+                        loading: () => '…',
+                        error: (_, _) => '—',
+                      ),
+                  route: '/settings/subscription',
+                  badge: true,
+                ),
+              if (oldAccount)
+                _nav(
+                  context,
+                  ref,
+                  Icons.devices_rounded,
+                  copy.devicesSessions,
+                  value: devicesLabel,
+                  route: '/settings/devices',
+                ),
+              if (oldAccount)
+                _nav(
+                  context,
+                  ref,
+                  Icons.verified_user_rounded,
+                  copy.signInRequestsTitle,
+                  subtitle: copy.signInRequestsSubtitle,
+                  route: '/settings/sign-in-requests',
+                ),
+              if (user != null && oldAccount)
                 _nav(
                   context,
                   ref,
@@ -222,26 +196,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   subtitle: copy.pairTvSubtitle,
                   route: '/settings/devices/pair-tv',
                 ),
-              _nav(
-                context,
-                ref,
-                Icons.security_rounded,
-                copy.security,
-                value: user?.mfaEnabled == true ? copy.mfaOn : copy.passwordMfa,
-                route: '/settings/security',
-              ),
+              if (oldAccount)
+                _nav(
+                  context,
+                  ref,
+                  Icons.security_rounded,
+                  copy.security,
+                  value: user?.mfaEnabled == true ? copy.mfaOn : copy.passwordMfa,
+                  route: '/settings/security',
+                ),
             ]),
             _section(copy.sectionPlayback, [
               // Server playback lease status: account only.
-              if (!demo) StreamSessionTile(copy: copy),
+              if (!demo && oldAccount) StreamSessionTile(copy: copy),
               _nav(
                 context,
                 ref,
                 Icons.high_quality_rounded,
                 copy.playbackPrefs,
-                value: session.playbackQuality == 'Auto'
-                    ? copy.qualityAuto
-                    : session.playbackQuality,
+                value: session.playbackQuality == 'Auto' ? copy.qualityAuto : session.playbackQuality,
                 route: '/settings/playback',
               ),
               // "Audio & Subtitles" removed (client 20 Oct); tracks stay
@@ -282,8 +255,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 title: copy.uiSounds,
                 subtitle: copy.uiSoundsHint,
                 value: uiSounds,
-                onChanged: (v) =>
-                    ref.read(uiSoundProvider.notifier).setEnabled(v),
+                onChanged: (v) => ref.read(uiSoundProvider.notifier).setEnabled(v),
               ),
             ]),
             // Developer tool: debug builds only (client builds showed it).
@@ -299,14 +271,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ]),
             _section(copy.sectionPersonalization, [
-              _nav(
-                context,
-                ref,
-                Icons.person_rounded,
-                copy.myAccount,
-                value: copy.personalHub,
-                route: '/my-account',
-              ),
+              _nav(context, ref, Icons.person_rounded, copy.myAccount, value: copy.personalHub, route: '/my-account'),
               _nav(
                 context,
                 ref,
@@ -331,14 +296,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 value: copy.trendingComing,
                 route: '/new',
               ),
-              _nav(
-                context,
-                ref,
-                Icons.child_care_rounded,
-                copy.kids,
-                value: copy.familyTitles,
-                route: '/kids',
-              ),
+              _nav(context, ref, Icons.child_care_rounded, copy.kids, value: copy.familyTitles, route: '/kids'),
               _nav(
                 context,
                 ref,
@@ -404,14 +362,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 value: 'v${ref.watch(appVersionProvider).valueOrNull ?? ''}',
                 route: '/settings/about',
               ),
-              if (demo)
-                _nav(
-                  context,
-                  ref,
-                  Icons.copyright_rounded,
-                  copy.demoCredits,
-                  route: demoCreditsRoute,
-                ),
+              if (demo) _nav(context, ref, Icons.copyright_rounded, copy.demoCredits, route: demoCreditsRoute),
             ]),
             const SizedBox(height: 8),
             // Demo: leave the demo and sign in (same place as Sign out).
@@ -468,12 +419,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           padding: const EdgeInsets.only(bottom: 8, top: 8),
           child: Text(
             title,
-            style: TextStyle(
-              color: AppColors.cyan,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1,
-              fontSize: 12,
-            ),
+            style: TextStyle(color: AppColors.cyan, fontWeight: FontWeight.w800, letterSpacing: 1, fontSize: 12),
           ),
         ),
         Container(
@@ -482,18 +428,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withValues(alpha: 0.08),
-                AppColors.surface.withValues(alpha: 0.94),
-              ],
+              colors: [Colors.white.withValues(alpha: 0.08), AppColors.surface.withValues(alpha: 0.94)],
             ),
             border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
             boxShadow: [
-              BoxShadow(
-                color: AppColors.cyan.withValues(alpha: 0.08),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
-              ),
+              BoxShadow(color: AppColors.cyan.withValues(alpha: 0.08), blurRadius: 18, offset: const Offset(0, 8)),
             ],
           ),
           clipBehavior: Clip.antiAlias,
@@ -588,11 +527,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       trailing: Transform.scale(
         scale: 0.88,
         alignment: Alignment.centerRight,
-        child: Switch.adaptive(
-          value: value,
-          activeThumbColor: AppColors.cyan,
-          onChanged: onChanged,
-        ),
+        child: Switch.adaptive(value: value, activeThumbColor: AppColors.cyan, onChanged: onChanged),
       ),
     );
   }
@@ -645,11 +580,7 @@ class _SettingsRow extends StatelessWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                      height: 1.2,
-                    ),
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, height: 1.2),
                   ),
                   if (hasSubtitle) ...[
                     const SizedBox(height: 2),
@@ -657,11 +588,7 @@ class _SettingsRow extends StatelessWidget {
                       subtitle!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 12,
-                        height: 1.25,
-                      ),
+                      style: TextStyle(color: AppColors.textSecondary, fontSize: 12, height: 1.25),
                     ),
                   ],
                 ],
@@ -678,11 +605,7 @@ class _SettingsRow extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.end,
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600),
                       ),
                     ),
             ],
@@ -691,11 +614,7 @@ class _SettingsRow extends StatelessWidget {
               trailing!,
             ] else if (showChevron) ...[
               const SizedBox(width: 2),
-              Icon(
-                Icons.chevron_right,
-                color: AppColors.textSecondary,
-                size: 22,
-              ),
+              Icon(Icons.chevron_right, color: AppColors.textSecondary, size: 22),
             ],
           ],
         ),

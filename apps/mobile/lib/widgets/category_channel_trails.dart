@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/catalog.dart';
 import '../core/library_controller.dart';
 import '../core/media_nav.dart';
 import '../core/providers.dart';
@@ -186,6 +187,25 @@ class _CategoryChannelTrailsScreenState
         _error = e;
         _loadingCats = false;
       });
+    }
+  }
+
+  /// Synced data arrived (3× per sync): nothing shown yet → load; otherwise
+  /// only the packages on screen that are still empty or failed reload
+  /// (no spinner, rows already shown stay).
+  void _refreshQuiet() {
+    if (!mounted || _loadingCats) return;
+    if (_categories.isEmpty || _error != null) {
+      unawaited(_boot());
+      return;
+    }
+    for (final c in _pagedCategories) {
+      final items = _itemsByCat[c.id];
+      if ((items == null || items.isEmpty) && _loadingCat[c.id] != true) {
+        _itemsByCat.remove(c.id);
+        _failedCat.remove(c.id);
+        unawaited(_loadCategory(c.id));
+      }
     }
   }
 
@@ -434,6 +454,13 @@ class _CategoryChannelTrailsScreenState
         if (mounted) unawaited(_boot());
       });
     }
+    ref.listen<int>(catalogRevisionProvider, (_, _) => _refreshQuiet());
+    // 18+ shown / hidden or another main panel: the package list changes.
+    ref.listen(catalogRepositoryProvider, (_, _) {
+      _itemsByCat.clear();
+      _totalByCat.clear();
+      unawaited(_boot());
+    });
 
     final filtered = _filteredCategories;
     final paged = _pagedCategories;

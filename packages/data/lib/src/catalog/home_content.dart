@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:domain/domain.dart';
 
 import '../backend/home_layout.dart';
@@ -36,6 +38,9 @@ class HomeContentResolver {
     final limit = s.limit;
     if (s.items.isNotEmpty && (s.source == SectionSource.manual || s.type == HomeSectionType.custom || s.type == HomeSectionType.collection)) {
       return refs(s.items, limit: limit);
+    }
+    if (s.source == SectionSource.random && s.type != HomeSectionType.top10) {
+      return dailyPicks(s.kind, limit: limit);
     }
     switch (s.type) {
       case HomeSectionType.top10:
@@ -106,6 +111,15 @@ class HomeContentResolver {
       if (kind != ContentKind.series) ...(await store.topRatedMovies(panelId, limit: half)).map(_movie),
       if (kind != ContentKind.movie) ...(await store.topRatedSeries(panelId, limit: half)).map(_series),
     ].take(limit).toList();
+  }
+
+  /// "Picked for you": a mix from the panel's better-rated titles that
+  /// changes once a day (same picks all day, so Home doesn't jump).
+  Future<List<MediaItem>> dailyPicks(ContentKind kind, {required int limit}) async {
+    final pool = await topRated(kind, limit: limit * 4);
+    final d = _clock();
+    pool.shuffle(Random(d.year * 1000 + d.month * 40 + d.day));
+    return pool.take(limit).toList();
   }
 
   Future<List<MediaItem>> category(ContentKind kind, String categoryId, {required int limit}) async {

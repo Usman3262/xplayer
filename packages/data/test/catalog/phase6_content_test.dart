@@ -39,6 +39,22 @@ class FakeAdapter implements ProviderAdapter {
         stream: StreamRef(kind: MediaKind.series, id: '$id-$s-$n', extension: 'mp4'));
     return ProviderSeriesDetails(series: sr(id), episodes: {1: [ep(1, 1), ep(1, 2)], 2: [ep(2, 1)]});
   }
+  int epgCalls = 0;
+  DateTime epgBase = DateTime.utc(2026, 11, 15, 12);
+  @override
+  Future<List<EpgEntry>> shortEpg(ProviderChannel channel, {int limit = 4}) async {
+    epgCalls++;
+    return [
+      EpgEntry(title: 'News', start: epgBase.subtract(const Duration(minutes: 30)), end: epgBase.add(const Duration(minutes: 30))),
+      EpgEntry(title: 'Sport', start: epgBase.add(const Duration(minutes: 30)), end: epgBase.add(const Duration(hours: 2))),
+    ];
+  }
+  final resolved = <StreamRef>[];
+  @override
+  Future<ResolvedStream> resolveStream(StreamRef ref) async {
+    resolved.add(ref);
+    return ResolvedStream(url: Uri.parse('http://panel.test/${ref.kind.name}/${ref.id}.${ref.extension ?? 'ts'}'));
+  }
   @override
   dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }
@@ -70,6 +86,16 @@ void main() {
 
   group('HomeContentResolver (6.4: rails from the panel, never TMDB lists)', () {
     HomeContentResolver home() => HomeContentResolver(store: store, panelId: 'p', clock: () => now);
+
+    test('random source = daily picks: same all day, within the limit, from the panel', () async {
+      const s = HomeSection(id: 'p', title: 'Picked for you', type: HomeSectionType.recommended,
+          source: SectionSource.random, layout: SectionLayout.rail, limit: 3);
+      final a = await home().section(s, HomeLayout.empty);
+      final b = await home().section(s, HomeLayout.empty);
+      expect(a.length, 3);
+      expect(a.map((m) => m.id), b.map((m) => m.id));
+      expect(a.every((m) => ['1', '2', '3', '4', 's1', 's2'].contains(m.id)), isTrue);
+    });
 
     test('newest = panel "added" date, mixed kinds interleaved by date, days filter', () async {
       final all = await home().newest(ContentKind.mixed, limit: 10);
@@ -312,6 +338,64 @@ void main() {
 
     test('related = same panel category', () async {
       expect((await repo().getRelated('1')).map((m) => m.id), ['2', '3']);
+    });
+  });
+
+  group('7.6 playback straight from the panel', () {
+    late FakeAdapter adapter;
+    setUp(() => adapter = FakeAdapter());
+    PanelCatalogRepository repo() =>
+        PanelCatalogRepository(store: store, panelId: 'p', adapter: () async => adapter, layout: () => HomeLayout.empty, clock: () => now);
+
+    test('movie: stored stream (with its container) → adapter link', () async {
+      final s = await repo().resolvePlayback('2', kind: MediaKind.movie);
+      expect(s!.url.toString(), 'http://panel.test/movie/2.mkv');
+      expect(adapter.resolved.single.kind, MediaKind.movie);
+    });
+
+    test('live channel, also when the kind is unknown', () async {
+      expect((await repo().resolvePlayback('100', kind: MediaKind.live))!.url.path, '/live/100.ts');
+      expect((await repo().resolvePlayback('100'))!.url.path, '/live/100.ts');
+    });
+
+    test('episode: found in the series episode list (fetched once, then stored)', () async {
+      final r = repo();
+      final s = await r.resolvePlayback('s1-2-1', kind: MediaKind.series, seriesId: 's1');
+      expect(s!.url.path, '/series/s1-2-1.mp4');
+      await r.resolvePlayback('s1-1-2', kind: MediaKind.series, seriesId: 's1');
+      expect(adapter.seriesCalls, 1);
+    });
+
+    test('episode id alone works after its list was opened (Continue Watching)', () async {
+      final r = repo();
+      await r.getEpisodes('s1', season: 1);
+      expect((await r.resolvePlayback('s1-1-1', kind: MediaKind.series))!.url.path, '/series/s1-1-1.mp4');
+    });
+
+    test('unknown id → null, no request to the panel', () async {
+      expect(await repo().resolvePlayback('nope', kind: MediaKind.movie), isNull);
+      expect(adapter.resolved, isEmpty);
+    });
+  });
+
+  group('7.2 live guide', () {
+    test('asks the panel once, then the stored guide (no request per open)', () async {
+      final adapter = FakeAdapter();
+      final r = PanelCatalogRepository(store: store, panelId: 'p', adapter: () async => adapter, clock: () => now);
+      final a = await r.liveGuide('100');
+      expect(a.map((e) => e.title), ['News', 'Sport']);
+      expect(a.first.isOnAt(now), isTrue);
+      final b = await r.liveGuide('100');
+      expect(b.map((e) => e.title), ['News', 'Sport']);
+      expect(adapter.epgCalls, 1);
+    });
+
+    test('a channel without a guide is not asked again for 15 minutes', () async {
+      final adapter = FakeAdapter()..epgBase = DateTime.utc(2020);
+      final r = PanelCatalogRepository(store: store, panelId: 'p', adapter: () async => adapter, clock: () => now);
+      expect(await r.liveGuide('100'), isEmpty);
+      expect(await r.liveGuide('100'), isEmpty);
+      expect(adapter.epgCalls, 1);
     });
   });
 }

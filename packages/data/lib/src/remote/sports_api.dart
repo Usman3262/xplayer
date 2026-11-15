@@ -1,3 +1,4 @@
+import '../backend/supabase_sports.dart' show MatchCentreSource;
 import 'dart:convert';
 
 import '../diag/diag.dart';
@@ -719,7 +720,7 @@ List<T> _stableSort<T>(List<T> list, int Function(T a, T b) compare) {
   return [for (final e in indexed) e.$2];
 }
 
-class SportsApi {
+class SportsApi implements MatchCentreSource {
   /// The account's package has no Sports (Usman 12 Nov: every /sports/*
   /// call except /sports/status answers 403 SPORTS_NOT_IN_PACKAGE). Screens
   /// show "not in your package" instead of an error; it is never retried.
