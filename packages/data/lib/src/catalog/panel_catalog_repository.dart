@@ -8,6 +8,7 @@ import '../diag/diag.dart';
 import '../providers/provider_adapter.dart';
 import '../providers/provider_mappers.dart';
 import '../providers/provider_models.dart';
+import '../remote/extras_api.dart' show VodInfoDto;
 import 'catalog_store.dart';
 import 'home_content.dart';
 import 'metadata_resolver.dart';
@@ -31,10 +32,12 @@ class PanelCatalogRepository implements CatalogRepository {
     DateTime Function()? clock,
   })  : _adapter = adapter,
         _layout = layout ?? (() => HomeLayout.empty),
+        _clock = clock ?? DateTime.now,
         _home = HomeContentResolver(store: store, panelId: panelId, clock: clock);
 
   final CatalogStore store;
   final String panelId;
+  final DateTime Function() _clock;
   final MetadataResolver? metadata;
   final ArtworkUrls artwork;
 
@@ -362,6 +365,31 @@ class PanelCatalogRepository implements CatalogRepository {
     return null;
   }
 
+  /// Movie details page info (7.3): the panel's own details (plot, cast,
+  /// director, runtime, trailer) with the global catalog's plot / backdrop /
+  /// trailer from the local metadata cache. No extra network for metadata.
+  Future<VodInfoDto?> movieInfo(String id) async {
+    final m = await store.movie(panelId, id);
+    if (m == null) return null;
+    final d = await _movieDetails(id);
+    final q = _query(_movie(m));
+    final meta = (metadata == null || q == null) ? null : (await metadata!.cached([q]))[MetadataResolver.keyOf(q)];
+    String? text(String? s) => (s == null || s.trim().isEmpty) ? null : s.trim();
+    final trailerId = text(meta?.trailerYoutube) ?? text(d?.trailerYoutubeId);
+    return VodInfoDto(
+      vodId: id,
+      plot: text(meta?.overview) ?? text(d?.plot),
+      cast: text(d?.cast),
+      director: text(d?.director),
+      genres: d?.genres ?? const [],
+      year: m.year?.toString() ?? meta?.year?.toString(),
+      durationSec: d?.durationSec,
+      rating: (meta?.rating ?? m.rating)?.toStringAsFixed(1),
+      backdropUrl: artwork.backdrop(meta?.backdropPath) ?? text(d?.backdropUrl),
+      trailer: trailerId == null ? null : 'https://www.youtube.com/watch?v=$trailerId',
+    );
+  }
+
   /// Panel details (plot, cast, runtime) once per movie per session.
   Future<ProviderMovieDetails?> _movieDetails(String id) => _details[id] ??= () async {
         try {
@@ -373,6 +401,100 @@ class PanelCatalogRepository implements CatalogRepository {
           return null;
         }
       }();
+
+  // ── Live guide (7.2) ─────────────────────────────────────────────────────
+
+  final _epgAsked = <String, DateTime>{};
+  final _epgLoads = <String, Future<List<EpgEntry>>>{};
+
+  /// Now / next for one channel: the stored guide when it still covers now,
+  /// else one short-EPG request to the panel (at most every 15 min per
+  /// channel; only for the channel the user is watching — never whole lists).
+  Future<List<EpgEntry>> liveGuide(String channelId, {int limit = 6}) {
+    final running = _epgLoads[channelId];
+    if (running != null) return running;
+    final f = _liveGuide(channelId, limit);
+    _epgLoads[channelId] = f;
+    f.whenComplete(() => _epgLoads.remove(channelId));
+    return f;
+  }
+
+  Future<List<EpgEntry>> _liveGuide(String channelId, int limit) async {
+    final now = _clock();
+    final stored = await store.epg(panelId, channelId, from: now, limit: limit);
+    if (stored.any((e) => e.isOnAt(now)) && stored.length >= 2) return stored;
+    final last = _epgAsked[channelId];
+    if (last != null && now.difference(last) < const Duration(minutes: 15)) return stored;
+    _epgAsked[channelId] = now;
+    try {
+      final c = await store.channel(panelId, channelId);
+      final a = await _adapter();
+      if (c == null || a == null) return stored;
+      final fresh = await a.shortEpg(c, limit: limit).timeout(const Duration(seconds: 15));
+      if (fresh.isEmpty) return stored;
+      await store.saveEpg(panelId, channelId, fresh);
+      unawaited(store.pruneEpg(panelId, now.subtract(const Duration(hours: 6))).catchError((_) => 0));
+      return [for (final e in fresh) if (e.end.isAfter(now)) e].take(limit).toList();
+    } catch (e) {
+      Diag.panelQuiet('EPG $channelId unavailable: ${e.runtimeType}');
+      return stored;
+    }
+  }
+
+  // ── Playback (7.6) ───────────────────────────────────────────────────────
+
+  /// Play URL for a channel, movie or episode of this panel, resolved right
+  /// before playback (Stalker links are short-lived). The video then goes
+  /// straight from the panel to the player: never through our backend.
+  /// The result holds credentials — player only, never logged.
+  /// Null when the title isn't in this panel's catalog.
+  Future<ResolvedStream?> resolvePlayback(String id, {MediaKind? kind, String? seriesId}) async {
+    final sw = Stopwatch()..start();
+    final ref = await playbackRef(id, kind: kind, seriesId: seriesId);
+    if (ref == null) {
+      Diag.event('PLAY', 'panel: ${kind?.name ?? '?'} $id not in this panel\'s catalog');
+      return null;
+    }
+    final a = await _adapter();
+    if (a == null) return null;
+    final s = await a.resolveStream(ref).timeout(const Duration(seconds: 20));
+    Diag.event('PLAY', 'panel: ${ref.kind.name} $id link ready in ${sw.elapsedMilliseconds}ms '
+        '(${s.url.scheme}, .${ref.extension ?? s.url.pathSegments.lastOrNull?.split('.').lastOrNull ?? '?'})');
+    return s;
+  }
+
+  /// The stored stream reference (no network, except an episode list that
+  /// isn't on the device yet).
+  Future<StreamRef?> playbackRef(String id, {MediaKind? kind, String? seriesId}) async {
+    final sid = (seriesId != null && seriesId.isNotEmpty) ? seriesId : _seriesOfEpisode[id];
+    if (sid != null) {
+      final ep = await _episode(sid, id);
+      if (ep != null) return ep.stream;
+    }
+    final order = switch (kind) {
+      MediaKind.live || MediaKind.sports => const [MediaKind.live, MediaKind.movie],
+      MediaKind.series => const <MediaKind>[],
+      _ => const [MediaKind.movie, MediaKind.live],
+    };
+    for (final k in order) {
+      final ref = k == MediaKind.live
+          ? (await store.channel(panelId, id))?.stream
+          : (await store.movie(panelId, id))?.stream;
+      if (ref != null) return ref;
+    }
+    return null;
+  }
+
+  Future<ProviderEpisode?> _episode(String seriesId, String episodeId) async {
+    final d = await _seriesDetails(seriesId);
+    if (d == null) return null;
+    for (final list in d.episodes.values) {
+      for (final e in list) {
+        if (e.id == episodeId) return e;
+      }
+    }
+    return null;
+  }
 
   @override
   String? knownContainerExtension(String streamId) => _ext[streamId];

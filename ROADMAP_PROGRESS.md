@@ -706,6 +706,11 @@ Phone done 2026-11-15 (implemented + unit tests; **untested on a device**). TV v
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-15 — **Adult view (user's fix, merged):** after the PIN, Movies/Series show **only** the 18+
+  packages (`adultView()`); "Hide 18+" brings the normal list back (replaces "inline among the others").
+  The user replaced `panel_catalog_repository.dart`, `adult.dart`, `catalog_browse_screen.dart`; the
+  Phase 7 methods (resolvePlayback, liveGuide, movieInfo) were re-added on top of the user's file.
+  Tests: data catalog 61 + mobile 55 pass, analyze no errors.
 - 2026-11-15 — **Phase 7 (phone)**: 7.6 panel playback, 7.1 admin Home sections, 7.2 panel EPG + Live
   reload, 7.3 movie info from panel/global cache, 7.5 word search, 7.8 Supabase sports (migration 027
   pushed), 7.9 Settings cleanup. Details in the Phase 7 section. Not yet run on a device.
