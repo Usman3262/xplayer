@@ -706,6 +706,15 @@ Phone done 2026-11-15 (implemented + unit tests; **untested on a device**). TV v
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-15 — **"Movies not showing" (Xtream World 8K line), from device logs:** the whole-list
+  `get_vod_streams` timed out 3× (20 s each) and once came back **empty after 22 s** → the sync saved
+  0 titles into all 447 movie categories and marked them synced → opening a category skipped the panel
+  ("synced, really empty"). Fixed: an empty whole-list answer for a panel with categories is a failure
+  (nothing saved/marked); a whole-list timeout/empty answer switches that kind to "load when opened"
+  for 7 days (scope `panel:slow_bulk:<kind>`, no more 20 s list requests); opening a category that is
+  empty on the device asks the panel once per session even if marked synced (repairs phones already in
+  this state). Tests: 3 unit; data 451 pass. **Verified on device:** live channels (5) and a series
+  episode play from the Xtream panel (link ≤3 ms, playing in 2–7 s).
 - 2026-11-15 — **Device logs (Phase 7 build):** **verified on a real device (LE2115, Stalker):** panel
   playback — 3 movies (one 18+) link 0.3–0.5 s, playing in 4–6 s; Live categories load when opened
   (Stalker + Xtream); panel PIN + XPlayer PIN. Fixed from the logs: "setState during build" crash in

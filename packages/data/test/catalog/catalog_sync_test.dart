@@ -49,8 +49,11 @@ class FakePanel implements ProviderAdapter {
         for (var i = 0; i < perCat; i++)
           ProviderChannel(id: '$categoryId-$i', name: 'ch', stream: StreamRef(kind: MediaKind.live, id: '$categoryId-$i'), categoryId: categoryId),
       ]);
+  /// The whole-list movie answer is `[]` (overloaded panel).
+  bool emptyMovieBulk = false;
   @override
   Future<List<ProviderMovie>> movies({String? categoryId, bool priority = false}) => _call('movie:$categoryId', () => [
+        if (!(emptyMovieBulk && categoryId == null))
         for (var i = 0; i < perCat; i++)
           ProviderMovie(id: '$categoryId-$i', name: 'mv', stream: StreamRef(kind: MediaKind.movie, id: '$categoryId-$i'),
               categoryId: categoryId, addedSec: 1000 + i),
@@ -230,6 +233,39 @@ void main() {
       panel.calls.clear();
       await syncer().sync('p', panel);
       expect(panel.calls.where((c) => !c.startsWith('cats:')), isEmpty);
+    });
+
+    test('empty whole-list answer = failure: nothing emptied or marked; categories load when opened next time', () async {
+      final panel = FakePanel(liveCats: 0, movieCats: 4, seriesCats: 0)
+        ..lists = const {MediaKind.movie: ListStrategy.bulkIfSmall};
+      // Movies already on the device from an earlier run.
+      await store.saveMovies('p', 'M1', [
+        ProviderMovie(id: 'old', name: 'Old', stream: const StreamRef(kind: MediaKind.movie, id: 'old'), categoryId: 'M1'),
+      ]);
+      panel.emptyMovieBulk = true;
+      await syncer().sync('p', panel);
+      expect(await store.syncInfo('p', 'movie:cat:M2'), isNull); // not marked "synced, empty"
+      expect((await store.movies('p', categoryId: 'M1')).map((r) => r.$1.id), ['old']); // not wiped
+      // Next run: no whole-list request; only the warm-up categories.
+      panel.calls.clear();
+      await syncer().sync('p', panel);
+      expect(panel.calls.where((c) => c.startsWith('movie:')).toList(), ['movie:M0', 'movie:M1']);
+    });
+
+    test('whole-list timeout → that kind loads when opened for a week (no 20 s requests again)', () async {
+      final panel = FakePanel(liveCats: 0, movieCats: 4, seriesCats: 0)
+        ..lists = const {MediaKind.movie: ListStrategy.bulkIfSmall}
+        ..failCats['null'] = const ProviderFailure(ProviderFailureKind.timeout, 'no answer');
+      await syncer().sync('p', panel);
+      panel.failCats.clear();
+      panel.calls.clear();
+      await syncer().sync('p', panel);
+      expect(panel.calls, isNot(contains('movie:null')));
+      expect(panel.calls.where((c) => c.startsWith('movie:')).toList(), ['movie:M0', 'movie:M1']);
+      now = now.add(const Duration(days: 8)); // a week later: try the whole list again
+      panel.calls.clear();
+      await syncer().sync('p', panel);
+      expect(panel.calls, contains('movie:null'));
     });
 
     test('bulkIfSmall: a huge panel goes category by category', () async {

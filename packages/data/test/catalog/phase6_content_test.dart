@@ -398,4 +398,15 @@ void main() {
       expect(adapter.epgCalls, 1);
     });
   });
+
+  group('category marked synced but empty on the device', () {
+    test('opening it asks the panel (once per session)', () async {
+      final adapter = FakeAdapter();
+      await store.markSynced('p', 'movie:cat:c9', at: now); // wrongly marked by a bad sync
+      final r = PanelCatalogRepository(store: store, panelId: 'p', adapter: () async => adapter, clock: () => now);
+      final page = await r.browse(kind: MediaKind.movie, categoryId: 'c9');
+      expect(page.items.map((m) => m.id), containsAll(['n1', 'n2']));
+      expect(adapter.movieCalls, ['c9 priority=true']);
+    });
+  });
 }

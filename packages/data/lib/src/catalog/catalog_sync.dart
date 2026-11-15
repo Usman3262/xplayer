@@ -244,7 +244,15 @@ class CatalogSyncer {
             return limit != null && l.length > limit ? l.sublist(0, limit) : l;
           }(),
       };
-      bool bulk(CatalogKind k) => switch (caps.listsFor(mk(k))) {
+      // Kinds whose whole-list request timed out / came back empty on this
+      // panel recently: their categories load when opened (like Stalker).
+      final slowBulk = <CatalogKind>{};
+      for (final k in order) {
+        final info = force ? null : await store.syncInfo(panelId, _slowBulkScope(k));
+        if (info != null && _clock().difference(info.syncedAt) < _slowBulkFor) slowBulk.add(k);
+      }
+      bool onDemand(CatalogKind k) => slowBulk.contains(k) || caps.listsFor(mk(k)) == ListStrategy.onDemand;
+      bool bulk(CatalogKind k) => slowBulk.contains(k) ? false : switch (caps.listsFor(mk(k))) {
             ListStrategy.bulk => limit == null,
             ListStrategy.bulkIfSmall => limit == null && (cats[k]?.length ?? 0) <= policy.bulkMaxCategories,
             _ => false,
@@ -254,14 +262,14 @@ class CatalogSyncer {
         for (final k in order)
           if (bulk(k)) (k, null) else ...lists[k]!.take(warmUp[k]!).map((c) => (k, c)),
         for (final k in order)
-          if (!bulk(k) && caps.listsFor(mk(k)) != ListStrategy.onDemand)
+          if (!bulk(k) && !onDemand(k))
             ...lists[k]!.skip(warmUp[k]!).map((c) => (k, c)),
       ];
       final bulkKinds = [for (final k in order) if (bulk(k)) k.name];
-      final onDemand = [for (final k in order) if (caps.listsFor(mk(k)) == ListStrategy.onDemand) k.name];
+      final onDemandKinds = [for (final k in order) if (onDemand(k)) k.name];
       Diag.event('SYNC', 'sync $panelId plan: ${work.length} requests'
           '${bulkKinds.isEmpty ? '' : ' (${bulkKinds.join('/')} in one request each)'}'
-          '${onDemand.isEmpty ? '' : '; ${onDemand.join('/')}: warm-up now, other categories when opened'}');
+          '${onDemandKinds.isEmpty ? '' : '; ${onDemandKinds.join('/')}: warm-up now, other categories when opened'}');
       emit(p.copyWith(phase: SyncPhase.items, done: 0, total: work.length));
 
       var next = 0;
@@ -298,6 +306,13 @@ class CatalogSyncer {
             }
             consecutiveFailures++;
             Diag.event('SYNC', 'sync $panelId $scope failed: ${f.kind.name} (${f.detail}) — skipped');
+            if (cat == null && (f.kind == ProviderFailureKind.timeout || f.kind == ProviderFailureKind.badResponse)) {
+              // The whole list is too big / slow for this panel: don't ask
+              // for it again for a week; categories load when opened.
+              await store.markSynced(panelId, _slowBulkScope(kind), at: _clock());
+              Diag.event('SYNC', 'sync $panelId ${kind.name}: whole-list request too slow for this panel → '
+                  'categories load when opened (for ${_slowBulkFor.inDays} days)');
+            }
             emit(p.copyWith(done: p.done + 1, failedCategories: p.failedCategories + 1));
             if (consecutiveFailures >= policy.maxConsecutiveFailures) {
               fatal = ProviderFailure(f.kind, 'panel not answering: $consecutiveFailures categories failed in a row');
@@ -344,6 +359,18 @@ class CatalogSyncer {
   bool _stop(String panelId) => _cancelled.containsKey(panelId);
 
   static const _cooldownScope = 'panel:cooldown';
+  static String _slowBulkScope(CatalogKind k) => 'panel:slow_bulk:${k.name}';
+  static const _slowBulkFor = Duration(days: 7);
+
+  /// A whole-list answer with no titles while the panel has categories is a
+  /// failed answer (an overloaded panel answered `[]` after 22 s, device
+  /// log 15 Nov) — never "this panel has no movies": saving it emptied all
+  /// 447 categories and marked them synced, so Movies stayed blank.
+  static void _requireItems(int count, List<ProviderCategory> cats, CatalogKind kind) {
+    if (count == 0 && cats.isNotEmpty) {
+      throw ProviderFailure(ProviderFailureKind.badResponse, 'empty ${kind.name} list for ${cats.length} categories');
+    }
+  }
 
   /// The panel stopped answering us or refuses us now (not a subscription
   /// problem): back off for a while instead of hammering it on every start.
@@ -372,6 +399,7 @@ class CatalogSyncer {
     switch (kind) {
       case CatalogKind.live:
         final items = await a.liveChannels();
+        _requireItems(items.length, cats, kind);
         for (final e in group(items, (x) => x.categoryId).entries) {
           await store.saveChannels(panelId, e.key, e.value);
         }
@@ -379,6 +407,7 @@ class CatalogSyncer {
         newest = _max(items.map((x) => x.addedSec));
       case CatalogKind.movie:
         final items = await a.movies();
+        _requireItems(items.length, cats, kind);
         for (final e in group(items, (x) => x.categoryId).entries) {
           await store.saveMovies(panelId, e.key, e.value);
         }
@@ -386,6 +415,7 @@ class CatalogSyncer {
         newest = _max(items.map((x) => x.addedSec));
       case CatalogKind.series:
         final items = await a.series();
+        _requireItems(items.length, cats, kind);
         for (final e in group(items, (x) => x.categoryId).entries) {
           await store.saveSeries(panelId, e.key, e.value);
         }

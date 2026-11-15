@@ -269,12 +269,17 @@ class PanelCatalogRepository implements CatalogRepository {
 
   final _categoryLoads = <String, Future<bool>>{};
 
+  /// Categories asked this session that really are empty on the panel.
+  final _emptyOnPanel = <String>{};
+
   /// True when the category was fetched (or another call just did).
   Future<bool> _fetchCategoryNow(MediaKind kind, String categoryId) {
     final scope = '${_kind(kind).name}:cat:$categoryId';
     return _categoryLoads[scope] ??= () async {
       try {
-        if (await store.syncInfo(panelId, scope) != null) return false; // synced, really empty
+        // Empty on the device: ask the panel once per session even if a sync
+        // marked it done (a bad whole-list answer could mark it wrongly).
+        if (_emptyOnPanel.contains(scope)) return false;
         final a = await _adapter();
         if (a == null) return false;
         final sw = Stopwatch()..start();
@@ -295,6 +300,7 @@ class PanelCatalogRepository implements CatalogRepository {
             n = items.length;
         }
         await store.markSynced(panelId, scope, at: DateTime.now(), count: n);
+        if (n == 0) _emptyOnPanel.add(scope);
         Diag.event('PANEL', 'opened $scope: $n titles fetched now (${sw.elapsedMilliseconds}ms, ahead of the sync)');
         return true;
       } catch (e) {
