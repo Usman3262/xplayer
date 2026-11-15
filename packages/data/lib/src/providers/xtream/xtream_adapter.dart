@@ -359,7 +359,8 @@ class XtreamAdapter implements ProviderAdapter {
       MediaKind.series => ('series', ref.extension ?? 'mp4'),
     };
     final prefix = _base.pathSegments.where((p) => p.isNotEmpty);
-    return _base.replace(pathSegments: [
+    // Same scheme as the API after an https → http fallback.
+    return _http.effective(_base).replace(pathSegments: [
       ...prefix,
       segment,
       credentials.username.trim(),

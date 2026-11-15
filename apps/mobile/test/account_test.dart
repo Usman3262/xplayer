@@ -113,10 +113,13 @@ void main() {
         throwsA(isA<AccountException>().having((e) => e.error, 'error', AccountError.invalid)));
   });
 
-  test('no backend configured → clear network error, no crash', () async {
+  test('no backend in this build → "not available" (not "no internet")', () async {
     AccountService.useAuth(null);
     // Backend is not initialised in tests → no Supabase client.
-    await expectLater(AccountService.signIn('a@b.co', 'x'), throwsA(isA<AccountException>()));
+    await expectLater(AccountService.signIn('a@b.co', 'x'),
+        throwsA(isA<AccountException>().having((e) => e.error, 'error', AccountError.notConfigured)));
+    await expectLater(AccountService.signUp('a@b.co', 'password1'),
+        throwsA(isA<AccountException>().having((e) => e.error, 'error', AccountError.notConfigured)));
   });
 
   test('offer shown once, never when signed in / required / disabled', () async {

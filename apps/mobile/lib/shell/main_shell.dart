@@ -82,7 +82,7 @@ class _MainShellState extends ConsumerState<MainShell> {
     // screen instead of closing the app.
     if (ref.read(demoModeProvider)) {
       exitDemo(ref);
-      context.go('/auth/welcome');
+      context.go('/connect');
       return;
     }
     if (_exitDialogOpen || !mounted) return;

@@ -10,10 +10,11 @@ Spec: `new-platform.md` · Rules: `CLAUDE.md` · App "where to change": `XPLAYER
 ---
 
 ## ▶ NEXT
-**Phase 6 · Step 6.1 — Local catalog database (phone; data package):** Drift DB for categories, channels,
-movies, series, episodes, EPG window and per-panel sync cursors; built for big panels (trial line: 57k live
-/ 187k movies / 50k series) → per-category storage, indexed queries, no whole-catalog loads in memory.
-**TV work is paused by the user (5.6b and all TV screens) — phone + admin + data only until told.**
+**Phase 6 · Step 6.2 — Background catalog sync (phone):** per panel: categories first (fast Home), then
+category-by-category items into `CatalogStore` (concurrency from admin, resumable via `sync_state`,
+re-sync after admin `cache.catalog_ttl_hours`, "new since last time" by `added`), EPG window with
+`cache.epg_retention_hours` pruning, progress for the UI, never blocking the screen.
+**TV still paused by the user.**
 
 ## Waiting on you
 - [ ] **Disk space: C: has ~1.1 GB free.** Needed: `npm install` in `apps/admin` (typecheck/lint the
@@ -538,7 +539,20 @@ role has sports.read without sports.write).
   sync (Phase 8), Google/Apple sign-in (not enabled in the project).
 
 ## Phase 6 — Catalog, cache, sync
-- [ ] 6.1 Drift local DB: categories, channels, movies, series, episodes, EPG window, sync cursors.
+- [x] 6.1 Drift local DB: categories, channels, movies, series, episodes, EPG window, sync cursors.
+  *Implemented:* `packages/data/lib/src/catalog/` — `catalog_db.dart` (Drift, schema v1, WAL; tables
+  categories / channels / movies / series / episodes / epg / sync_state, all keyed by panel; indexes:
+  by category+order, by `added` (newest rails from the panel), by tmdb id, episodes by series/season/
+  number, EPG by end time) and `catalog_store.dart` (`CatalogStore`: save one category per transaction
+  (removed items disappear), keyset pages, newest movies/series keyset across equal dates, series
+  details saved when opened, EPG window + prune, sync bookkeeping, counts, `clearPanel`). No
+  credentials / stream URLs stored (only the play command Stalker/M3U need). Runs on a background
+  isolate (`drift_flutter`). Phone: `core/catalog.dart` (`CatalogService`), a removed panel's catalog is
+  deleted (`ConnectionManager.onRemoved`). Admin controls already exist: `cache.catalog_ttl_hours`,
+  `cache.epg_retention_hours` (Versions → Cache & refresh) — used by the sync in 6.2.
+  *Tested:* 9 store tests on in-memory SQLite (replace-per-category, paging, newest keyset, series
+  details, EPG window/prune, sync info, panel isolation, **60k movies: write 1.3 s, page + newest read
+  3 ms**) + removal hook test → data 100/100; mobile 47/47; TV analyze: no errors (TV untouched).
 - [ ] 6.2 Incremental sync per connection (hashes/counts/timestamps), background, resumable.
 - [ ] 6.3 Enrichment: match provider items → global catalog (tmdb id / title+year),
   missing metadata via `metadata-tmdb`; admin overrides win.
@@ -618,6 +632,19 @@ role has sports.read without sports.write).
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-15 — Device logs (user): **Xtream works**; **M3U failed: `https://pro.business-cloud-8.ru/get.php`
+  → Connection refused** (no https on that host). Fix: `ProviderHttp` retries an https panel URL once
+  over http when https is refused / TLS fails, remembers the host, stream URLs follow (Xtream / M3U /
+  Stalker). 3 tests. Account "can't reach XPlayer": Supabase answers normally from PC
+  (`invalid_credentials`); added `[BACKEND]` (configured? init ok?) and `[ACCOUNT]` (real Supabase error
+  code / exception) logs + a separate message when the build has no backend ("Accounts are not
+  available in this version") instead of "no internet". Likely cause: app run without
+  `--dart-define-from-file=../../env/app.json` — to confirm from the user's `[BACKEND]` line.
+  Data 94/94 provider tests, mobile 47/47.
+- 2026-11-15 — Settings → Sign out now = device sign-out: removes all panels (+ sealed credentials,
+  + their local catalog), signs out the app account (also offline), clears old tokens, leaves demo →
+  **Choose your panel**. All old `/auth/welcome` jumps → `/connect`. Tests: `sign_out_test.dart` 2.
+- 2026-11-15 — Step 6.1 done: local catalog DB (Drift) + store; 60k movies write 1.3 s / read 3 ms.
 - 2026-11-15 — **First real-device run (OnePlus LE2115, Android 14, user):** Stalker connects; Xtream and
   M3U fail with "network" (no detail). PC → same servers OK (Neo HTTP 200, trial HTTP 200), cleartext is
   allowed in the Android config ⇒ cause unknown yet. Added `[PANEL]` logs (`Diag.panel`): every panel

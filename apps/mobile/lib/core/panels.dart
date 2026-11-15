@@ -2,6 +2,7 @@ import 'package:data/data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'catalog.dart';
 import 'remote_config.dart';
 import 'session_controller.dart';
 
@@ -13,8 +14,10 @@ class PanelsService {
 
   static ConnectionManager? _manager;
 
-  static ConnectionManager get manager =>
-      _manager ??= ConnectionManager(config: () => RemoteConfigService.current);
+  static ConnectionManager get manager => _manager ??= ConnectionManager(
+        config: () => RemoteConfigService.current,
+        onRemoved: CatalogService.clearPanel,
+      );
 
   /// Test hook: use a manager with fake adapters / storage.
   @visibleForTesting

@@ -20,7 +20,7 @@ class AccountUser {
 }
 
 /// Why sign-in / sign-up failed → one message each (AccountErrors.text).
-enum AccountError { invalid, notConfirmed, exists, weakPassword, badEmail, rateLimit, signupOff, network, generic }
+enum AccountError { invalid, notConfirmed, exists, weakPassword, badEmail, rateLimit, signupOff, network, notConfigured, generic }
 
 class AccountException implements Exception {
   const AccountException(this.error);
@@ -83,10 +83,14 @@ class SupabaseAccountAuth implements AccountAuth {
     try {
       return await f();
     } on AuthException catch (e) {
-      throw AccountException(mapAuthError(e.code, e.statusCode, e.message));
+      final mapped = mapAuthError(e.code, e.statusCode, e.message);
+      debugPrint('[ACCOUNT] Supabase auth error: ${e.runtimeType} code=${e.code} status=${e.statusCode} '
+          'message="${e.message}" → ${mapped.name}');
+      throw AccountException(mapped);
     } on AccountException {
       rethrow;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('[ACCOUNT] request failed (treated as no internet): ${e.runtimeType}: $e');
       throw const AccountException(AccountError.network);
     }
   }
@@ -134,6 +138,7 @@ extension AccountErrorText on AccountError {
         AccountError.rateLimit => c.authErrRateLimit,
         AccountError.signupOff => c.authErrSignupOff,
         AccountError.network => c.authErrNetwork,
+        AccountError.notConfigured => c.authErrNotConfigured,
         AccountError.generic => c.authErrGeneric,
       };
 }
@@ -185,17 +190,24 @@ class AccountService {
 
   static bool get signedIn => user.value != null;
 
-  static Future<void> signIn(String email, String password) async {
+  static AccountAuth _require() {
     final a = auth;
-    if (a == null) throw const AccountException(AccountError.network);
+    if (a == null) {
+      debugPrint('[ACCOUNT] no backend in this build (Supabase not configured / init failed)');
+      throw const AccountException(AccountError.notConfigured);
+    }
+    return a;
+  }
+
+  static Future<void> signIn(String email, String password) async {
+    final a = _require();
     await a.signIn(email.trim(), password);
     user.value = a.current;
   }
 
   /// Returns true when the user must confirm the email before signing in.
   static Future<bool> signUp(String email, String password, {String? displayName}) async {
-    final a = auth;
-    if (a == null) throw const AccountException(AccountError.network);
+    final a = _require();
     if (!_emailOk(email)) throw const AccountException(AccountError.badEmail);
     if (password.length < 8) throw const AccountException(AccountError.weakPassword);
     final needsConfirm = await a.signUp(email.trim(), password, displayName: displayName);
@@ -203,14 +215,18 @@ class AccountService {
     return needsConfirm;
   }
 
+  /// Always signs out on this device, even offline (the server-side revoke
+  /// may fail; the local session is dropped either way).
   static Future<void> signOut() async {
-    await auth?.signOut();
-    user.value = null;
+    try {
+      await auth?.signOut();
+    } finally {
+      user.value = null;
+    }
   }
 
   static Future<void> sendPasswordReset(String email) async {
-    final a = auth;
-    if (a == null) throw const AccountException(AccountError.network);
+    final a = _require();
     if (!_emailOk(email)) throw const AccountException(AccountError.badEmail);
     await a.sendPasswordReset(email.trim());
   }
@@ -223,6 +239,12 @@ class AccountService {
     if (!p.accountsOn || p.required || signedIn) return false;
     final prefs = await SharedPreferences.getInstance();
     return !(prefs.getBool(_offerKey) ?? false);
+  }
+
+  /// After a full device sign-out the offer may show again.
+  static Future<void> resetOffer() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_offerKey);
   }
 
   static Future<void> markOffered() async {

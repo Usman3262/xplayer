@@ -17,12 +17,20 @@ class Backend {
 
   /// Safe to call once at startup; never throws.
   static Future<void> init() async {
-    if (!configured || _ready) return;
+    if (_ready) return;
+    if (!configured) {
+      // Accounts + admin config need these. Run with
+      // --dart-define-from-file=../../env/app.json
+      debugPrint('[BACKEND] NOT CONFIGURED: SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY missing '
+          '(run with --dart-define-from-file=../../env/app.json). Accounts and admin config are off.');
+      return;
+    }
     try {
       await Supabase.initialize(url: url, publishableKey: publishableKey);
       _ready = true;
+      debugPrint('[BACKEND] ready: ${Uri.tryParse(url)?.host ?? '?'}');
     } catch (e) {
-      debugPrint('[Backend] Supabase init failed: $e');
+      debugPrint('[BACKEND] Supabase init FAILED: ${e.runtimeType}: $e');
     }
   }
 

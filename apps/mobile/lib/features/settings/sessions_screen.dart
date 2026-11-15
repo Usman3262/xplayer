@@ -102,7 +102,7 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
         title: copy.signedOutTitle,
         message: copy.allSessionsRevoked,
       );
-      if (mounted) context.go('/auth/welcome');
+      if (mounted) context.go('/connect');
     } catch (e) {
       if (!mounted) return;
       await ActionFeedback.error(

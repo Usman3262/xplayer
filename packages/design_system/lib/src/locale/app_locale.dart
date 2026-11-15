@@ -597,9 +597,9 @@ class AppCopy {
   String get signOutConfirmTitle =>
       _t('Sign out?', 'تسجيل الخروج؟', 'سائن آؤٹ؟');
   String get signOutConfirmMessage => _t(
-    'You will return to the sign-in screen on this device.',
-    'ستعود إلى شاشة تسجيل الدخول على هذا الجهاز.',
-    'آپ اس آلے پر سائن اِن اسکرین پر واپس جائیں گے۔',
+    'This removes your panels and signs you out on this device. You will start again at "Choose your panel".',
+    'سيؤدي هذا إلى حذف لوحاتك وتسجيل خروجك على هذا الجهاز. ستبدأ من جديد من "اختر لوحتك".',
+    'This removes your panels and signs you out on this device. You will start again at "Choose your panel".',
   );
   String get offlineDownloadsSoon => _t(
     'Offline saves coming soon',
@@ -2894,6 +2894,7 @@ class AppCopy {
   String get authErrRateLimit => _t('Too many attempts. Wait a few minutes and try again.', 'محاولات كثيرة. انتظر بضع دقائق وحاول مجددًا.', 'Too many attempts. Wait a few minutes and try again.');
   String get authErrSignupOff => _t('New accounts are closed right now.', 'إنشاء الحسابات الجديدة متوقف حاليًا.', 'New accounts are closed right now.');
   String get authErrNetwork => _t("Can't reach ${AppBrand.name} right now. Check your internet.", 'تعذّر الوصول إلى ${AppBrand.name} الآن. تحقق من الإنترنت.', "Can't reach ${AppBrand.name} right now. Check your internet.");
+  String get authErrNotConfigured => _t('Accounts are not available in this version of the app.', 'الحسابات غير متاحة في هذا الإصدار من التطبيق.', 'Accounts are not available in this version of the app.');
   String get authErrGeneric => _t('Something went wrong. Try again.', 'حدث خطأ. حاول مجددًا.', 'Something went wrong. Try again.');
   String get accountRowTitle => _t('${AppBrand.name} account', 'حساب ${AppBrand.name}', '${AppBrand.name} account');
   String get accountNotSignedIn => _t('Not signed in', 'غير مسجّل الدخول', 'Not signed in');

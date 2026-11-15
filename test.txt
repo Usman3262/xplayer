@@ -1,0 +1,36 @@
+I haven't found the cause yet; the phone log only says [Connect] failed: network. I've added detailed logs so your next run will show the real reason. What I ruled out:
+
+Both servers answer. From this PC, Neo and your trial line both log in normally (HTTP 200). Neo's block on your home IP has lifted.
+Android allows plain http. Your Stalker portal is http too and it works.
+So the problem is either in how the URL was typed or something on the phone's network. I can't tell which until I see the new log lines.
+
+New [PANEL] lines (they never contain usernames, passwords or MACs; a test checks this):
+
+What the app understood from the form:
+
+[PANEL] connect xtream → server http://host:port, username 8 chars, password 10 chars
+This also flags an invalid URL, or spaces at the start or end of a password.
+Every request:
+
+[PANEL] GET http://host:port/player_api.php → HTTP 200 in 512ms, 1.2 KB, starts "{"user_info":…"
+The real network error, instead of just "network":
+
+[PANEL] GET http://host/player_api.php → NETWORK ERROR after 30ms: ClientException: Failed host lookup: 'host'
+It also shows connection refused/reset, TLS problems, or "no answer within 8000ms".
+Why a login was refused (field names only): auth=0, status=Expired, …
+M3U: whether the file is a real playlist (#EXTM3U yes/no) and how many channels, movies and series it holds.
+Stalker: which address it used and the profile status.
+Removed noise: the [API] … LOCAL miss, [TokenStore] read miss, [ApiEndpoints] and SPORTS_DATA lines came from the old backend. They're switched off now (DiagConfig.legacyBackend).
+
+Run it and show only the useful lines (PowerShell):
+
+
+cd c:\dev\crunch4k-test\apps\mobile
+flutter run --dart-define-from-file=../../env/app.json 2>&1 | Select-String -Pattern '\[PANEL\]|\[ERR\]'
+Then try Xtream once and M3U once, and paste the [PANEL] lines here.
+
+Two quick things to double-check meanwhile:
+
+For the trial line, the server must be a real address like http://xplayer.wd.business-cloud-8.ru. Writing * literally won't work.
+For M3U: if you used the panel's own get.php?...type=m3u link, both of your panels block that link (we saw code 884). It should then say "This panel doesn't allow this login type", not "network". The logs will tell us which case it is.
+Checks: provider tests 90/90 (including the new log-safety tests), analyze clean. I noted this device run in the roadmap.

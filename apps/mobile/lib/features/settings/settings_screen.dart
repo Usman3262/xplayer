@@ -12,6 +12,7 @@ import '../../core/remote_config.dart';
 import '../../core/providers.dart';
 import '../../core/account.dart';
 import '../../core/panels.dart';
+import '../../core/sign_out.dart';
 import '../../core/session_controller.dart';
 import '../../core/app_log.dart';
 import '../../core/ui_sound.dart';
@@ -419,7 +420,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onPressed: () {
                   playUiTap(ref);
                   exitDemo(ref);
-                  context.go('/auth/welcome');
+                  context.go('/connect');
                 },
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.cyan,
@@ -442,8 +443,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     destructive: true,
                   );
                   if (!ok || !context.mounted) return;
-                  await ref.read(sessionProvider.notifier).signOut();
-                  if (context.mounted) context.go('/auth/welcome');
+                  await signOutDevice(ref);
+                  if (context.mounted) context.go('/connect');
                 },
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.danger,

@@ -32,6 +32,7 @@ class ConnectionManager {
     ProviderAdapter Function(ProviderCredentials)? createAdapter,
     RemoteConfig Function()? config,
     DateTime Function()? clock,
+    this.onRemoved,
   })  : _store = store ?? ConnectionStore(),
         _create = createAdapter ?? ProviderAdapterFactory.create,
         _config = config ?? (() => RemoteConfig.empty),
@@ -41,6 +42,9 @@ class ConnectionManager {
   final ProviderAdapter Function(ProviderCredentials) _create;
   final RemoteConfig Function() _config;
   final DateTime Function() _clock;
+
+  /// Called after a panel is removed (e.g. delete its local catalog).
+  final Future<void> Function(String panelId)? onRemoved;
 
   /// Current panels (primary first). Screens listen to this.
   final ValueNotifier<List<PanelConnection>> connections = ValueNotifier(const []);
@@ -241,6 +245,11 @@ class ConnectionManager {
     var list = [for (final x in connections.value) if (x.id != id) x];
     if (c.isPrimary) list = _promoteNext(list);
     await _persist(list);
+    try {
+      await onRemoved?.call(id);
+    } catch (e) {
+      Diag.panel('cleanup after removing panel failed: ${e.runtimeType}');
+    }
   }
 
   /// Catalog sync finished (Phase 6).

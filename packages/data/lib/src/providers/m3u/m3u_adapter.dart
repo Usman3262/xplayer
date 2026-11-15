@@ -133,7 +133,7 @@ class M3uAdapter implements ProviderAdapter {
     final url = ref.command == null ? null : Uri.tryParse(ref.command!);
     if (url == null) throw const ProviderFailure(ProviderFailureKind.badResponse, 'no stream url');
     final c = _catalog;
-    return ResolvedStream(url: url, headers: c?.headers['${ref.kind.name}:${ref.id}'] ?? const {});
+    return ResolvedStream(url: _http.effective(url), headers: c?.headers['${ref.kind.name}:${ref.id}'] ?? const {});
   }
 
   @override

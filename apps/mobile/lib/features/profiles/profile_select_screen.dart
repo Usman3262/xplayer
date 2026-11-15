@@ -185,7 +185,7 @@ class _ProfileSelectScreenState extends ConsumerState<ProfileSelectScreen> {
                   );
                   if (!ok || !context.mounted) return;
                   await ref.read(sessionProvider.notifier).signOut();
-                  if (context.mounted) context.go('/auth/welcome');
+                  if (context.mounted) context.go('/connect');
                 },
                 child: Text(
                   copy.signOutShort,

@@ -84,3 +84,5 @@ export 'src/providers/stalker/stalker_adapter.dart';
 export 'src/providers/connections/panel_connection.dart';
 export 'src/providers/connections/connection_store.dart';
 export 'src/providers/connections/connection_manager.dart';
+export 'src/catalog/catalog_db.dart' show CatalogDb;
+export 'src/catalog/catalog_store.dart';

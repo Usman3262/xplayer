@@ -73,14 +73,35 @@ class ProviderHttp {
     return decodeJson(body);
   }
 
+  /// Hosts where https failed (refused / TLS) and plain http worked. Many
+  /// IPTV panels only run http, and users often paste "https://" by habit.
+  final Set<String> _httpOnlyHosts = {};
+
+  /// [uri] with the scheme that works for its host (http after a fallback).
+  /// Adapters use it for stream URLs too.
+  Uri effective(Uri uri) =>
+      uri.scheme == 'https' && _httpOnlyHosts.contains(uri.host) ? uri.replace(scheme: 'http', port: _httpPort(uri)) : uri;
+
+  /// https on the default port 443 → http on 80; an explicit port is kept.
+  static int? _httpPort(Uri u) => u.hasPort && u.port != 443 ? u.port : null;
+
   /// GET [uri] as text (M3U playlists, XMLTV).
   Future<String> getText(Uri uri, {Map<String, String> headers = const {}, bool auth = false}) async {
     final timeout = auth ? limits.authTimeout : limits.requestTimeout;
+    uri = effective(uri);
     var attempt = 0;
     while (true) {
       try {
         return await _slots.run(() => _once(uri, headers, timeout));
       } on ProviderFailure catch (f) {
+        if (uri.scheme == 'https' && _isHttpsProblem(f)) {
+          final plain = uri.replace(scheme: 'http', port: _httpPort(uri));
+          Diag.panel('https failed (${f.detail}) → trying http: ${Diag.panelUrl(plain)}');
+          final text = await _slots.run(() => _once(plain, headers, timeout));
+          _httpOnlyHosts.add(uri.host);
+          Diag.panel('http works for ${uri.host}: using http for this panel');
+          return text;
+        }
         // Login answers fast or fails fast: no retries on the auth call.
         if (auth || !f.isRetryable || attempt >= limits.retries || _closed) rethrow;
         attempt++;
@@ -89,6 +110,19 @@ class ProviderHttp {
         await Future<void>.delayed(wait);
       }
     }
+  }
+
+  /// The https side is the problem (nothing listening on 443, TLS / cert
+  /// failure) — worth one try over http before giving up.
+  static bool _isHttpsProblem(ProviderFailure f) {
+    if (f.kind != ProviderFailureKind.network) return false;
+    final d = f.detail.toLowerCase();
+    return d.contains('refused') ||
+        d.contains('handshake') ||
+        d.contains('certificate') ||
+        d.contains('tls') ||
+        d.contains('ssl') ||
+        d.contains('reset by peer');
   }
 
   Future<String> _once(Uri uri, Map<String, String> headers, Duration timeout) async {

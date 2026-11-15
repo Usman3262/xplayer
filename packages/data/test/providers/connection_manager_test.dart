@@ -238,4 +238,16 @@ void main() {
       expect(ProviderAdapterFactory.supports(k), isTrue, reason: k.name);
     }
   });
+
+  test('removing a panel runs the cleanup hook (its local catalog is deleted)', () async {
+    final removed = <String>[];
+    final m = ConnectionManager(
+      store: ConnectionStore(secrets: box, random: Random(3)),
+      createAdapter: (c) => FakeAdapter(c, ok),
+      onRemoved: (id) async => removed.add(id),
+    );
+    final a = await m.connect(neo);
+    await m.remove(a.id);
+    expect(removed, [a.id]);
+  });
 }

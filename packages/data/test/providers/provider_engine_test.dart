@@ -354,4 +354,45 @@ void main() {
       expect(lines.where((l) => l.contains('LOCAL miss') || l.contains('SPORTS_DATA')), isEmpty);
     });
   });
+
+  group('https → http fallback (panels without https)', () {
+    test('refused on https → same request over http works; host remembered; streams follow', () async {
+      final asked = <String>[];
+      final h = ProviderHttp(client: MockClient((r) async {
+        asked.add('${r.url.scheme}://${r.url.host}${r.url.hasPort ? ':${r.url.port}' : ''}${r.url.path}');
+        if (r.url.scheme == 'https') throw http.ClientException('Connection refused', r.url);
+        return http.Response('#EXTM3U http://x/1.ts', 200);
+      }), backoffBase: Duration.zero);
+      final t = await h.getText(Uri.parse('https://pro.example/get.php?username=u&password=p&type=m3u_plus'));
+      expect(t, startsWith('#EXTM3U'));
+      expect(asked, ['https://pro.example/get.php', 'http://pro.example/get.php']);
+      // Next call goes straight to http.
+      await h.getText(Uri.parse('https://pro.example/other'));
+      expect(asked.last, 'http://pro.example/other');
+      expect(h.effective(Uri.parse('https://pro.example:8443/live/u/p/1.ts')).toString(), 'http://pro.example:8443/live/u/p/1.ts');
+      expect(h.effective(Uri.parse('https://elsewhere.example/a')).scheme, 'https');
+    });
+
+    test('Xtream stream URLs use http after the API fell back', () async {
+      final a = XtreamAdapter(
+        const XtreamCredentials(server: 'https://panel.example', username: 'u', password: 'p'),
+        http: ProviderHttp(client: MockClient((r) async {
+          if (r.url.scheme == 'https') throw http.ClientException('HandshakeException: wrong version number', r.url);
+          return http.Response('{"user_info":{"auth":1,"status":"Active"}}', 200);
+        })),
+      );
+      await a.authenticate();
+      expect(a.streamUri(const StreamRef(kind: MediaKind.live, id: '5')).toString(), 'http://panel.example/live/u/p/5.ts');
+    });
+
+    test('a real "not found" on https is not retried over http', () async {
+      var calls = 0;
+      final h = ProviderHttp(client: MockClient((r) async {
+        calls++;
+        return http.Response('nope', 404);
+      }));
+      await expectLater(h.getText(Uri.parse('https://p.example/x')), throwsA(isA<ProviderFailure>()));
+      expect(calls, 1);
+    });
+  });
 }

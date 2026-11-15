@@ -480,7 +480,8 @@ class StalkerAdapter implements ProviderAdapter {
       'disable_ad': '0',
       'download': '0',
     }));
-    return cleanLink(jsonStr(js['cmd']));
+    final link = cleanLink(jsonStr(js['cmd']));
+    return link == null ? null : _http.effective(link);
   }
 
   /// "ffmpeg http://…" / "auto http://…" → the URL.

@@ -64,7 +64,7 @@ class DemoSignInScreen extends ConsumerWidget {
                   onPressed: () {
                     playUiTap(ref);
                     exitDemo(ref);
-                    context.go('/auth/welcome');
+                    context.go('/connect');
                   },
                 ),
               ],
