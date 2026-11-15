@@ -2817,6 +2817,60 @@ class AppCopy {
     'کڈز پروفائل میں جانے پر PIN مانگیں',
   );
 
+  // ── Panels: "Choose your panel", connect form, My panels (Phase 5.6) ──
+  String get choosePanelTitle => _t('Choose your panel', 'اختر لوحتك', 'Choose your panel');
+  String get choosePanelBody => _t('Connect the IPTV service you already have. Your login stays on this device.', 'اربط خدمة IPTV التي لديك. بيانات الدخول تبقى على هذا الجهاز.', 'Connect the IPTV service you already have. Your login stays on this device.');
+  String get panelXtream => _t('Xtream Codes', 'Xtream Codes', 'Xtream Codes');
+  String get panelXtreamDesc => _t('Server URL, username and password', 'رابط الخادم واسم المستخدم وكلمة المرور', 'Server URL, username and password');
+  String get panelM3u => _t('M3U playlist', 'قائمة M3U', 'M3U playlist');
+  String get panelM3uDesc => _t('Playlist link', 'رابط قائمة التشغيل', 'Playlist link');
+  String get panelStalker => _t('Stalker portal (MAC)', 'بوابة Stalker (MAC)', 'Stalker portal (MAC)');
+  String get panelStalkerDesc => _t('Portal URL and MAC address', 'رابط البوابة وعنوان MAC', 'Portal URL and MAC address');
+  String get fieldServerUrl => _t('Server URL', 'رابط الخادم', 'Server URL');
+  String get fieldUsername => _t('Username', 'اسم المستخدم', 'Username');
+  String get fieldPassword => _t('Password', 'كلمة المرور', 'Password');
+  String get fieldPlaylistUrl => _t('Playlist URL', 'رابط قائمة التشغيل', 'Playlist URL');
+  String get fieldEpgUrl => _t('EPG URL (optional)', 'رابط دليل البرامج (اختياري)', 'EPG URL (optional)');
+  String get fieldPortalUrl => _t('Portal URL', 'رابط البوابة', 'Portal URL');
+  String get fieldMac => _t('MAC address', 'عنوان MAC', 'MAC address');
+  String get fieldPanelName => _t('Name (optional)', 'الاسم (اختياري)', 'Name (optional)');
+  String get macDeviceHint => _t('This is your device MAC. Give it to your provider, or type the MAC they registered. It keeps working on any Wi-Fi.', 'هذا عنوان MAC لجهازك. أعطه لمزوّدك أو اكتب العنوان المسجّل لديه. يعمل على أي شبكة Wi-Fi.', 'This is your device MAC. Give it to your provider, or type the MAC they registered. It keeps working on any Wi-Fi.');
+  String get macCopied => _t('MAC copied', 'تم نسخ عنوان MAC', 'MAC copied');
+  String get connectPanel => _t('Connect', 'اتصال', 'Connect');
+  String get panelConnected => _t('Connected', 'تم الاتصال', 'Connected');
+  String get errFieldRequired => _t('Required', 'مطلوب', 'Required');
+  String get errInvalidUrl => _t('Enter a valid link (http://…)', 'أدخل رابطًا صحيحًا (http://…)', 'Enter a valid link (http://…)');
+  String get errInvalidMac => _t('MAC looks like 00:1A:79:12:34:56', 'عنوان MAC بالشكل 00:1A:79:12:34:56', 'MAC looks like 00:1A:79:12:34:56');
+  String get panelErrUnauthorized => _t('Wrong login, or this line is not active. Check the details from your provider.', 'بيانات الدخول خاطئة أو الاشتراك غير مفعّل. تحقق من البيانات من مزوّدك.', 'Wrong login, or this line is not active. Check the details from your provider.');
+  String get panelErrExpired => _t('This subscription has expired. Renew it with your provider.', 'انتهى هذا الاشتراك. جدّده لدى مزوّدك.', 'This subscription has expired. Renew it with your provider.');
+  String get panelErrBanned => _t('This line is blocked by the provider.', 'هذا الخط محظور من المزوّد.', 'This line is blocked by the provider.');
+  String get panelErrNetwork => _t("Can't reach the server. Check the link and your internet.", 'تعذّر الوصول إلى الخادم. تحقق من الرابط والإنترنت.', "Can't reach the server. Check the link and your internet.");
+  String get panelErrTimeout => _t('The server took too long to answer. Try again.', 'الخادم تأخر في الرد. حاول مرة أخرى.', 'The server took too long to answer. Try again.');
+  String get panelErrBusy => _t('The server is busy. Wait a moment and try again.', 'الخادم مشغول. انتظر قليلًا وحاول مجددًا.', 'The server is busy. Wait a moment and try again.');
+  String get panelErrServer => _t('The server has a problem right now. Try again later.', 'الخادم يواجه مشكلة الآن. حاول لاحقًا.', 'The server has a problem right now. Try again later.');
+  String get panelErrBadResponse => _t("This link didn't answer like a panel. Check the link.", 'هذا الرابط لم يستجب كلوحة. تحقق من الرابط.', "This link didn't answer like a panel. Check the link.");
+  String get panelErrUnsupported => _t("This panel doesn't allow this login type. Try the Xtream login.", 'هذه اللوحة لا تسمح بنوع الدخول هذا. جرّب دخول Xtream.', "This panel doesn't allow this login type. Try the Xtream login.");
+  String get panelErrTypeOff => _t('This panel type is not available right now.', 'نوع اللوحة هذا غير متاح حاليًا.', 'This panel type is not available right now.');
+  String panelErrTooMany(int n) => _t('You can save up to $n panels. Remove one first.', 'يمكنك حفظ $n لوحات كحد أقصى. احذف واحدة أولًا.', 'You can save up to $n panels. Remove one first.');
+  String get myPanels => _t('My panels', 'لوحاتي', 'My panels');
+  String get addPanel => _t('Add panel', 'إضافة لوحة', 'Add panel');
+  String get mainPanel => _t('Main', 'رئيسية', 'Main');
+  String get makeMainPanel => _t('Make main panel', 'اجعلها اللوحة الرئيسية', 'Make main panel');
+  String get checkPanelNow => _t('Check now', 'تحقق الآن', 'Check now');
+  String get panelTurnOff => _t('Turn off', 'إيقاف', 'Turn off');
+  String get panelTurnOn => _t('Turn on', 'تشغيل', 'Turn on');
+  String get removePanelConfirm => _t('Remove this panel and its login from this device?', 'حذف هذه اللوحة وبيانات دخولها من هذا الجهاز؟', 'Remove this panel and its login from this device?');
+  String get panelStatusActive => _t('Active', 'نشط', 'Active');
+  String get panelStatusExpired => _t('Expired', 'منتهي', 'Expired');
+  String get panelStatusRefused => _t('Login refused', 'الدخول مرفوض', 'Login refused');
+  String get panelStatusUnreachable => _t('Unreachable', 'غير متاح', 'Unreachable');
+  String get panelStatusOff => _t('Off', 'متوقف', 'Off');
+  String get panelStatusChecking => _t('Checking…', 'جارٍ التحقق…', 'Checking…');
+  String get panelStatusCheckDetails => _t('Check details', 'تحقق من البيانات', 'Check details');
+  String panelExpiresOn(String date) => _t('Expires $date', 'ينتهي $date', 'Expires $date');
+  String get panelNoExpiry => _t('No expiry date', 'بدون تاريخ انتهاء', 'No expiry date');
+  String get panelsEmpty => _t('No panels yet. Add the IPTV service you use.', 'لا توجد لوحات بعد. أضف خدمة IPTV التي تستخدمها.', 'No panels yet. Add the IPTV service you use.');
+
   List<(String, String)> get appearanceThemesList => [
     (themeCinematic, themeCinematicDesc),
     (themeMidnight, themeMidnightDesc),

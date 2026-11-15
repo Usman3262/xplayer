@@ -81,3 +81,6 @@ export 'src/providers/xtream/xtream_adapter.dart';
 export 'src/providers/m3u/m3u_parser.dart';
 export 'src/providers/m3u/m3u_adapter.dart';
 export 'src/providers/stalker/stalker_adapter.dart';
+export 'src/providers/connections/panel_connection.dart';
+export 'src/providers/connections/connection_store.dart';
+export 'src/providers/connections/connection_manager.dart';

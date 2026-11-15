@@ -13,6 +13,7 @@ import '../../core/app_update.dart';
 import '../../core/app_update_provider.dart';
 import '../../core/launch_sound.dart';
 import '../../core/providers.dart';
+import '../../core/panels.dart';
 import '../../core/session_controller.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -164,9 +165,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     if (!mounted) return;
     final next = !session.onboardingDone
         ? '/onboarding'
-        : !session.isLoggedIn
-        ? '/auth/welcome'
-        : !session.profileSelected
+        : !PanelsService.hasPanel
+        ? '/connect'
+        : session.isLoggedIn && !session.profileSelected
         ? '/profiles'
         : '/home';
     AppLog.nav('splash→next', to: next);

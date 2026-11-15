@@ -21,6 +21,7 @@ import 'core/library_controller.dart';
 import 'core/downloads_controller.dart';
 import 'core/backend.dart';
 import 'core/providers.dart';
+import 'core/panels.dart';
 import 'core/remote_config.dart';
 import 'core/screen_record_protect.dart';
 import 'core/session_controller.dart';
@@ -58,6 +59,7 @@ Future<void> main() async {
   // (instant, no network); the fresh one arrives in the background.
   await Backend.init();
   await RemoteConfigService.init(appVersion: packageInfo.version);
+  await PanelsService.init();
   runApp(const ProviderScope(child: MobileRootApp()));
 }
 

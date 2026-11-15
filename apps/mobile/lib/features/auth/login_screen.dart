@@ -81,7 +81,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          const _LoginGlow(),
+          const LoginGlow(),
           SafeArea(
             child: Column(
               children: [
@@ -89,7 +89,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                   child: Row(
                     children: [
-                      _RoundIconBtn(
+                      LoginRoundIconBtn(
                         icon: const AppBackIcon(
                           size: 18,
                           style: AppBackIconStyle.chevron,
@@ -157,7 +157,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const Spacer(),
                       // Task #143 #5: TV login option in top bar (not below form).
-                      _RoundIconBtn(
+                      LoginRoundIconBtn(
                         icon: const Icon(Icons.tv_rounded),
                         onTap: () {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -166,7 +166,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         },
                       ),
                       const SizedBox(width: 8),
-                      _RoundIconBtn(
+                      LoginRoundIconBtn(
                         icon: const Icon(Icons.help_outline_rounded),
                         onTap: () => _showLoginHelp(context, copy),
                       ),
@@ -223,18 +223,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 20),
-                                _FieldLabel(copy.emailOrUsername),
+                                LoginFieldLabel(copy.emailOrUsername),
                                 const SizedBox(height: 6),
-                                _LoginField(
+                                LoginField(
                                   controller: _email,
                                   hint: copy.emailHint,
                                   prefix: Icons.person_outline_rounded,
                                   keyboardType: TextInputType.text,
                                 ),
                                 const SizedBox(height: 14),
-                                _FieldLabel(copy.passwordLabel),
+                                LoginFieldLabel(copy.passwordLabel),
                                 const SizedBox(height: 6),
-                                _LoginField(
+                                LoginField(
                                   controller: _password,
                                   obscure: _obscure,
                                   prefix: Icons.lock_outline_rounded,
@@ -461,8 +461,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 }
 
-class _FieldLabel extends StatelessWidget {
-  const _FieldLabel(this.text);
+class LoginFieldLabel extends StatelessWidget {
+  const LoginFieldLabel(this.text, {super.key});
   final String text;
 
   @override
@@ -479,14 +479,18 @@ class _FieldLabel extends StatelessWidget {
   }
 }
 
-class _LoginField extends StatelessWidget {
-  const _LoginField({
+class LoginField extends StatelessWidget {
+  const LoginField({
+    super.key,
     required this.controller,
     this.hint,
     this.obscure = false,
     this.prefix,
     this.suffix,
     this.keyboardType,
+    this.errorText,
+    this.textInputAction,
+    this.onSubmitted,
   });
 
   final TextEditingController controller;
@@ -496,12 +500,21 @@ class _LoginField extends StatelessWidget {
   final Widget? suffix;
   final TextInputType? keyboardType;
 
+  /// Shown under the field (panel form validation).
+  final String? errorText;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onSubmitted;
+
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
       obscureText: obscure,
       keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      onSubmitted: onSubmitted,
+      autocorrect: false,
+      enableSuggestions: !obscure && keyboardType != TextInputType.url,
       cursorColor: AppColors.cyan,
       style: TextStyle(
         color: Colors.white,
@@ -511,6 +524,15 @@ class _LoginField extends StatelessWidget {
       ),
       decoration: InputDecoration(
         hintText: hint,
+        errorText: errorText,
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.danger),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.danger, width: 1.5),
+        ),
         hintStyle: const TextStyle(
           color: Color(0xFF64748B),
           fontSize: 14,
@@ -538,8 +560,8 @@ class _LoginField extends StatelessWidget {
   }
 }
 
-class _RoundIconBtn extends StatelessWidget {
-  const _RoundIconBtn({required this.icon, required this.onTap});
+class LoginRoundIconBtn extends StatelessWidget {
+  const LoginRoundIconBtn({super.key, required this.icon, required this.onTap});
   final Widget icon;
   final VoidCallback onTap;
 
@@ -569,8 +591,8 @@ class _RoundIconBtn extends StatelessWidget {
   }
 }
 
-class _LoginGlow extends StatelessWidget {
-  const _LoginGlow();
+class LoginGlow extends StatelessWidget {
+  const LoginGlow({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/panels.dart';
 import '../../core/session_controller.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -60,7 +61,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     debugPrint('[ACTION] onboarding.complete');
     await ref.read(sessionProvider.notifier).completeOnboarding();
     if (!mounted) return;
-    context.go('/auth/welcome');
+    context.go(PanelsService.hasPanel ? '/home' : '/connect');
   }
 
   @override

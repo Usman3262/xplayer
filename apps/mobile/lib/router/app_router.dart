@@ -60,6 +60,11 @@ import '../features/settings/splash_preview_screen.dart';
 import '../features/settings/subscription_screen.dart';
 import '../features/settings/tv_pair_screen.dart';
 import '../features/splash/splash_screen.dart';
+import '../features/connect/choose_panel_screen.dart';
+import '../features/connect/panel_form_screen.dart';
+import '../features/settings/panels_screen.dart';
+import '../core/panels.dart';
+import 'package:data/data.dart' show ProviderKind;
 import '../features/sports/sports_or_kids_branch.dart';
 import '../features/update/update_app_screen.dart';
 import '../shell/main_shell.dart';
@@ -113,9 +118,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         return demoRedirectFor(loc);
       }
 
+      // Flow (D17): splash → Choose your panel → connect → home. An app
+      // account is optional (offered after connecting), never required.
+      final isConnect = loc == '/connect' || loc.startsWith('/connect/');
+      if (!PanelsService.hasPanel) {
+        if (isConnect || isAuth || isPublicLegal) return null;
+        return '/connect';
+      }
+
       if (!session.isLoggedIn) {
-        if (isAuth || isPublicLegal) return null;
-        return '/auth/welcome';
+        // Guest: everything except the profile picker (account feature).
+        if (isProfiles || isOnboarding) return '/home';
+        return null;
       }
 
       if (!session.profileSelected) {
@@ -129,6 +143,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/splash', builder: (_, _) => const SplashScreen()),
       GoRoute(path: '/update', builder: (_, _) => const UpdateAppScreen()),
       GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingScreen()),
+      GoRoute(path: '/connect', builder: (_, _) => const ChoosePanelScreen()),
+      GoRoute(
+        path: '/connect/:kind',
+        redirect: (_, state) =>
+            ProviderKind.fromKey(state.pathParameters['kind']) == null ? '/connect' : null,
+        builder: (_, state) =>
+            PanelFormScreen(kind: ProviderKind.fromKey(state.pathParameters['kind'])!),
+      ),
       GoRoute(path: '/auth/welcome', builder: (_, _) => const WelcomeScreen()),
       GoRoute(
         path: demoSignInRoute,
@@ -266,6 +288,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: '/downloads', builder: (_, _) => const DownloadsScreen()),
       GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
+      GoRoute(path: '/settings/panels', builder: (_, _) => const PanelsScreen()),
       GoRoute(
         path: '/settings/diagnostic',
         builder: (_, _) => const ConnectionDiagnosticScreen(),
@@ -399,6 +422,7 @@ class _RouterRefresh extends ChangeNotifier {
     _demoSub = ref.listen<bool>(demoModeProvider, (_, _) {
       notifyListeners();
     });
+    PanelsService.manager.connections.addListener(notifyListeners);
   }
 
   final Ref ref;
@@ -407,6 +431,7 @@ class _RouterRefresh extends ChangeNotifier {
 
   @override
   void dispose() {
+    PanelsService.manager.connections.removeListener(notifyListeners);
     _sub.close();
     _demoSub.close();
     super.dispose();

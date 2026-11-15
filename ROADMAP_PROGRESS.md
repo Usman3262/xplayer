@@ -10,10 +10,9 @@ Spec: `new-platform.md` · Rules: `CLAUDE.md` · App "where to change": `XPLAYER
 ---
 
 ## ▶ NEXT
-**Phase 5 · Step 5.5 — Connection manager:** saved panels (several per device) in secure storage,
-per-device generated MAC for Stalker (`00:1A:79:xx:xx:xx`, created once, shown with copy, user can type
-their own), test connection → status (§3.5), expiry, primary panel, enable/disable/remove, last sync;
-registers the adapters with limits from the admin config. Unit tests.
+**Phase 5 · Step 5.6b — "Choose your panel" on Android TV** (TV's own D-pad UI, same flow and rules as
+the phone: choose → form with on-screen keyboard → Connect → home; My panels in TV settings; the device
+MAC shown large for Stalker). Reuse `PanelsService`/`panel_copy` logic; widget tests with D-pad focus.
 
 ## Waiting on you
 - [ ] **Android build setup on this PC** (to run on your phone/TV): free ~10 GB, install Android Studio
@@ -39,6 +38,8 @@ registers the adapters with limits from the admin config. Unit tests.
 - Q6 Sports (matches & lineups) from an **external API** (provider to choose).
 
 ## Decisions made (defaults — change any time)
+- **D18 Panel form texts:** field labels are the app's own (AppCopy, EN/AR); the admin config controls
+  which panel types show, their order, title, description, help text, icon and field placeholders.
 | # | Decision | Why |
 |---|---|---|
 | D1 | Admin = **Next.js** (App Router, TS, Tailwind, shadcn/ui) in `apps/admin` | User request; React-based so spec still holds |
@@ -469,9 +470,38 @@ role has sports.read without sports.write).
   1.2 s, 921/447/388 categories, 657 movies over 47 pages, **live channel, movie and episode links all
   HTTP 200 (live = real MPEG-TS)**. Generated MAC `00:1A:79:F0:06:3B` registered by the user; line
   expires 2026-11-16 09:29.
-- [ ] 5.5 Connection manager: multiple panels, secure storage, test connection, status,
+- [x] 5.5 Connection manager: multiple panels, secure storage, test connection, status,
   expiry, primary, enable/disable, last sync.
-- [ ] 5.6 Onboarding UI (phone + TV): choose panel → form → test → connect in seconds
+  *Implemented* in `packages/data/lib/src/providers/connections/`: `PanelConnection` (list entry, no
+  secrets, tolerant JSON), `ConnectionStore` (list in prefs; credentials **sealed per panel with
+  `TokenVault`** — Keystore/Keychain — with the same plain fallback as login tokens on broken Keystores;
+  device MAC `00:1A:79:xx:xx:xx` created once, user can set their own), `ConnectionManager` (`test`,
+  `connect` = login then save / nothing saved on failure, duplicates update, first panel primary,
+  `recheck`/`recheckAll` never throw → status §3.5, `setPrimary`, `setEnabled` (disabled kept, primary
+  moves on), `rename`, `remove` (credentials deleted), `markSynced`, adapters cached per panel) and
+  `registerProviderAdapters(config)` (limits + `player.live_format` from admin).
+  Admin controls already existed: panel types on/off (`onboarding_panel_types`) and panel limit
+  (`providers.max_connections`, Access page) — both enforced by the manager.
+  *Tested:* 14 unit tests (sealing: password never in prefs; failure saves nothing; dedupe; limits;
+  recheck states; vault failure; enable/disable/primary; remove; restart; corrupt data; MAC) →
+  provider suite 85/85; analyze clean. Not wired into the apps yet (5.6).
+- [x] 5.6a **Phone** — "Choose your panel" flow + My panels (TV = 5.6b).
+  *Implemented* (apps/mobile): `core/panels.dart` (`PanelsService` = ConnectionManager + adapters
+  registered from admin config, re-registered on new config; saved panels loaded before `runApp`,
+  re-checked 2 s after start), `features/connect/` (`ChoosePanelScreen`, `PanelFormScreen`,
+  `panel_copy.dart`: admin panel types → options, failure/status/field texts), `features/settings/
+  panels_screen.dart` (status dot, expiry, Main badge, make main, check now, on/off, rename, remove,
+  pull-to-refresh, add). Same look as the sign-in screen (login widgets made public: `LoginGlow`,
+  `LoginField` (+error/submit), `LoginFieldLabel`, `LoginRoundIconBtn`) but theme tokens instead of
+  hard-coded colours. Flow: splash → onboarding → **/connect** (no panel) → form → Connect → **/home**;
+  account no longer required (guest skips profiles; sign-in = 5.7). Settings → Account → "My panels".
+  All texts in `AppCopy` (EN + AR).
+  *Tested:* `panels_flow_test.dart` 9 widget/unit tests (admin options, failure texts, choose → form,
+  required/URL/MAC errors without network, connect → Home + saved as primary, refused → message, nothing
+  saved, Stalker MAC prefilled); full mobile suite 35/35; analyze: no errors in touched files.
+  *Not tested on a device* (no Android SDK). In Chrome, panels will fail to connect (browser CORS) —
+  screens only. Home rails stay empty until Phase 6/7 feed them from the panel.
+- [ ] 5.6b TV: choose panel → form → test → connect in seconds
   (account check first, catalog in background, cache-first) — using the app's existing look.
 - [ ] 5.7 Optional XPlayer account after connecting (Supabase Auth: sign up / sign in, policy from
   `auth.mode`, guest data kept on device and synced after sign-up).
@@ -557,6 +587,8 @@ role has sports.read without sports.write).
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-15 — Step 5.6a done (phone): Choose your panel → form → Connect → Home, My panels; 9 new tests, mobile 35/35.
+- 2026-11-15 — Step 5.5 done: connection manager + sealed credential store + device MAC; 85/85 provider tests.
 - 2026-11-15 — Step 5.4 done: Stalker adapter; live MAG line verified incl. playable live/movie/episode links. 71/71 offline tests.
 - 2026-11-15 — Step 5.3 done: M3U parser/adapter, UTF-8 + 884 fixes, live tests opt-in; trial line measured (57k live / 187k movies / 50k series ⇒ per-category sync in Phase 6). Neo IP-blocked this PC after heavy probing.
 - 2026-11-15 — Step 5.2 done: Xtream adapter + real Neo fixtures; 40/40 tests incl. live Neo run. Neo test account expires 2026-11-21.

@@ -10,6 +10,7 @@ import '../auth/login_screen.dart' show showSupportHelpSheet;
 import '../../core/demo_mode.dart';
 import '../../core/remote_config.dart';
 import '../../core/providers.dart';
+import '../../core/panels.dart';
 import '../../core/session_controller.dart';
 import '../../core/app_log.dart';
 import '../../core/ui_sound.dart';
@@ -149,6 +150,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             const SizedBox(height: 18),
             _section(copy.sectionAccount, [
+              _nav(
+                context,
+                ref,
+                Icons.dns_rounded,
+                copy.myPanels,
+                value: '${ref.watch(panelsProvider).where((c) => c.enabled).length}',
+                route: '/settings/panels',
+              ),
               _nav(
                 context,
                 ref,
