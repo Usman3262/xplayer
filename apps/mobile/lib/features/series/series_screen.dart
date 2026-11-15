@@ -3,6 +3,7 @@ import 'package:domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/adult.dart';
 import '../../core/session_controller.dart';
 import '../../widgets/catalog_browse_screen.dart';
 
@@ -17,6 +18,7 @@ class SeriesScreen extends ConsumerWidget {
       kind: MediaKind.series,
       eyebrow: copy.series,
       searchHint: copy.searchSeries,
+      topAction: const AdultButton(kind: MediaKind.series),
     );
   }
 }

@@ -204,7 +204,33 @@ void main() {
         return http.Response('1', 200);
       }, limits: const ProviderLimits(concurrency: 3));
       await Future.wait([for (var i = 0; i < 20; i++) h.getJson(uri)]);
-      expect(peak, 3);
+      expect(peak, 2); // background work keeps one of the 3 slots free for the user
+    });
+
+    test('priority lane: user requests jump the queue while background work is busy', () async {
+      final order = <String>[];
+      final h = make((r) async {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        order.add(r.url.path);
+        return http.Response('1', 200);
+      }, limits: const ProviderLimits(concurrency: 3));
+      final background = [for (var i = 0; i < 10; i++) h.getJson(uri.replace(path: '/bg$i'))];
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+      final user = h.getJson(uri.replace(path: '/user'), priority: true);
+      await user;
+      await Future.wait(background);
+      // The user request finished long before the 10 queued background ones.
+      expect(order.indexOf('/user'), lessThan(4));
+    });
+
+    test('priority requests fail fast (no retries)', () async {
+      var calls = 0;
+      final h = make((_) async {
+        calls++;
+        return http.Response('', 503);
+      });
+      await expectLater(h.getJson(uri, priority: true), throwsA(isA<ProviderFailure>()));
+      expect(calls, 1);
     });
 
     test('limits come from the admin config, clamped to safe ranges', () {

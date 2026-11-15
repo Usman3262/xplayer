@@ -105,11 +105,12 @@ class StalkerAdapter implements ProviderAdapter {
 
   // ── Session ──────────────────────────────────────────────────────────────
 
-  Future<Object?> _get(Uri api, Map<String, String> params, {bool auth = false}) async {
+  Future<Object?> _get(Uri api, Map<String, String> params, {bool auth = false, bool priority = false}) async {
     final text = await _http.getText(
       api.replace(queryParameters: {...params, 'JsHttpRequest': '1-xml'}),
       headers: _headers,
       auth: auth,
+      priority: priority,
     );
     if (text.contains('Authorization failed')) {
       throw const ProviderFailure(ProviderFailureKind.unauthorized, 'token');
@@ -152,20 +153,27 @@ class StalkerAdapter implements ProviderAdapter {
       }, auth: true));
 
   /// Calls the API; on an expired token, handshakes again once and retries.
-  Future<Object?> _call(Map<String, String> params) async {
+  Future<Object?> _call(Map<String, String> params, {bool priority = false}) async {
     if (_token == null) await _login();
     try {
-      return await _get(_api!, params);
+      return await _get(_api!, params, priority: priority);
     } on ProviderFailure catch (f) {
       if (f.kind != ProviderFailureKind.unauthorized) rethrow;
       await _login();
-      return _get(_api!, params);
+      return _get(_api!, params, priority: priority);
     }
   }
+
+  /// The portal's parental password (`parent_password`, set on the panel
+  /// for the account) — the adult PIN, as on a MAG box. Null until login.
+  String? get parentalPin => _parentalPin;
+  String? _parentalPin;
 
   Future<Map<String, dynamic>> _login() async {
     await _handshake();
     final p = await _profile();
+    final pin = jsonStr(p['parent_password'])?.trim();
+    _parentalPin = (pin == null || pin.isEmpty) ? null : pin;
     Diag.panel('stalker profile: status=${p['status']}, blocked=${p['blocked']}, has id ${p['id'] != null}');
     checkProfile(p);
     return p;
@@ -210,7 +218,7 @@ class StalkerAdapter implements ProviderAdapter {
   List<ProviderCategory> _cats(Object? raw) => [
         for (final c in jsonMapList(raw))
           if (_id(c['id']) case final id? when id != '*')
-            ProviderCategory(id: id, name: (jsonStr(c['title']) ?? '').trim()),
+            ProviderCategory(id: id, name: (jsonStr(c['title']) ?? '').trim(), adult: jsonBool(c['censored']) ?? false),
       ];
 
   @override
@@ -226,8 +234,8 @@ class StalkerAdapter implements ProviderAdapter {
       _cats(await _call({'type': 'series', 'action': 'get_categories'}));
 
   /// Page 1, then the remaining pages in parallel (ProviderHttp caps it).
-  Future<List<Map<String, dynamic>>> _paged(Map<String, String> params, {int? maxPages}) async {
-    final first = jsonMap(await _call({...params, 'p': '1'}));
+  Future<List<Map<String, dynamic>>> _paged(Map<String, String> params, {int? maxPages, bool priority = false}) async {
+    final first = jsonMap(await _call({...params, 'p': '1'}, priority: priority));
     final items = [...jsonMapList(first['data'])];
     final total = jsonInt(first['total_items']) ?? items.length;
     final per = jsonInt(first['max_page_items']) ?? (items.isEmpty ? 1 : items.length);
@@ -235,7 +243,7 @@ class StalkerAdapter implements ProviderAdapter {
     if (maxPages != null && pages > maxPages) pages = maxPages;
     if (pages > 1) {
       final rest = await Future.wait([
-        for (var p = 2; p <= pages; p++) _call({...params, 'p': '$p'}),
+        for (var p = 2; p <= pages; p++) _call({...params, 'p': '$p'}, priority: priority),
       ]);
       for (final r in rest) {
         items.addAll(jsonMapList(jsonMap(r)['data']));
@@ -268,6 +276,7 @@ class StalkerAdapter implements ProviderAdapter {
                 catchupDays: (jsonBool(c['archive']) ?? false) || (jsonBool(c['enable_tv_archive']) ?? false)
                     ? (jsonInt(c['tv_archive_duration']) ?? 0)
                     : 0,
+                adult: jsonBool(c['censored']) ?? false,
               ),
       ];
 
@@ -302,6 +311,7 @@ class StalkerAdapter implements ProviderAdapter {
       categoryId: _id(m['category_id']),
       addedSec: _dateSec(m['added']),
       tmdbId: _tmdb(m['tmdb_id']),
+      adult: jsonBool(m['censored']) ?? false,
     );
   }
 
@@ -336,6 +346,7 @@ class StalkerAdapter implements ProviderAdapter {
       categoryId: _id(s['category_id']),
       addedSec: _dateSec(s['added']),
       tmdbId: _tmdb(s['tmdb_id']),
+      adult: jsonBool(s['censored']) ?? false,
     );
   }
 
@@ -375,7 +386,7 @@ class StalkerAdapter implements ProviderAdapter {
       'season_id': '0',
       'episode_id': '0',
       'sortby': 'added',
-    });
+    }, priority: true);
     final cached = _vod[seriesId];
     final info = cached == null ? null : parseSeries(cached);
     return parseSeasons(
@@ -422,7 +433,7 @@ class StalkerAdapter implements ProviderAdapter {
 
   @override
   Future<List<EpgEntry>> shortEpg(ProviderChannel channel, {int limit = 4}) async =>
-      parseShortEpg(await _call({'type': 'itv', 'action': 'get_short_epg', 'ch_id': channel.id, 'size': '$limit'}));
+      parseShortEpg(await _call({'type': 'itv', 'action': 'get_short_epg', 'ch_id': channel.id, 'size': '$limit'}, priority: true));
 
   static List<EpgEntry> parseShortEpg(Object? raw) {
     final out = <EpgEntry>[];
@@ -471,7 +482,7 @@ class StalkerAdapter implements ProviderAdapter {
   }
 
   Future<Uri?> _createLink(String type, String cmd, {String series = ''}) async {
-    final js = jsonMap(await _call({
+    final js = jsonMap(await _call(priority: true, {
       'type': type,
       'action': 'create_link',
       'cmd': cmd,

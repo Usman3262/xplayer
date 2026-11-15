@@ -108,6 +108,20 @@ export function SettingsCard({
                   />
                   {units[r.key] ? <span className="text-muted-foreground w-8 text-xs">{units[r.key]}</span> : null}
                 </span>
+              ) : r.value_type === "string_list" ? (
+                // Comma-separated in the box, saved as a list.
+                <Input
+                  id={id}
+                  value={Array.isArray(v) ? v.join(", ") : String(v ?? "")}
+                  disabled={!canWrite}
+                  onChange={(e) =>
+                    setVals({
+                      ...vals,
+                      [r.key]: e.target.value.split(",").map((x) => x.trim()).filter((x) => x.length > 0),
+                    })
+                  }
+                  className="h-10 w-72"
+                />
               ) : (
                 <Input
                   id={id}

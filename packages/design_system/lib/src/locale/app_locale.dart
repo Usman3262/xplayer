@@ -2901,6 +2901,19 @@ class AppCopy {
   String get signOutConfirm => _t('Sign out of your account? Your panels stay on this device.', 'تسجيل الخروج من حسابك؟ لوحاتك تبقى على هذا الجهاز.', 'Sign out of your account? Your panels stay on this device.');
   String get accountRequiredBody => _t('Sign in to your ${AppBrand.name} account to continue.', 'سجّل الدخول إلى حساب ${AppBrand.name} للمتابعة.', 'Sign in to your ${AppBrand.name} account to continue.');
 
+  // ── Adult (18+) section, PIN protected ──
+  String get adultButton => _t('Adult 18+', 'للكبار +18', 'Adult 18+');
+  String get adultPinTitle => _t('Enter adult PIN', 'أدخل رمز المحتوى للكبار', 'Enter adult PIN');
+  String get adultPinPanelHint => _t('Use the parental PIN of your panel account.', 'استخدم رمز الرقابة الأبوية لحساب لوحتك.', 'Use the parental PIN of your panel account.');
+  String get adultPinAppHint => _t('Enter your XPlayer adult PIN.', 'أدخل رمز XPlayer للمحتوى للكبار.', 'Enter your XPlayer adult PIN.');
+  String get adultPinCreateTitle => _t('Create adult PIN', 'أنشئ رمز المحتوى للكبار', 'Create adult PIN');
+  String get adultPinCreateHint => _t("Your panel doesn't share its PIN with apps, so choose a 4-digit PIN for 18+ content on this device.", 'لوحتك لا تشارك رمزها مع التطبيقات، لذا اختر رمزًا من 4 أرقام للمحتوى +18 على هذا الجهاز.', "Your panel doesn't share its PIN with apps, so choose a 4-digit PIN for 18+ content on this device.");
+  String get adultPinRepeat => _t('Enter the same PIN again', 'أدخل الرمز نفسه مرة أخرى', 'Enter the same PIN again');
+  String get adultPinMismatch => _t("The PINs don't match. Try again.", 'الرمزان غير متطابقين. حاول مجددًا.', "The PINs don't match. Try again.");
+  String get adultPinWrong => _t('Wrong PIN.', 'رمز خاطئ.', 'Wrong PIN.');
+  String get adultPinLocked => _t('Too many wrong PINs. Try again in a minute.', 'محاولات خاطئة كثيرة. حاول بعد دقيقة.', 'Too many wrong PINs. Try again in a minute.');
+  String get adultPinSet => _t('Adult PIN saved.', 'تم حفظ الرمز.', 'Adult PIN saved.');
+
   List<(String, String)> get appearanceThemesList => [
     (themeCinematic, themeCinematicDesc),
     (themeMidnight, themeMidnightDesc),

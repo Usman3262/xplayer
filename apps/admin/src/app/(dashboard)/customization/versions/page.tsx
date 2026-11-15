@@ -22,9 +22,10 @@ export default function VersionsPage() {
 }
 
 const PLAYER_KEYS = ["player.live_format", "player.retry_count", "player.buffer_seconds", "player.progress_save_s"];
+const CONTENT_KEYS = ["content.adult_section", "content.adult_keywords"];
 const DIAG_KEYS = ["diagnostics.remote_logs", "diagnostics.log_retention_days"];
 const PANEL_KEYS = ["providers.request_timeout_ms", "providers.request_concurrency"];
-const CACHE_KEYS = ["cache.catalog_ttl_hours", "cache.sync_parallel_categories", "cache.epg_retention_hours", "cache.image_cache_mb", "config.refresh_interval_s", "search.min_chars"];
+const CACHE_KEYS = ["cache.catalog_ttl_hours", "cache.sync_parallel_categories", "cache.sync_gap_ms", "cache.epg_retention_hours", "cache.image_cache_mb", "config.refresh_interval_s", "search.min_chars"];
 
 const LABELS: Record<string, string> = {
   "player.live_format": "Live stream format",
@@ -33,12 +34,15 @@ const LABELS: Record<string, string> = {
   "player.progress_save_s": "Save watch progress every",
   "cache.catalog_ttl_hours": "Refresh panel catalog after",
   "cache.sync_parallel_categories": "Categories synced at once",
+  "cache.sync_gap_ms": "Pause between category requests",
   "cache.epg_retention_hours": "Keep TV guide for",
   "cache.image_cache_mb": "Image cache on device",
   "config.refresh_interval_s": "Apps check for new settings every",
   "search.min_chars": "Start searching after",
   "providers.request_timeout_ms": "Catalog request timeout",
   "diagnostics.remote_logs": "Apps upload diagnostic logs",
+  "content.adult_section": "Adult 18+ section (PIN)",
+  "content.adult_keywords": "18+ words in category names",
   "diagnostics.log_retention_days": "Keep app logs for",
   "providers.request_concurrency": "Parallel requests per panel",
 };
@@ -50,6 +54,7 @@ const UNITS: Record<string, string> = {
   "cache.image_cache_mb": "MB",
   "config.refresh_interval_s": "s",
   "search.min_chars": "chars",
+  "cache.sync_gap_ms": "ms",
   "providers.request_timeout_ms": "ms",
   "diagnostics.log_retention_days": "days",
 };
@@ -65,7 +70,7 @@ async function VersionsContent() {
       .select("id,title,message,platforms,starts_at,ends_at,is_active")
       .order("starts_at", { ascending: false })
       .limit(20),
-    supabase.from("app_settings").select("key,value_type,value,validation,description").in("key", [...PLAYER_KEYS, ...CACHE_KEYS, ...PANEL_KEYS, ...DIAG_KEYS]),
+    supabase.from("app_settings").select("key,value_type,value,validation,description").in("key", [...PLAYER_KEYS, ...CACHE_KEYS, ...PANEL_KEYS, ...DIAG_KEYS, ...CONTENT_KEYS]),
   ]);
   if (versions.error || maintenance.error || settings.error) {
     return <ErrorState description="These settings could not be loaded." />;
@@ -92,6 +97,7 @@ async function VersionsContent() {
         <SettingsCard title="Player" description="Defaults for every user; users can change some in their settings." rows={pick(PLAYER_KEYS)} labels={LABELS} units={UNITS} canWrite={canWrite} />
         <SettingsCard title="Cache & refresh" description="How long the apps keep data before refreshing." rows={pick(CACHE_KEYS)} labels={LABELS} units={UNITS} canWrite={canWrite} />
         <SettingsCard title="Panel connections" description="How the apps talk to users' panels (login timeout and panel limit are under Access)." rows={pick(PANEL_KEYS)} labels={LABELS} units={UNITS} canWrite={canWrite} />
+        <SettingsCard title="Adult content" description="18+ categories are hidden everywhere in the apps. With the section on, an Adult 18+ button opens them after a PIN (the panel PIN on MAG/Stalker, an XPlayer PIN on Xtream/M3U)." rows={pick(CONTENT_KEYS)} labels={LABELS} units={UNITS} canWrite={canWrite} />
         <SettingsCard title="Diagnostics" description="Important app log lines (panel requests, sync, sign-in, crashes) are uploaded for support. Scrubbed on the device: no passwords, MACs or stream links." rows={pick(DIAG_KEYS)} labels={LABELS} units={UNITS} canWrite={canWrite} />
       </div>
     </div>

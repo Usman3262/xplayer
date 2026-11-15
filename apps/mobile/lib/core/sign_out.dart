@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'account.dart';
+import 'adult.dart';
 import 'app_log.dart';
 import 'demo_mode.dart';
 import 'panels.dart';
@@ -35,4 +36,5 @@ Future<void> clearDeviceState() async {
     // Offline: the Supabase session is still cleared locally by signOut.
   }
   await AccountService.resetOffer();
+  await AdultService.lock.clear(); // XPlayer adult PIN is per device owner
 }

@@ -100,8 +100,12 @@ class RemoteLogs {
   static void _captureCrashes() {
     final previous = FlutterError.onError;
     FlutterError.onError = (details) {
-      Diag.event('CRASH', '${details.exception.runtimeType}: ${details.exceptionAsString()}'
-          ' | ${_frames(details.stack)}');
+      // Full report incl. "The relevant error-causing widget was: … file:line"
+      // (layout errors have no app frames in the stack).
+      final report = details.toString().replaceAll(RegExp(r'(\r?\n\s*)+'), ' ⏎ ');
+      Diag.event('CRASH', '${details.exception.runtimeType}: '
+          '${report.length > 1500 ? '${report.substring(0, 1500)}…' : report}'
+          ' | app frames: ${_frames(details.stack)}');
       previous?.call(details);
     };
     final previousPlatform = PlatformDispatcher.instance.onError;

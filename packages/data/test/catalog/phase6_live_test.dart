@@ -28,7 +28,7 @@ void main() {
     final acc = await adapter.authenticate();
     expect(acc.status, ConnectionStatus.active);
 
-    final sync = await CatalogSyncer(store: store, policy: const SyncPolicy(parallelCategories: 2))
+    final sync = await CatalogSyncer(store: store, policy: const SyncPolicy(gap: Duration.zero, failureBackoff: Duration.zero, parallelCategories: 2))
         .sync('live', adapter, maxCategoriesPerKind: 2);
     expect(sync.phase, SyncPhase.done);
     final counts = await store.counts('live');

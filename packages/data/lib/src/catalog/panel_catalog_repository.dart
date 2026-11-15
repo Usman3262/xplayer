@@ -26,6 +26,7 @@ class PanelCatalogRepository implements CatalogRepository {
     this.metadata,
     this.artwork = const ArtworkUrls(),
     this.onMetadataArrived,
+    this.adultOnly = false,
     DateTime Function()? clock,
   })  : _adapter = adapter,
         _layout = layout ?? (() => HomeLayout.empty),
@@ -38,6 +39,26 @@ class PanelCatalogRepository implements CatalogRepository {
 
   /// New posters / plots arrived → screens may reload once.
   final void Function()? onMetadataArrived;
+
+  /// The 18+ view (after the PIN): categories / browse / search show only
+  /// adult content. The normal view (false) never shows it anywhere.
+  final bool adultOnly;
+
+  /// Does the panel have 18+ categories of [kind]? (shows the Adult button)
+  Future<bool> hasAdult(MediaKind kind) async =>
+      (await store.categories(panelId, _kind(kind), adult: true)).isNotEmpty;
+
+  /// The same repository, 18+ only (for the adult screen after the PIN).
+  PanelCatalogRepository adultView() => PanelCatalogRepository(
+        store: store,
+        panelId: panelId,
+        adapter: _adapter,
+        layout: _layout,
+        metadata: metadata,
+        artwork: artwork,
+        onMetadataArrived: onMetadataArrived,
+        adultOnly: true,
+      );
 
   final Future<ProviderAdapter?> Function() _adapter;
   final HomeLayout Function() _layout;
@@ -182,7 +203,7 @@ class PanelCatalogRepository implements CatalogRepository {
 
   @override
   Future<List<CatalogCategory>> getCategories(MediaKind kind) async =>
-      [for (final c in await store.categories(panelId, _kind(kind))) providerCategoryToDomain(c)];
+      [for (final c in await store.categories(panelId, _kind(kind), adult: adultOnly)) providerCategoryToDomain(c)];
 
   static CatalogKind _kind(MediaKind k) => switch (k) {
         MediaKind.movie => CatalogKind.movie,
@@ -196,13 +217,13 @@ class PanelCatalogRepository implements CatalogRepository {
     final after = int.tryParse(cursor ?? '');
     final List<(MediaItem, int)> rows = switch (kind) {
       MediaKind.movie => [
-          for (final r in await store.movies(panelId, categoryId: categoryId, limit: limit, afterSort: after)) (_movie(r.$1), r.$2),
+          for (final r in await store.movies(panelId, categoryId: categoryId, limit: limit, afterSort: after, adult: adultOnly)) (_movie(r.$1), r.$2),
         ],
       MediaKind.series => [
-          for (final r in await store.series(panelId, categoryId: categoryId, limit: limit, afterSort: after)) (_series(r.$1), r.$2),
+          for (final r in await store.series(panelId, categoryId: categoryId, limit: limit, afterSort: after, adult: adultOnly)) (_series(r.$1), r.$2),
         ],
       MediaKind.live || MediaKind.sports => [
-          for (final r in await store.channels(panelId, categoryId: categoryId, limit: limit, afterSort: after)) (_channelItem(r.$1), r.$2),
+          for (final r in await store.channels(panelId, categoryId: categoryId, limit: limit, afterSort: after, adult: adultOnly)) (_channelItem(r.$1), r.$2),
         ],
     };
     final items = await _enrich([for (final r in rows) r.$1], fetchFirst: limit);
@@ -221,11 +242,11 @@ class PanelCatalogRepository implements CatalogRepository {
     final per = kind == null ? (limit / 3).ceil() : limit;
     final items = <MediaItem>[
       if (kind == null || kind == MediaKind.movie)
-        ...(await store.searchMovies(panelId, query, limit: per, offset: offset, categoryId: categoryId)).map(_movie),
+        ...(await store.searchMovies(panelId, query, limit: per, offset: offset, categoryId: categoryId, adult: adultOnly)).map(_movie),
       if (kind == null || kind == MediaKind.series)
-        ...(await store.searchSeries(panelId, query, limit: per, offset: offset, categoryId: categoryId)).map(_series),
+        ...(await store.searchSeries(panelId, query, limit: per, offset: offset, categoryId: categoryId, adult: adultOnly)).map(_series),
       if (kind == null || kind == MediaKind.live || kind == MediaKind.sports)
-        ...(await store.searchChannels(panelId, query, limit: per, offset: offset, categoryId: categoryId)).map(_channelItem),
+        ...(await store.searchChannels(panelId, query, limit: per, offset: offset, categoryId: categoryId, adult: adultOnly)).map(_channelItem),
     ];
     return CatalogPage(items: await _enrich(items, fetchFirst: 10), nextCursor: items.length < per ? null : '${offset + per}');
   }
@@ -258,9 +279,10 @@ class PanelCatalogRepository implements CatalogRepository {
   Future<ProviderMovieDetails?> _movieDetails(String id) => _details[id] ??= () async {
         try {
           final a = await _adapter();
-          return await a?.movieDetails(id).timeout(const Duration(seconds: 10));
+          return await a?.movieDetails(id).timeout(const Duration(seconds: 30));
         } catch (e) {
-          Diag.event('PANEL', 'movie details $id unavailable: ${e.runtimeType}');
+          Diag.event('PANEL', 'movie details $id unavailable: ${e.runtimeType}: $e');
+          _details.remove(id); // try again next time it's opened
           return null;
         }
       }();
@@ -271,20 +293,33 @@ class PanelCatalogRepository implements CatalogRepository {
   @override
   String? knownSeriesIdForEpisode(String episodeId) => _seriesOfEpisode[episodeId];
 
-  /// Seasons/episodes: stored copy, else fetched from the panel and stored.
-  Future<ProviderSeriesDetails?> _seriesDetails(String seriesId) async {
+  final _seriesLoads = <String, Future<ProviderSeriesDetails?>>{};
+
+  /// Seasons/episodes: stored copy, else fetched from the panel (once, even
+  /// when the season list and the episode list ask at the same time).
+  Future<ProviderSeriesDetails?> _seriesDetails(String seriesId) {
+    final running = _seriesLoads[seriesId];
+    if (running != null) return running;
+    final f = _loadSeriesDetails(seriesId);
+    _seriesLoads[seriesId] = f;
+    f.whenComplete(() => _seriesLoads.remove(seriesId));
+    return f;
+  }
+
+  Future<ProviderSeriesDetails?> _loadSeriesDetails(String seriesId) async {
     final cached = await store.seriesDetails(panelId, seriesId);
     if (cached != null) return cached;
+    final sw = Stopwatch()..start();
     try {
       final a = await _adapter();
-      final d = await a?.seriesDetails(seriesId).timeout(const Duration(seconds: 15));
+      final d = await a?.seriesDetails(seriesId).timeout(const Duration(seconds: 30));
       if (d == null) return null;
       await store.saveSeriesDetails(panelId, d);
       Diag.event('PANEL', 'series $seriesId: ${d.seasonNumbers.length} seasons, '
-          '${d.episodes.values.fold<int>(0, (n, l) => n + l.length)} episodes fetched + stored');
+          '${d.episodes.values.fold<int>(0, (n, l) => n + l.length)} episodes fetched + stored in ${sw.elapsedMilliseconds}ms');
       return d;
     } catch (e) {
-      Diag.event('PANEL', 'series $seriesId episodes unavailable: ${e.runtimeType}');
+      Diag.event('PANEL', 'series $seriesId episodes unavailable after ${sw.elapsedMilliseconds}ms: ${e.runtimeType}: $e');
       return null;
     }
   }

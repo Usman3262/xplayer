@@ -22,6 +22,7 @@ import 'core/downloads_controller.dart';
 import 'core/backend.dart';
 import 'core/providers.dart';
 import 'core/account.dart';
+import 'core/adult.dart';
 import 'core/catalog.dart';
 import 'core/remote_logs.dart';
 import 'core/panels.dart';
@@ -162,6 +163,7 @@ class _MobileRootAppState extends ConsumerState<MobileRootApp>
     final demo = ref.read(demoModeProvider);
     if (state == AppLifecycleState.paused) {
       CatalogService.pause(); // panel catalog sync continues on return
+      AdultService.lock.lock(); // 18+ needs the PIN again after leaving the app
       unawaited(RemoteLogs.flush());
       _pausedAt ??= DateTime.now();
       if (!demo) ref.read(appDownloadsProvider.notifier).appPaused();

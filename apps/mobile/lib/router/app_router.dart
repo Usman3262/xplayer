@@ -434,9 +434,27 @@ class _RouterRefresh extends ChangeNotifier {
     _demoSub = ref.listen<bool>(demoModeProvider, (_, _) {
       notifyListeners();
     });
-    PanelsService.manager.connections.addListener(notifyListeners);
-    AccountService.user.addListener(notifyListeners);
-    RemoteConfigService.listenable.addListener(notifyListeners);
+    _routing = _signature();
+    PanelsService.manager.connections.addListener(_maybeNotify);
+    AccountService.user.addListener(_maybeNotify);
+    RemoteConfigService.listenable.addListener(_maybeNotify);
+  }
+
+  /// Only what the redirects depend on. Re-running redirects on every panel
+  /// status / sync change rebuilt the pages while the user navigated
+  /// (duplicate page key crash seen on device, 2026-11-15).
+  String _routing = '';
+  String _signature() {
+    final c = RemoteConfigService.current;
+    return '${PanelsService.hasPanel}|${AccountService.signedIn}|${c.authMode.name}|'
+        '${c.boolSetting('auth.guest_enabled', true)}|${c.version}';
+  }
+
+  void _maybeNotify() {
+    final next = _signature();
+    if (next == _routing) return;
+    _routing = next;
+    notifyListeners();
   }
 
   final Ref ref;
@@ -445,9 +463,9 @@ class _RouterRefresh extends ChangeNotifier {
 
   @override
   void dispose() {
-    PanelsService.manager.connections.removeListener(notifyListeners);
-    AccountService.user.removeListener(notifyListeners);
-    RemoteConfigService.listenable.removeListener(notifyListeners);
+    PanelsService.manager.connections.removeListener(_maybeNotify);
+    AccountService.user.removeListener(_maybeNotify);
+    RemoteConfigService.listenable.removeListener(_maybeNotify);
     _sub.close();
     _demoSub.close();
     super.dispose();

@@ -7,6 +7,7 @@ import '../backend/remote_config.dart';
 import '../diag/diag.dart';
 import '../providers/provider_adapter.dart';
 import '../providers/provider_models.dart';
+import 'adult.dart';
 import 'catalog_store.dart';
 
 /// How the sync behaves. Built-in defaults; admin config overrides
@@ -15,17 +16,22 @@ import 'catalog_store.dart';
 class SyncPolicy {
   const SyncPolicy({
     this.ttl = const Duration(hours: 12),
-    this.parallelCategories = 2,
+    this.parallelCategories = 1,
+    this.gap = const Duration(milliseconds: 300),
     this.maxConsecutiveFailures = 5,
+    this.failureBackoff = const Duration(seconds: 5),
     this.epgRetention = const Duration(hours: 48),
+    this.adultKeywords = AdultClassifier.defaultKeywords,
   });
 
   factory SyncPolicy.fromConfig(RemoteConfig c) {
     int clamp(int v, int lo, int hi) => v < lo ? lo : (v > hi ? hi : v);
     return SyncPolicy(
       ttl: Duration(hours: clamp(c.intSetting('cache.catalog_ttl_hours', 12), 1, 24 * 14)),
-      parallelCategories: clamp(c.intSetting('cache.sync_parallel_categories', 2), 1, 6),
+      parallelCategories: clamp(c.intSetting('cache.sync_parallel_categories', 1), 1, 6),
+      gap: Duration(milliseconds: clamp(c.intSetting('cache.sync_gap_ms', 300), 0, 5000)),
       epgRetention: Duration(hours: clamp(c.intSetting('cache.epg_retention_hours', 48), 1, 24 * 14)),
+      adultKeywords: c.listSetting('content.adult_keywords', AdultClassifier.defaultKeywords),
     );
   }
 
@@ -35,9 +41,19 @@ class SyncPolicy {
   /// Categories fetched at the same time (panels ban bursts; keep low).
   final int parallelCategories;
 
+  /// Pause between two category requests of one worker. Real panels
+  /// IP-block clients that sync too fast (user's line, 2026-11-15).
+  final Duration gap;
+
+  /// After a failed category, wait this × failures-in-a-row before the next.
+  final Duration failureBackoff;
+
   /// This many failed categories in a row ⇒ the panel is down; stop.
   final int maxConsecutiveFailures;
   final Duration epgRetention;
+
+  /// Category-name words that mark 18+ (admin `content.adult_keywords`).
+  final List<String> adultKeywords;
 }
 
 enum SyncPhase { idle, categories, live, movies, series, done, stopped, failed }
@@ -164,7 +180,11 @@ class CatalogSyncer {
         if (_stop(panelId)) return _finish(emit, p, SyncPhase.stopped, sw);
         final list = await _categories(adapter, kind);
         cats[kind] = list;
-        await store.saveCategories(panelId, kind, list);
+        final adult = AdultClassifier(policy.adultKeywords);
+        bool isAdult(ProviderCategory c) => adult.isAdultCategory(c.name, panelFlag: c.adult);
+        await store.saveCategories(panelId, kind, list, isAdult: isAdult);
+        final adultCount = list.where(isAdult).length;
+        if (adultCount > 0) Diag.event('SYNC', 'sync $panelId ${kind.name}: $adultCount adult (18+) categories, hidden behind the PIN');
         final removed = await store.pruneMissingCategories(panelId, kind, {for (final c in list) c.id});
         await store.markSynced(panelId, '${kind.name}:categories', at: _clock(), count: list.length);
         Diag.event('SYNC', 'sync $panelId ${kind.name}: ${list.length} categories${removed > 0 ? ', $removed old items removed' : ''}');
@@ -196,6 +216,8 @@ class CatalogSyncer {
               emit(p.copyWith(done: p.done + 1, skipped: p.skipped + 1));
               continue;
             }
+            if (policy.gap > Duration.zero) await Future<void>.delayed(policy.gap);
+            if (_stop(panelId)) return;
             try {
               final n = await _syncCategory(panelId, adapter, kind, cat.id, scope);
               consecutiveFailures = 0;
@@ -216,6 +238,8 @@ class CatalogSyncer {
                 fatal = ProviderFailure(f.kind, 'panel not answering: $consecutiveFailures categories failed in a row');
                 return;
               }
+              // Panel struggling: slow down before asking again.
+              await Future<void>.delayed(policy.failureBackoff * consecutiveFailures);
             }
           }
         }

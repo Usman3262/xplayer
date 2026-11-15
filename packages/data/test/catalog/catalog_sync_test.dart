@@ -63,6 +63,8 @@ class FakePanel implements ProviderAdapter {
   dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }
 
+const fast = SyncPolicy(gap: Duration.zero, failureBackoff: Duration.zero, parallelCategories: 2);
+
 void main() {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   late CatalogStore store;
@@ -74,7 +76,7 @@ void main() {
   });
   tearDown(() => store.close());
 
-  CatalogSyncer syncer({SyncPolicy policy = const SyncPolicy()}) => CatalogSyncer(store: store, policy: policy, clock: () => now);
+  CatalogSyncer syncer({SyncPolicy policy = fast}) => CatalogSyncer(store: store, policy: policy, clock: () => now);
 
   test('full run: categories first, then every category; everything saved', () async {
     final panel = FakePanel();
@@ -92,7 +94,7 @@ void main() {
 
   test('resumable: fresh categories are skipped; after the admin TTL they refresh; force refreshes all', () async {
     final panel = FakePanel();
-    final s = syncer(policy: const SyncPolicy(ttl: Duration(hours: 6)));
+    final s = syncer(policy: const SyncPolicy(gap: Duration.zero, failureBackoff: Duration.zero, ttl: Duration(hours: 6)));
     await s.sync('p', panel);
     panel.calls.clear();
     final again = await s.sync('p', panel);
@@ -109,7 +111,7 @@ void main() {
 
   test('cancel stops the run; the next run continues where it stopped', () async {
     final panel = FakePanel(liveCats: 10, movieCats: 0, seriesCats: 0)..delay = const Duration(milliseconds: 20);
-    final s = syncer(policy: const SyncPolicy(parallelCategories: 1));
+    final s = syncer(policy: const SyncPolicy(gap: Duration.zero, failureBackoff: Duration.zero, parallelCategories: 1));
     // Cancel exactly after 3 live categories finished (no timing guesses).
     void onProgress() {
       final p = s.progress.value['p'];
@@ -139,7 +141,7 @@ void main() {
 
   test('expired line stops at once', () async {
     final panel = FakePanel()..failCats['L0'] = const ProviderFailure(ProviderFailureKind.expired);
-    final r = await syncer(policy: const SyncPolicy(parallelCategories: 1)).sync('p', panel);
+    final r = await syncer(policy: const SyncPolicy(gap: Duration.zero, failureBackoff: Duration.zero, parallelCategories: 1)).sync('p', panel);
     expect(r.phase, SyncPhase.failed);
     expect(r.failure!.kind, ProviderFailureKind.expired);
     expect(panel.calls.any((c) => c.startsWith('movie:')), isFalse);
@@ -150,14 +152,14 @@ void main() {
     for (var i = 0; i < 20; i++) {
       panel.failCats['L$i'] = const ProviderFailure(ProviderFailureKind.network);
     }
-    final r = await syncer(policy: const SyncPolicy(parallelCategories: 1, maxConsecutiveFailures: 3)).sync('p', panel);
+    final r = await syncer(policy: const SyncPolicy(gap: Duration.zero, failureBackoff: Duration.zero, parallelCategories: 1, maxConsecutiveFailures: 3)).sync('p', panel);
     expect(r.phase, SyncPhase.failed);
     expect(panel.calls.where((c) => c.startsWith('live:')), hasLength(3));
   });
 
   test('never more categories at once than the admin allows', () async {
     final panel = FakePanel(liveCats: 12, movieCats: 0, seriesCats: 0)..delay = const Duration(milliseconds: 5);
-    await syncer(policy: const SyncPolicy(parallelCategories: 3)).sync('p', panel);
+    await syncer(policy: const SyncPolicy(gap: Duration.zero, failureBackoff: Duration.zero, parallelCategories: 3)).sync('p', panel);
     expect(panel.peak, 3);
   });
 
@@ -184,11 +186,22 @@ void main() {
   test('policy from the admin config, clamped', () {
     final c = RemoteConfig.tryParse({
       'version': 1,
-      'settings': {'cache.catalog_ttl_hours': 3, 'cache.sync_parallel_categories': 50, 'cache.epg_retention_hours': 0},
+      'settings': {'cache.catalog_ttl_hours': 3, 'cache.sync_parallel_categories': 50, 'cache.epg_retention_hours': 0, 'cache.sync_gap_ms': 99999},
     })!;
     final p = SyncPolicy.fromConfig(c);
     expect(p.ttl, const Duration(hours: 3));
     expect(p.parallelCategories, 6);
     expect(p.epgRetention, const Duration(hours: 1));
+    expect(p.gap, const Duration(seconds: 5));
+    // Defaults are gentle: one category at a time, 300 ms apart.
+    expect(SyncPolicy.fromConfig(RemoteConfig.empty).parallelCategories, 1);
+    expect(SyncPolicy.fromConfig(RemoteConfig.empty).gap, const Duration(milliseconds: 300));
+  });
+
+  test('pause between category requests is respected', () async {
+    final panel = FakePanel(liveCats: 4, movieCats: 0, seriesCats: 0);
+    final sw = Stopwatch()..start();
+    await syncer(policy: const SyncPolicy(gap: Duration(milliseconds: 50), failureBackoff: Duration.zero)).sync('p', panel);
+    expect(sw.elapsedMilliseconds, greaterThanOrEqualTo(200)); // 4 categories × 50 ms, one at a time
   });
 }

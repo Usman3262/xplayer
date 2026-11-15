@@ -38,9 +38,13 @@ class CatalogStore {
 
   // ── Categories ───────────────────────────────────────────────────────────
 
-  /// Replaces the panel's category list for [kind] (order kept).
-  Future<void> saveCategories(String panelId, CatalogKind kind, List<ProviderCategory> list) =>
+  /// Replaces the panel's category list for [kind] (order kept). [isAdult]
+  /// decides 18+ (default: the panel's flag); adult categories also mark
+  /// the items already stored in them.
+  Future<void> saveCategories(String panelId, CatalogKind kind, List<ProviderCategory> list,
+          {bool Function(ProviderCategory c)? isAdult}) =>
       db.transaction(() async {
+        bool adultOf(ProviderCategory c) => isAdult?.call(c) ?? c.adult;
         await (db.delete(db.categories)..where((c) => c.panelId.equals(panelId) & c.kind.equals(kind.name))).go();
         await _insertChunks(db.categories, [
           for (var i = 0; i < list.length; i++)
@@ -51,16 +55,40 @@ class CatalogStore {
               name: list[i].name,
               parentId: Value(list[i].parentId),
               sort: i,
+              adult: Value(adultOf(list[i])),
             ),
         ]);
+        final adultIds = [for (final c in list) if (adultOf(c)) c.id];
+        if (adultIds.isEmpty) return;
+        switch (kind) {
+          case CatalogKind.live:
+            await (db.update(db.channels)..where((t) => t.panelId.equals(panelId) & t.categoryId.isIn(adultIds)))
+                .write(const ChannelsCompanion(adult: Value(true)));
+          case CatalogKind.movie:
+            await (db.update(db.movies)..where((t) => t.panelId.equals(panelId) & t.categoryId.isIn(adultIds)))
+                .write(const MoviesCompanion(adult: Value(true)));
+          case CatalogKind.series:
+            await (db.update(db.seriesItems)..where((t) => t.panelId.equals(panelId) & t.categoryId.isIn(adultIds)))
+                .write(const SeriesItemsCompanion(adult: Value(true)));
+        }
       });
 
-  Future<List<ProviderCategory>> categories(String panelId, CatalogKind kind) async {
-    final rows = await (db.select(db.categories)
-          ..where((c) => c.panelId.equals(panelId) & c.kind.equals(kind.name))
-          ..orderBy([(c) => OrderingTerm(expression: c.sort)]))
-        .get();
-    return [for (final r in rows) ProviderCategory(id: r.id, name: r.name, parentId: r.parentId)];
+  /// Is this category 18+ (as saved by the last category sync)?
+  Future<bool> _categoryAdult(String panelId, CatalogKind kind, String? categoryId) async {
+    if (categoryId == null) return false;
+    final r = await (db.select(db.categories)
+          ..where((c) => c.panelId.equals(panelId) & c.kind.equals(kind.name) & c.id.equals(categoryId)))
+        .getSingleOrNull();
+    return r?.adult ?? false;
+  }
+
+  /// [adult]: false = normal (18+ hidden), true = only 18+, null = all.
+  Future<List<ProviderCategory>> categories(String panelId, CatalogKind kind, {bool? adult = false}) async {
+    final q = db.select(db.categories)
+      ..where((c) => c.panelId.equals(panelId) & c.kind.equals(kind.name))
+      ..orderBy([(c) => OrderingTerm(expression: c.sort)]);
+    if (adult != null) q.where((c) => c.adult.equals(adult));
+    return [for (final r in await q.get()) ProviderCategory(id: r.id, name: r.name, parentId: r.parentId, adult: r.adult)];
   }
 
   /// Deletes items whose category the panel no longer has ([keepIds] =
@@ -89,6 +117,7 @@ class CatalogStore {
   /// Replaces one category's channels ([categoryId] null = the whole list).
   Future<void> saveChannels(String panelId, String? categoryId, List<ProviderChannel> list) =>
       db.transaction(() async {
+        final catAdult = await _categoryAdult(panelId, CatalogKind.live, categoryId);
         final del = db.delete(db.channels)..where((c) => c.panelId.equals(panelId));
         if (categoryId != null) del.where((c) => c.categoryId.equals(categoryId));
         await del.go();
@@ -106,14 +135,16 @@ class CatalogStore {
               addedSec: Value(list[i].addedSec),
               command: Value(list[i].stream.command),
               sort: i,
+              adult: Value(catAdult || list[i].adult),
             ),
         ]);
       });
 
   /// A page of channels in panel order; pass the last row's `sort` as
   /// [afterSort] for the next page.
-  Future<List<(ProviderChannel, int)>> channels(String panelId, {String? categoryId, int limit = 60, int? afterSort}) async {
+  Future<List<(ProviderChannel, int)>> channels(String panelId, {String? categoryId, int limit = 60, int? afterSort, bool? adult = false}) async {
     final q = db.select(db.channels)..where((c) => c.panelId.equals(panelId));
+    if (adult != null) q.where((c) => c.adult.equals(adult));
     if (categoryId != null) q.where((c) => c.categoryId.equals(categoryId));
     if (afterSort != null) q.where((c) => c.sort.isBiggerThanValue(afterSort));
     q
@@ -137,11 +168,13 @@ class CatalogStore {
         epgId: r.epgId,
         catchupDays: r.catchupDays,
         addedSec: r.addedSec,
+        adult: r.adult,
       );
 
   // ── Movies ───────────────────────────────────────────────────────────────
 
   Future<void> saveMovies(String panelId, String? categoryId, List<ProviderMovie> list) => db.transaction(() async {
+        final catAdult = await _categoryAdult(panelId, CatalogKind.movie, categoryId);
         final del = db.delete(db.movies)..where((m) => m.panelId.equals(panelId));
         if (categoryId != null) del.where((m) => m.categoryId.equals(categoryId));
         await del.go();
@@ -160,12 +193,14 @@ class CatalogStore {
               extension: Value(list[i].stream.extension),
               command: Value(list[i].stream.command),
               sort: i,
+              adult: Value(catAdult || list[i].adult),
             ),
         ]);
       });
 
-  Future<List<(ProviderMovie, int)>> movies(String panelId, {String? categoryId, int limit = 60, int? afterSort}) async {
+  Future<List<(ProviderMovie, int)>> movies(String panelId, {String? categoryId, int limit = 60, int? afterSort, bool? adult = false}) async {
     final q = db.select(db.movies)..where((m) => m.panelId.equals(panelId));
+    if (adult != null) q.where((m) => m.adult.equals(adult));
     if (categoryId != null) q.where((m) => m.categoryId.equals(categoryId));
     if (afterSort != null) q.where((m) => m.sort.isBiggerThanValue(afterSort));
     q
@@ -176,8 +211,9 @@ class CatalogStore {
 
   /// Newest by the panel's `added` (the "Recently added" rails come from
   /// the panel, never TMDB). Keyset: pass the last movie for the next page.
-  Future<List<ProviderMovie>> newestMovies(String panelId, {int limit = 20, ProviderMovie? after}) async {
+  Future<List<ProviderMovie>> newestMovies(String panelId, {int limit = 20, ProviderMovie? after, bool? adult = false}) async {
     final q = db.select(db.movies)..where((m) => m.panelId.equals(panelId) & m.addedSec.isNotNull());
+    if (adult != null) q.where((m) => m.adult.equals(adult));
     if (after?.addedSec != null) {
       final a = after!.addedSec!;
       q.where((m) => m.addedSec.isSmallerThanValue(a) | (m.addedSec.equals(a) & m.id.isSmallerThanValue(after.id)));
@@ -203,20 +239,22 @@ class CatalogStore {
         categoryId: r.categoryId,
         addedSec: r.addedSec,
         tmdbId: r.tmdbId,
+        adult: r.adult,
       );
 
   // ── Series ───────────────────────────────────────────────────────────────
 
   Future<void> saveSeries(String panelId, String? categoryId, List<ProviderSeries> list) => db.transaction(() async {
+        final catAdult = await _categoryAdult(panelId, CatalogKind.series, categoryId);
         final del = db.delete(db.seriesItems)..where((s) => s.panelId.equals(panelId));
         if (categoryId != null) del.where((s) => s.categoryId.equals(categoryId));
         await del.go();
         await _insertChunks(db.seriesItems, [
-          for (var i = 0; i < list.length; i++) _seriesCompanion(panelId, list[i], categoryId, i),
+          for (var i = 0; i < list.length; i++) _seriesCompanion(panelId, list[i], categoryId, i, adult: catAdult || list[i].adult),
         ]);
       });
 
-  static SeriesItemsCompanion _seriesCompanion(String panelId, ProviderSeries s, String? categoryId, int sort) =>
+  static SeriesItemsCompanion _seriesCompanion(String panelId, ProviderSeries s, String? categoryId, int sort, {bool adult = false}) =>
       SeriesItemsCompanion.insert(
         panelId: panelId,
         id: s.id,
@@ -231,10 +269,12 @@ class CatalogStore {
         addedSec: Value(s.addedSec),
         tmdbId: Value(s.tmdbId),
         sort: sort,
+        adult: Value(adult),
       );
 
-  Future<List<(ProviderSeries, int)>> series(String panelId, {String? categoryId, int limit = 60, int? afterSort}) async {
+  Future<List<(ProviderSeries, int)>> series(String panelId, {String? categoryId, int limit = 60, int? afterSort, bool? adult = false}) async {
     final q = db.select(db.seriesItems)..where((s) => s.panelId.equals(panelId));
+    if (adult != null) q.where((s) => s.adult.equals(adult));
     if (categoryId != null) q.where((s) => s.categoryId.equals(categoryId));
     if (afterSort != null) q.where((s) => s.sort.isBiggerThanValue(afterSort));
     q
@@ -243,8 +283,9 @@ class CatalogStore {
     return [for (final r in await q.get()) (_series(r), r.sort)];
   }
 
-  Future<List<ProviderSeries>> newestSeries(String panelId, {int limit = 20, ProviderSeries? after}) async {
+  Future<List<ProviderSeries>> newestSeries(String panelId, {int limit = 20, ProviderSeries? after, bool? adult = false}) async {
     final q = db.select(db.seriesItems)..where((s) => s.panelId.equals(panelId) & s.addedSec.isNotNull());
+    if (adult != null) q.where((s) => s.adult.equals(adult));
     if (after?.addedSec != null) {
       final a = after!.addedSec!;
       q.where((s) => s.addedSec.isSmallerThanValue(a) | (s.addedSec.equals(a) & s.id.isSmallerThanValue(after.id)));
@@ -267,6 +308,7 @@ class CatalogStore {
         categoryId: r.categoryId,
         addedSec: r.addedSec,
         tmdbId: r.tmdbId,
+        adult: r.adult,
       );
 
   /// Saves a series' seasons/episodes (fetched when the user opens it) and
@@ -277,7 +319,8 @@ class CatalogStore {
               ..where((s) => s.panelId.equals(panelId) & s.id.equals(seriesId)))
             .getSingleOrNull();
         await db.into(db.seriesItems).insertOnConflictUpdate(
-              _seriesCompanion(panelId, d.series, existing?.categoryId, existing?.sort ?? 1 << 30),
+              _seriesCompanion(panelId, d.series, existing?.categoryId, existing?.sort ?? 1 << 30,
+                  adult: (existing?.adult ?? false) || d.series.adult),
             );
         await (db.delete(db.episodes)..where((e) => e.panelId.equals(panelId) & e.seriesId.equals(seriesId))).go();
         await _insertChunks(db.episodes, [
@@ -395,7 +438,7 @@ class CatalogStore {
   /// Best rated first (panel rating), keyset by offset (small pages only).
   Future<List<ProviderMovie>> topRatedMovies(String panelId, {int limit = 20, int offset = 0}) async {
     final rows = await (db.select(db.movies)
-          ..where((m) => m.panelId.equals(panelId) & m.rating.isNotNull())
+          ..where((m) => m.panelId.equals(panelId) & m.rating.isNotNull() & m.adult.equals(false))
           ..orderBy([(m) => OrderingTerm.desc(m.rating), (m) => OrderingTerm.desc(m.addedSec)])
           ..limit(limit, offset: offset))
         .get();
@@ -404,7 +447,7 @@ class CatalogStore {
 
   Future<List<ProviderSeries>> topRatedSeries(String panelId, {int limit = 20, int offset = 0}) async {
     final rows = await (db.select(db.seriesItems)
-          ..where((s) => s.panelId.equals(panelId) & s.rating.isNotNull())
+          ..where((s) => s.panelId.equals(panelId) & s.rating.isNotNull() & s.adult.equals(false))
           ..orderBy([(s) => OrderingTerm.desc(s.rating), (s) => OrderingTerm.desc(s.addedSec)])
           ..limit(limit, offset: offset))
         .get();
@@ -434,7 +477,7 @@ class CatalogStore {
 
   Future<ProviderMovie?> movieByTmdb(String panelId, int tmdbId) async {
     final r = await (db.select(db.movies)
-          ..where((m) => m.panelId.equals(panelId) & m.tmdbId.equals(tmdbId))
+          ..where((m) => m.panelId.equals(panelId) & m.tmdbId.equals(tmdbId) & m.adult.equals(false))
           ..limit(1))
         .getSingleOrNull();
     return r == null ? null : _movie(r);
@@ -442,7 +485,7 @@ class CatalogStore {
 
   Future<ProviderSeries?> seriesByTmdb(String panelId, int tmdbId) async {
     final r = await (db.select(db.seriesItems)
-          ..where((s) => s.panelId.equals(panelId) & s.tmdbId.equals(tmdbId))
+          ..where((s) => s.panelId.equals(panelId) & s.tmdbId.equals(tmdbId) & s.adult.equals(false))
           ..limit(1))
         .getSingleOrNull();
     return r == null ? null : _series(r);
@@ -450,11 +493,12 @@ class CatalogStore {
 
   /// Name contains [q] (case-insensitive; `%`/`_` taken literally).
   /// Simple LIKE for now — full-text search is Phase 7.5.
-  Future<List<ProviderMovie>> searchMovies(String panelId, String q, {int limit = 40, int offset = 0, String? categoryId}) async {
+  Future<List<ProviderMovie>> searchMovies(String panelId, String q, {int limit = 40, int offset = 0, String? categoryId, bool? adult = false}) async {
     final pattern = _like(q);
     if (pattern == null) return const [];
     final query = db.select(db.movies)
       ..where((m) => m.panelId.equals(panelId) & m.name.like(pattern, escapeChar: r'\'));
+    if (adult != null) query.where((m) => m.adult.equals(adult));
     if (categoryId != null) query.where((m) => m.categoryId.equals(categoryId));
     query
       ..orderBy([(m) => OrderingTerm.desc(m.addedSec)])
@@ -462,11 +506,12 @@ class CatalogStore {
     return [for (final r in await query.get()) _movie(r)];
   }
 
-  Future<List<ProviderSeries>> searchSeries(String panelId, String q, {int limit = 40, int offset = 0, String? categoryId}) async {
+  Future<List<ProviderSeries>> searchSeries(String panelId, String q, {int limit = 40, int offset = 0, String? categoryId, bool? adult = false}) async {
     final pattern = _like(q);
     if (pattern == null) return const [];
     final query = db.select(db.seriesItems)
       ..where((s) => s.panelId.equals(panelId) & s.name.like(pattern, escapeChar: r'\'));
+    if (adult != null) query.where((s) => s.adult.equals(adult));
     if (categoryId != null) query.where((s) => s.categoryId.equals(categoryId));
     query
       ..orderBy([(s) => OrderingTerm.desc(s.addedSec)])
@@ -474,11 +519,12 @@ class CatalogStore {
     return [for (final r in await query.get()) _series(r)];
   }
 
-  Future<List<ProviderChannel>> searchChannels(String panelId, String q, {int limit = 40, int offset = 0, String? categoryId}) async {
+  Future<List<ProviderChannel>> searchChannels(String panelId, String q, {int limit = 40, int offset = 0, String? categoryId, bool? adult = false}) async {
     final pattern = _like(q);
     if (pattern == null) return const [];
     final query = db.select(db.channels)
       ..where((c) => c.panelId.equals(panelId) & c.name.like(pattern, escapeChar: r'\'));
+    if (adult != null) query.where((c) => c.adult.equals(adult));
     if (categoryId != null) query.where((c) => c.categoryId.equals(categoryId));
     query
       ..orderBy([(c) => OrderingTerm(expression: c.sort)])

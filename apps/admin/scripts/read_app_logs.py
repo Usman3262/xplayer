@@ -13,6 +13,7 @@ URL, KEY = env["NEXT_PUBLIC_SUPABASE_URL"], env["SUPABASE_SECRET_KEY"]
 ap = argparse.ArgumentParser()
 ap.add_argument("--minutes", type=int, default=30)
 ap.add_argument("--device")
+ap.add_argument("--session")
 ap.add_argument("--model", help="substring of the device model, e.g. LE2115")
 ap.add_argument("--tag", help="comma list, e.g. PANEL,SYNC,ERR")
 ap.add_argument("--limit", type=int, default=300)
@@ -21,6 +22,8 @@ a = ap.parse_args()
 since = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=a.minutes)).isoformat()
 q = [("select", "logged_at,created_at,device_id,session_id,device_model,app_version,tag,message"),
      ("created_at", f"gte.{since}"), ("order", "logged_at.asc,id.asc"), ("limit", str(a.limit))]
+if a.session:
+    q.append(("session_id", f"eq.{a.session}"))
 if a.device:
     q.append(("device_id", f"eq.{a.device}"))
 if a.model:

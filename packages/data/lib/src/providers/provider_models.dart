@@ -356,11 +356,15 @@ class ResolvedStream {
 }
 
 class ProviderCategory {
-  const ProviderCategory({required this.id, required this.name, this.parentId});
+  const ProviderCategory({required this.id, required this.name, this.parentId, this.adult = false});
 
   final String id;
   final String name;
   final String? parentId;
+
+  /// The panel marks it adult (Stalker `censored`). Name keywords are
+  /// checked too (AdultClassifier) when the catalog is synced.
+  final bool adult;
 }
 
 class ProviderChannel {
@@ -374,6 +378,7 @@ class ProviderChannel {
     this.epgId,
     this.catchupDays = 0,
     this.addedSec,
+    this.adult = false,
   });
 
   final String id;
@@ -387,6 +392,9 @@ class ProviderChannel {
   final String? epgId;
   final int catchupDays;
   final int? addedSec;
+
+  /// The panel marks it adult (Xtream `is_adult`, Stalker `censored`).
+  final bool adult;
 }
 
 class ProviderMovie {
@@ -400,6 +408,7 @@ class ProviderMovie {
     this.categoryId,
     this.addedSec,
     this.tmdbId,
+    this.adult = false,
   });
 
   final String id;
@@ -411,6 +420,9 @@ class ProviderMovie {
   final String? categoryId;
   final int? addedSec;
   final int? tmdbId;
+
+  /// The panel marks it adult (Xtream `is_adult`, Stalker `censored`).
+  final bool adult;
 }
 
 class ProviderSeries {
@@ -426,6 +438,7 @@ class ProviderSeries {
     this.categoryId,
     this.addedSec,
     this.tmdbId,
+    this.adult = false,
   });
 
   final String id;
@@ -441,6 +454,9 @@ class ProviderSeries {
   /// Last change on the panel (Xtream `last_modified`).
   final int? addedSec;
   final int? tmdbId;
+
+  /// The panel marks it adult (Xtream `is_adult`, Stalker `censored`).
+  final bool adult;
 }
 
 class ProviderEpisode {

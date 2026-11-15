@@ -24,11 +24,20 @@ class CatalogBrowseScreen extends ConsumerStatefulWidget {
     required this.kind,
     required this.eyebrow,
     this.searchHint,
+    this.topAction,
+    this.sectionKey,
   });
 
   final MediaKind kind;
   final String eyebrow;
   final String? searchHint;
+
+  /// Shown above the search field (e.g. the "Adult 18+" button on Series).
+  final Widget? topAction;
+
+  /// Own row cache / category order (the 18+ view must not share the
+  /// normal section's cached rows).
+  final String? sectionKey;
 
   @override
   ConsumerState<CatalogBrowseScreen> createState() =>
@@ -290,7 +299,7 @@ class _CatalogBrowseScreenState extends ConsumerState<CatalogBrowseScreen> {
     }
   }
 
-  String get _section => widget.kind == MediaKind.series ? 'series' : 'vod';
+  String get _section => widget.sectionKey ?? (widget.kind == MediaKind.series ? 'series' : 'vod');
 
   void _scheduleSaveRows() {
     _saveRows?.cancel();
@@ -412,6 +421,7 @@ class _CatalogBrowseScreenState extends ConsumerState<CatalogBrowseScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          ?widget.topAction,
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: TextField(

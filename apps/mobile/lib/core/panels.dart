@@ -1,6 +1,7 @@
 import 'package:data/data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'catalog.dart';
 import 'remote_config.dart';
@@ -26,6 +27,7 @@ class PanelsService {
   /// Call once in main() after RemoteConfigService.init: loads the saved
   /// panels (no network), then re-checks them after the first frame.
   static Future<void> init() async {
+    await _restoreHttpOnlyHosts();
     registerProviderAdapters(RemoteConfigService.current);
     RemoteConfigService.listenable.addListener(
       () => registerProviderAdapters(RemoteConfigService.current),
@@ -38,6 +40,20 @@ class PanelsService {
       await manager.recheckAll();
       await CatalogService.syncAll();
     });
+  }
+
+  /// Panel hosts that only work over http (learned once, kept): saves the
+  /// https attempt on every start (which times out on a blocking server).
+  static const _httpHostsKey = 'xp.http_only_hosts';
+  static Future<void> _restoreHttpOnlyHosts() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      ProviderHttp.httpOnlyHosts.addAll(prefs.getStringList(_httpHostsKey) ?? const []);
+      ProviderHttp.onHttpOnlyHost = (_) async {
+        final p = await SharedPreferences.getInstance();
+        await p.setStringList(_httpHostsKey, ProviderHttp.httpOnlyHosts.toList());
+      };
+    } catch (_) {}
   }
 
   /// At least one panel is switched on → the app can open Home.

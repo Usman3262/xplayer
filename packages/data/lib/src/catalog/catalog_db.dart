@@ -24,6 +24,9 @@ class Categories extends Table {
   /// Panel order.
   IntColumn get sort => integer()();
 
+  /// 18+ (panel flag or name keyword): hidden unless unlocked with the PIN.
+  BoolColumn get adult => boolean().withDefault(const Constant(false))();
+
   @override
   Set<Column> get primaryKey => {panelId, kind, id};
 }
@@ -44,6 +47,8 @@ class Channels extends Table {
 
   /// Order inside its category as the panel sent it.
   IntColumn get sort => integer()();
+
+  BoolColumn get adult => boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {panelId, id};
@@ -67,6 +72,8 @@ class Movies extends Table {
   TextColumn get extension => text().nullable()();
   TextColumn get command => text().nullable()();
   IntColumn get sort => integer()();
+
+  BoolColumn get adult => boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {panelId, id};
@@ -96,6 +103,8 @@ class SeriesItems extends Table {
   IntColumn get addedSec => integer().nullable()();
   IntColumn get tmdbId => integer().nullable()();
   IntColumn get sort => integer()();
+
+  BoolColumn get adult => boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {panelId, id};
@@ -169,7 +178,7 @@ class CatalogDb extends _$CatalogDb {
   CatalogDb(super.e);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -181,6 +190,14 @@ class CatalogDb extends _$CatalogDb {
                 'CREATE INDEX IF NOT EXISTS movies_by_rating ON movies (panel_id, rating)'));
             await m.createIndex(Index('series_by_rating',
                 'CREATE INDEX IF NOT EXISTS series_by_rating ON series (panel_id, rating)'));
+          }
+          if (from < 3) {
+            // Adult (18+) flags; filled from the next category sync (category
+            // flags also mark their existing items, no full re-sync needed).
+            await m.addColumn(categories, categories.adult);
+            await m.addColumn(channels, channels.adult);
+            await m.addColumn(movies, movies.adult);
+            await m.addColumn(seriesItems, seriesItems.adult);
           }
         },
         beforeOpen: (details) async {

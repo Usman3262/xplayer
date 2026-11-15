@@ -49,6 +49,13 @@ playback, so content shows but doesn't play yet) → 7.1 dynamic Home sections �
 - Q6 Sports (matches & lineups) from an **external API** (provider to choose).
 
 ## Decisions made (defaults — change any time)
+- **D19 Adult (18+) PIN source:** Stalker/MAG portals → the panel account's parental PIN
+  (`parent_password` from the portal profile), exactly like a MAG box. Xtream/M3U → the Xtream API does
+  not share the panel's PIN (checked: not in `user_info`; players like TiviMate/Smarters keep their
+  own), so the user creates an XPlayer adult PIN on first use (salted SHA-256 on the device; cleared
+  by device sign-out). 18+ = panel flag (Xtream `is_adult`, Stalker `censored`) or a whole-word keyword
+  in the category name (admin list). Hidden everywhere by default; unlock lasts 30 min or until the app
+  goes to the background; 5 wrong PINs ⇒ 1 min wait.
 - **D18 Panel form texts:** field labels are the app's own (AppCopy, EN/AR); the admin config controls
   which panel types show, their order, title, description, help text, icon and field placeholders.
 | # | Decision | Why |
@@ -670,6 +677,37 @@ role has sports.read without sports.write).
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-15 — **Adult 18+ section (user request)**: data — `AdultClassifier` (whole words, so Sussex/Essex
+  are fine; Arabic too), adult flags parsed (Xtream `is_adult`, Stalker `censored`), Stalker
+  `parentalPin`, DB schema v3 (`adult` on categories/channels/movies/series; adult categories mark
+  stored items, no re-sync), every normal query hides 18+, `PanelCatalogRepository.adultView()` /
+  `hasAdult()`, `AdultPinLock` (panel PIN or XPlayer PIN). Phone — "Adult 18+" button at the top of
+  Series (only if the panel has 18+ series and admin allows), PIN sheet (kids-PIN look), the existing
+  browse screen fed by the 18+ view, lock on background, cleared on sign-out. Admin — migration 025
+  `content.adult_section` + `content.adult_keywords`, Versions → "Adult content" card, list editor
+  for `string_list` settings. Tests: data 428 (adult 5 + PIN 5), mobile 53 (adult 4), admin tsc 0.
+  Live on Neo: 113 live / 90 movie categories → 0 marked; 95 series → 1 ("مسلسلات كرتون للكبار
+  مترجمة", via "للكبار"). Trial line (likely real XXX) not reachable from this IP right now.
+- 2026-11-15 — **Device check of Phase 6 via remote logs** (OnePlus, trial line) → found + fixed:
+  1. *Series episodes / details timing out*: from 11:31 the provider stopped answering this home IP
+     entirely (login too; PC also times out) — our full sync (~1,750 category requests, repeated per
+     app start, 2 parallel, no pause) tripped its flood protection. Fixes: sync 1 category at a time,
+     300 ms apart (admin `cache.sync_gap_ms`, migration 024; parallel default → 1), back-off after
+     failures; **priority lane** in `ProviderHttp` (details / episodes / guide / play links jump the
+     queue, one slot kept free, background drops to 1 while the user waits, no retries = fail fast);
+     series details fetched once even when seasons + episodes ask together; failed movie details no
+     longer cached as "none"; http-only hosts remembered across starts (blocked https otherwise times
+     out every start). *Verified live on Neo:* opening a series + movie while a forced sync runs →
+     25 episodes + details in **570 ms**, sync 3,365 items 0 failed.
+  2. *TMDB flood*: 30+ parallel metadata calls → 60–77 s each. Fix: one app-wide metadata queue (≤2
+     calls in flight, titles deduped). *Verified live:* 20 titles in 2.9 s, then 0.7–1.5 s.
+  3. *Home reload storm* (~20 loads / 3 min): repository rebuilt on every artwork arrival. Fix: the
+     repository stays per main panel; only the lists refresh on new content.
+  4. *Crashes*: duplicate Navigator page key → GlobalKey error. Router now refreshes only when routing
+     inputs change (panel yes/no, signed in, auth policy). RenderFlex overflow 8.7 px — crash logs now
+     carry the widget/file, to locate on the next run.
+  Tests: data 135 (provider + catalog, incl. priority lane, metadata queue, pacing), mobile 49, admin
+  tsc 0 errors. The trial line can't be re-tested now (provider not answering this IP).
 - 2026-11-15 — **Phase 6 complete** (6.3 metadata on demand + 6.4 panel-backed screens), verified live end to
   end with Neo + metadata-tmdb. Next: device check via remote logs, then 7.6 player.
 - 2026-11-15 — **First check via remote logs (OnePlus LE2115):** `[BACKEND] ready (from bundled env/app.json)`

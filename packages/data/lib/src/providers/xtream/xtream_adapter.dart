@@ -72,8 +72,9 @@ class XtreamAdapter implements ProviderAdapter {
         },
       );
 
-  Future<Object?> _action(String action, [Map<String, String> extra = const {}]) =>
-      _http.getJson(_api({'action': action, ...extra}));
+  /// [priority]: the user is waiting on this (details, episodes, guide).
+  Future<Object?> _action(String action, [Map<String, String> extra = const {}, bool priority = false]) =>
+      _http.getJson(_api({'action': action, ...extra}), priority: priority);
 
   // ── Account ──────────────────────────────────────────────────────────────
 
@@ -173,6 +174,7 @@ class XtreamAdapter implements ProviderAdapter {
                 epgId: _nonEmpty(s['epg_channel_id']),
                 catchupDays: (jsonBool(s['tv_archive']) ?? false) ? (jsonInt(s['tv_archive_duration']) ?? 0) : 0,
                 addedSec: jsonInt(s['added']),
+                adult: jsonBool(s['is_adult']) ?? false,
               ),
       ];
 
@@ -197,6 +199,7 @@ class XtreamAdapter implements ProviderAdapter {
       categoryId: _id(s['category_id']),
       addedSec: jsonInt(s['added']),
       tmdbId: _tmdb(s['tmdb'] ?? s['tmdb_id']),
+      adult: jsonBool(s['is_adult']) ?? false,
     );
   }
 
@@ -223,6 +226,7 @@ class XtreamAdapter implements ProviderAdapter {
       categoryId: _id(s['category_id']),
       addedSec: jsonInt(s['last_modified']),
       tmdbId: _tmdb(s['tmdb'] ?? s['tmdb_id']),
+      adult: jsonBool(s['is_adult']) ?? false,
     );
   }
 
@@ -230,7 +234,7 @@ class XtreamAdapter implements ProviderAdapter {
 
   @override
   Future<ProviderMovieDetails> movieDetails(String movieId) async =>
-      parseVodInfo(await _action('get_vod_info', {'vod_id': movieId}), movieId);
+      parseVodInfo(await _action('get_vod_info', {'vod_id': movieId}, true), movieId);
 
   static ProviderMovieDetails parseVodInfo(Object? raw, String movieId) {
     final root = jsonMap(raw);
@@ -263,7 +267,7 @@ class XtreamAdapter implements ProviderAdapter {
 
   @override
   Future<ProviderSeriesDetails> seriesDetails(String seriesId) async =>
-      parseSeriesInfo(await _action('get_series_info', {'series_id': seriesId}), seriesId);
+      parseSeriesInfo(await _action('get_series_info', {'series_id': seriesId}, true), seriesId);
 
   static ProviderSeriesDetails parseSeriesInfo(Object? raw, String seriesId) {
     final root = jsonMap(raw);
@@ -315,7 +319,7 @@ class XtreamAdapter implements ProviderAdapter {
 
   @override
   Future<List<EpgEntry>> shortEpg(ProviderChannel channel, {int limit = 4}) async =>
-      parseShortEpg(await _action('get_short_epg', {'stream_id': channel.id, 'limit': '$limit'}));
+      parseShortEpg(await _action('get_short_epg', {'stream_id': channel.id, 'limit': '$limit'}, true));
 
   static List<EpgEntry> parseShortEpg(Object? raw) {
     final out = <EpgEntry>[];

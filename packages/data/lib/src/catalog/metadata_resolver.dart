@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:domain/domain.dart';
@@ -31,7 +32,6 @@ class MetadataResolver {
   final MetadataFetch _fetch;
   final Duration missRetry;
   final DateTime Function() _clock;
-  final _inFlight = <String>{};
 
   static String keyOf(MetadataQuery q) {
     final kind = q.kind == CatalogKind.series ? 'series' : 'movie';
@@ -46,51 +46,88 @@ class MetadataResolver {
     return {for (final e in rows.entries) e.key: _parse(e.value.json)};
   }
 
-  /// Cache first; asks the server for what's missing (or a stale "no
-  /// match"). Network problems never throw — you get what is known.
+  /// Cache first; what's missing goes into ONE shared queue for the whole
+  /// app: at most [maxInFlight] calls at a time, ≤25 titles each, every
+  /// title asked once even if many screens want it. Network problems never
+  /// throw — you get what is known.
   Future<Map<String, TitleMetadata?>> resolve(List<MetadataQuery> queries) async {
     final unique = {for (final q in queries) keyOf(q): q};
     final rows = await store.metadata(unique.keys);
     final now = _clock();
     final out = <String, TitleMetadata?>{};
-    final missing = <MetadataQuery>[];
+    final waits = <String, Future<TitleMetadata?>>{};
     for (final e in unique.entries) {
       final row = rows[e.key];
       final staleMiss = row != null && row.json == null && now.difference(row.fetchedAt) > missRetry;
       if (row != null && !staleMiss) {
         out[e.key] = _parse(row.json);
-      } else if (!_inFlight.contains(e.key)) {
-        missing.add(e.value);
+        continue;
+      }
+      final pending = _pending[e.key];
+      if (pending != null) {
+        waits[e.key] = pending.future;
+      } else {
+        final c = Completer<TitleMetadata?>();
+        _pending[e.key] = c;
+        _queue.add(e.value);
+        waits[e.key] = c.future;
       }
     }
-    for (var i = 0; i < missing.length; i += MetadataQuery.maxBatch) {
-      final part = missing.sublist(i, i + MetadataQuery.maxBatch > missing.length ? missing.length : i + MetadataQuery.maxBatch);
-      final keys = part.map(keyOf).toList();
-      _inFlight.addAll(keys);
-      final sw = Stopwatch()..start();
-      try {
-        final reply = await _fetch({'action': 'resolve', 'items': [for (final q in part) q.toJson()]});
-        final results = jsonMap(reply)['results'];
-        final list = results is List ? results : const [];
-        final save = <String, String?>{};
-        var found = 0;
-        for (var k = 0; k < keys.length; k++) {
-          final raw = k < list.length ? list[k] : null;
-          final meta = TitleMetadata.tryParse(raw);
-          if (meta != null) found++;
-          out[keys[k]] = meta;
-          save[keys[k]] = meta == null ? null : jsonEncode(raw);
-        }
-        await store.saveMetadata(save, at: _clock());
-        Diag.event('META', 'resolved ${part.length} titles in ${sw.elapsedMilliseconds}ms: $found matched, '
-            '${part.length - found} no match (${part.where((q) => q.tmdbId != null).length} by tmdb id)');
-      } catch (e) {
-        Diag.event('META', 'resolve failed for ${part.length} titles: ${e.runtimeType}: $e — will retry later');
-      } finally {
-        _inFlight.removeAll(keys);
-      }
+    _pump();
+    for (final w in waits.entries) {
+      out[w.key] = await w.value;
     }
     return out;
+  }
+
+  /// Calls running at once (the server fetches each new title from TMDB).
+  static const maxInFlight = 2;
+  final _queue = <MetadataQuery>[];
+  final _pending = <String, Completer<TitleMetadata?>>{};
+  int _running = 0;
+
+  void _pump() {
+    while (_running < maxInFlight && _queue.isNotEmpty) {
+      final n = _queue.length < MetadataQuery.maxBatch ? _queue.length : MetadataQuery.maxBatch;
+      final part = _queue.sublist(0, n);
+      _queue.removeRange(0, n);
+      _running++;
+      _fetchBatch(part).whenComplete(() {
+        _running--;
+        _pump();
+      });
+    }
+  }
+
+  Future<void> _fetchBatch(List<MetadataQuery> part) async {
+    final keys = part.map(keyOf).toList();
+    final sw = Stopwatch()..start();
+    final results = <String, TitleMetadata?>{};
+    try {
+      final reply = await _fetch({'action': 'resolve', 'items': [for (final q in part) q.toJson()]});
+      final raw = jsonMap(reply)['results'];
+      final list = raw is List ? raw : const [];
+      final save = <String, String?>{};
+      var found = 0;
+      for (var k = 0; k < keys.length; k++) {
+        final item = k < list.length ? list[k] : null;
+        final meta = TitleMetadata.tryParse(item);
+        if (meta != null) found++;
+        results[keys[k]] = meta;
+        save[keys[k]] = meta == null ? null : jsonEncode(item);
+      }
+      await store.saveMetadata(save, at: _clock());
+      Diag.event('META', 'resolved ${part.length} titles in ${sw.elapsedMilliseconds}ms: $found matched, '
+          '${part.length - found} no match (${part.where((q) => q.tmdbId != null).length} by tmdb id), '
+          '${_queue.length} waiting');
+    } catch (e) {
+      Diag.event('META', 'resolve failed for ${part.length} titles after ${sw.elapsedMilliseconds}ms: '
+          '${e.runtimeType}: $e — will retry later');
+    } finally {
+      for (final k in keys) {
+        _pending.remove(k)?.complete(results[k]);
+      }
+    }
   }
 
   static TitleMetadata? _parse(String? json) {

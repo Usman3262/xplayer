@@ -68,14 +68,21 @@ class ProviderHttp {
   bool _closed = false;
 
   /// GET [uri] and decode JSON. [auth] uses the short login timeout.
-  Future<Object?> getJson(Uri uri, {Map<String, String> headers = const {}, bool auth = false}) async {
-    final body = await getText(uri, headers: headers, auth: auth);
+  /// [priority] = the user is waiting (details, episodes, play): jumps the
+  /// queue, may use the slot kept free for it, and fails fast (no retries).
+  Future<Object?> getJson(Uri uri, {Map<String, String> headers = const {}, bool auth = false, bool priority = false}) async {
+    final body = await getText(uri, headers: headers, auth: auth, priority: priority);
     return decodeJson(body);
   }
 
   /// Hosts where https failed (refused / TLS) and plain http worked. Many
   /// IPTV panels only run http, and users often paste "https://" by habit.
-  final Set<String> _httpOnlyHosts = {};
+  /// Shared by all panels and kept across app starts ([onHttpOnlyHost]):
+  /// a blocked/slow https otherwise times out on every start instead of
+  /// being refused, and the fallback never happens.
+  static final Set<String> httpOnlyHosts = {};
+  static void Function(String host)? onHttpOnlyHost;
+  Set<String> get _httpOnlyHosts => httpOnlyHosts;
 
   /// [uri] with the scheme that works for its host (http after a fallback).
   /// Adapters use it for stream URLs too.
@@ -86,24 +93,25 @@ class ProviderHttp {
   static int? _httpPort(Uri u) => u.hasPort && u.port != 443 ? u.port : null;
 
   /// GET [uri] as text (M3U playlists, XMLTV).
-  Future<String> getText(Uri uri, {Map<String, String> headers = const {}, bool auth = false}) async {
+  Future<String> getText(Uri uri, {Map<String, String> headers = const {}, bool auth = false, bool priority = false}) async {
     final timeout = auth ? limits.authTimeout : limits.requestTimeout;
     uri = effective(uri);
+    final urgent = priority || auth;
     var attempt = 0;
     while (true) {
       try {
-        return await _slots.run(() => _once(uri, headers, timeout));
+        return await _slots.run(() => _once(uri, headers, timeout), priority: urgent);
       } on ProviderFailure catch (f) {
         if (uri.scheme == 'https' && _isHttpsProblem(f)) {
           final plain = uri.replace(scheme: 'http', port: _httpPort(uri));
           Diag.panel('https failed (${f.detail}) → trying http: ${Diag.panelUrl(plain)}');
-          final text = await _slots.run(() => _once(plain, headers, timeout));
-          _httpOnlyHosts.add(uri.host);
+          final text = await _slots.run(() => _once(plain, headers, timeout), priority: urgent);
+          if (_httpOnlyHosts.add(uri.host)) onHttpOnlyHost?.call(uri.host);
           Diag.panel('http works for ${uri.host}: using http for this panel');
           return text;
         }
-        // Login answers fast or fails fast: no retries on the auth call.
-        if (auth || !f.isRetryable || attempt >= limits.retries || _closed) rethrow;
+        // The user is waiting (login, details, play): fail fast, no retries.
+        if (urgent || !f.isRetryable || attempt >= limits.retries || _closed) rethrow;
         attempt++;
         final wait = _backoffBase * math.pow(2, attempt - 1).toInt();
         Diag.panel('retry $attempt/${limits.retries} in ${wait.inMilliseconds}ms → ${Diag.panelUrl(uri)}');
@@ -209,32 +217,52 @@ class ProviderHttp {
 
 Object? _decode(String s) => jsonDecode(s);
 
-/// Small async semaphore: at most [max] requests in flight per panel.
+/// Per-panel request slots with a priority lane. Many panels answer only a
+/// couple of requests at once and silently drop the rest (seen on the
+/// user's line: details/episodes timed out while the sync was running).
+/// * background requests (sync) use at most `max - 1` slots, and only 1
+///   while the user is waiting on something;
+/// * priority requests (the user is waiting) jump the queue and may use any
+///   free slot.
 class _Slots {
   _Slots(this.max);
 
   final int max;
   int _busy = 0;
-  final _waiting = <Completer<void>>[];
+  int _priorityActive = 0;
+  final _waitingPriority = <Completer<void>>[];
+  final _waitingNormal = <Completer<void>>[];
 
-  Future<T> run<T>(Future<T> Function() task) async {
-    if (_busy >= max) {
-      // The finishing request hands its slot straight to us (no _busy++),
-      // so a newcomer can never slip in between and exceed [max].
+  int get _normalLimit => max <= 1 ? 1 : (_priorityActive > 0 || _waitingPriority.isNotEmpty ? 1 : max - 1);
+
+  bool _canStart(bool priority) => priority ? _busy < max : _busy < _normalLimit;
+
+  Future<T> run<T>(Future<T> Function() task, {bool priority = false}) async {
+    if (!_canStart(priority)) {
       final c = Completer<void>();
-      _waiting.add(c);
-      await c.future;
+      (priority ? _waitingPriority : _waitingNormal).add(c);
+      await c.future; // the slot is handed over (already counted)
     } else {
       _busy++;
     }
+    if (priority) _priorityActive++;
     try {
       return await task();
     } finally {
-      if (_waiting.isNotEmpty) {
-        _waiting.removeAt(0).complete();
-      } else {
-        _busy--;
-      }
+      if (priority) _priorityActive--;
+      _busy--;
+      _wake();
+    }
+  }
+
+  void _wake() {
+    while (_waitingPriority.isNotEmpty && _busy < max) {
+      _busy++;
+      _waitingPriority.removeAt(0).complete();
+    }
+    while (_waitingNormal.isNotEmpty && _busy < _normalLimit) {
+      _busy++;
+      _waitingNormal.removeAt(0).complete();
     }
   }
 }

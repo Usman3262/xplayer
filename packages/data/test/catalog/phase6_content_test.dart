@@ -150,6 +150,32 @@ void main() {
       expect((calls.last['items'] as List).single, {'kind': 'movie', 'title': 'Unknown Film', 'year': 2001});
     });
 
+    test('many screens at once: one queue, ≤2 calls in flight, each title asked once', () async {
+      var inFlight = 0, peak = 0;
+      final asked = <String>[];
+      final r = MetadataResolver(
+        store: store,
+        clock: () => now,
+        fetch: (body) async {
+          inFlight++;
+          peak = inFlight > peak ? inFlight : peak;
+          await Future<void>.delayed(const Duration(milliseconds: 15));
+          inFlight--;
+          final items = body['items'] as List;
+          asked.addAll(items.map((i) => '${(i as Map)['title']}'));
+          return {'results': [for (final _ in items) null]};
+        },
+      );
+      // 12 screens, overlapping titles (0..59), all at the same moment.
+      await Future.wait([
+        for (var s = 0; s < 12; s++)
+          r.resolve([for (var i = s * 4; i < s * 4 + 15; i++) MetadataQuery(kind: CatalogKind.movie, title: 'Film $i')]),
+      ]);
+      expect(peak, lessThanOrEqualTo(2));
+      expect(asked.toSet().length, asked.length); // no title asked twice
+      expect(asked.toSet().length, 59);
+    });
+
     test('batches of at most 25', () async {
       await resolver().resolve([for (var i = 0; i < 60; i++) MetadataQuery(kind: CatalogKind.movie, title: 'Film $i')]);
       expect(calls.map((c) => (c['items'] as List).length), [25, 25, 10]);
@@ -158,7 +184,7 @@ void main() {
     test('server down → no throw, nothing cached, asked again next time', () async {
       down = true;
       const q = MetadataQuery(kind: CatalogKind.movie, tmdbId: 550);
-      expect(await resolver().resolve([q]), isEmpty);
+      expect((await resolver().resolve([q]))[MetadataResolver.keyOf(q)], isNull); // unknown, not cached
       down = false;
       expect((await resolver().resolve([q]))[MetadataResolver.keyOf(q)], isNotNull);
     });

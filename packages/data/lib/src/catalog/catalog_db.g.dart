@@ -67,6 +67,19 @@ class $CategoriesTable extends Categories
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _adultMeta = const VerificationMeta('adult');
+  @override
+  late final GeneratedColumn<bool> adult = GeneratedColumn<bool>(
+    'adult',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("adult" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     panelId,
@@ -75,6 +88,7 @@ class $CategoriesTable extends Categories
     name,
     parentId,
     sort,
+    adult,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -131,6 +145,12 @@ class $CategoriesTable extends Categories
     } else if (isInserting) {
       context.missing(_sortMeta);
     }
+    if (data.containsKey('adult')) {
+      context.handle(
+        _adultMeta,
+        adult.isAcceptableOrUnknown(data['adult']!, _adultMeta),
+      );
+    }
     return context;
   }
 
@@ -164,6 +184,10 @@ class $CategoriesTable extends Categories
         DriftSqlType.int,
         data['${effectivePrefix}sort'],
       )!,
+      adult: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}adult'],
+      )!,
     );
   }
 
@@ -184,6 +208,9 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
 
   /// Panel order.
   final int sort;
+
+  /// 18+ (panel flag or name keyword): hidden unless unlocked with the PIN.
+  final bool adult;
   const CategoryRow({
     required this.panelId,
     required this.kind,
@@ -191,6 +218,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     required this.name,
     this.parentId,
     required this.sort,
+    required this.adult,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -203,6 +231,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       map['parent_id'] = Variable<String>(parentId);
     }
     map['sort'] = Variable<int>(sort);
+    map['adult'] = Variable<bool>(adult);
     return map;
   }
 
@@ -216,6 +245,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
           ? const Value.absent()
           : Value(parentId),
       sort: Value(sort),
+      adult: Value(adult),
     );
   }
 
@@ -231,6 +261,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       name: serializer.fromJson<String>(json['name']),
       parentId: serializer.fromJson<String?>(json['parentId']),
       sort: serializer.fromJson<int>(json['sort']),
+      adult: serializer.fromJson<bool>(json['adult']),
     );
   }
   @override
@@ -243,6 +274,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       'name': serializer.toJson<String>(name),
       'parentId': serializer.toJson<String?>(parentId),
       'sort': serializer.toJson<int>(sort),
+      'adult': serializer.toJson<bool>(adult),
     };
   }
 
@@ -253,6 +285,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     String? name,
     Value<String?> parentId = const Value.absent(),
     int? sort,
+    bool? adult,
   }) => CategoryRow(
     panelId: panelId ?? this.panelId,
     kind: kind ?? this.kind,
@@ -260,6 +293,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     name: name ?? this.name,
     parentId: parentId.present ? parentId.value : this.parentId,
     sort: sort ?? this.sort,
+    adult: adult ?? this.adult,
   );
   CategoryRow copyWithCompanion(CategoriesCompanion data) {
     return CategoryRow(
@@ -269,6 +303,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       name: data.name.present ? data.name.value : this.name,
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
       sort: data.sort.present ? data.sort.value : this.sort,
+      adult: data.adult.present ? data.adult.value : this.adult,
     );
   }
 
@@ -280,13 +315,15 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('parentId: $parentId, ')
-          ..write('sort: $sort')
+          ..write('sort: $sort, ')
+          ..write('adult: $adult')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(panelId, kind, id, name, parentId, sort);
+  int get hashCode =>
+      Object.hash(panelId, kind, id, name, parentId, sort, adult);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -296,7 +333,8 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
           other.id == this.id &&
           other.name == this.name &&
           other.parentId == this.parentId &&
-          other.sort == this.sort);
+          other.sort == this.sort &&
+          other.adult == this.adult);
 }
 
 class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
@@ -306,6 +344,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
   final Value<String> name;
   final Value<String?> parentId;
   final Value<int> sort;
+  final Value<bool> adult;
   final Value<int> rowid;
   const CategoriesCompanion({
     this.panelId = const Value.absent(),
@@ -314,6 +353,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     this.name = const Value.absent(),
     this.parentId = const Value.absent(),
     this.sort = const Value.absent(),
+    this.adult = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CategoriesCompanion.insert({
@@ -323,6 +363,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     required String name,
     this.parentId = const Value.absent(),
     required int sort,
+    this.adult = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : panelId = Value(panelId),
        kind = Value(kind),
@@ -336,6 +377,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     Expression<String>? name,
     Expression<String>? parentId,
     Expression<int>? sort,
+    Expression<bool>? adult,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -345,6 +387,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
       if (name != null) 'name': name,
       if (parentId != null) 'parent_id': parentId,
       if (sort != null) 'sort': sort,
+      if (adult != null) 'adult': adult,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -356,6 +399,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     Value<String>? name,
     Value<String?>? parentId,
     Value<int>? sort,
+    Value<bool>? adult,
     Value<int>? rowid,
   }) {
     return CategoriesCompanion(
@@ -365,6 +409,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
       name: name ?? this.name,
       parentId: parentId ?? this.parentId,
       sort: sort ?? this.sort,
+      adult: adult ?? this.adult,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -390,6 +435,9 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     if (sort.present) {
       map['sort'] = Variable<int>(sort.value);
     }
+    if (adult.present) {
+      map['adult'] = Variable<bool>(adult.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -405,6 +453,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
           ..write('name: $name, ')
           ..write('parentId: $parentId, ')
           ..write('sort: $sort, ')
+          ..write('adult: $adult, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -529,6 +578,19 @@ class $ChannelsTable extends Channels
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _adultMeta = const VerificationMeta('adult');
+  @override
+  late final GeneratedColumn<bool> adult = GeneratedColumn<bool>(
+    'adult',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("adult" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     panelId,
@@ -542,6 +604,7 @@ class $ChannelsTable extends Channels
     addedSec,
     command,
     sort,
+    adult,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -629,6 +692,12 @@ class $ChannelsTable extends Channels
     } else if (isInserting) {
       context.missing(_sortMeta);
     }
+    if (data.containsKey('adult')) {
+      context.handle(
+        _adultMeta,
+        adult.isAcceptableOrUnknown(data['adult']!, _adultMeta),
+      );
+    }
     return context;
   }
 
@@ -682,6 +751,10 @@ class $ChannelsTable extends Channels
         DriftSqlType.int,
         data['${effectivePrefix}sort'],
       )!,
+      adult: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}adult'],
+      )!,
     );
   }
 
@@ -705,6 +778,7 @@ class ChannelRow extends DataClass implements Insertable<ChannelRow> {
 
   /// Order inside its category as the panel sent it.
   final int sort;
+  final bool adult;
   const ChannelRow({
     required this.panelId,
     required this.id,
@@ -717,6 +791,7 @@ class ChannelRow extends DataClass implements Insertable<ChannelRow> {
     this.addedSec,
     this.command,
     required this.sort,
+    required this.adult,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -744,6 +819,7 @@ class ChannelRow extends DataClass implements Insertable<ChannelRow> {
       map['command'] = Variable<String>(command);
     }
     map['sort'] = Variable<int>(sort);
+    map['adult'] = Variable<bool>(adult);
     return map;
   }
 
@@ -772,6 +848,7 @@ class ChannelRow extends DataClass implements Insertable<ChannelRow> {
           ? const Value.absent()
           : Value(command),
       sort: Value(sort),
+      adult: Value(adult),
     );
   }
 
@@ -792,6 +869,7 @@ class ChannelRow extends DataClass implements Insertable<ChannelRow> {
       addedSec: serializer.fromJson<int?>(json['addedSec']),
       command: serializer.fromJson<String?>(json['command']),
       sort: serializer.fromJson<int>(json['sort']),
+      adult: serializer.fromJson<bool>(json['adult']),
     );
   }
   @override
@@ -809,6 +887,7 @@ class ChannelRow extends DataClass implements Insertable<ChannelRow> {
       'addedSec': serializer.toJson<int?>(addedSec),
       'command': serializer.toJson<String?>(command),
       'sort': serializer.toJson<int>(sort),
+      'adult': serializer.toJson<bool>(adult),
     };
   }
 
@@ -824,6 +903,7 @@ class ChannelRow extends DataClass implements Insertable<ChannelRow> {
     Value<int?> addedSec = const Value.absent(),
     Value<String?> command = const Value.absent(),
     int? sort,
+    bool? adult,
   }) => ChannelRow(
     panelId: panelId ?? this.panelId,
     id: id ?? this.id,
@@ -836,6 +916,7 @@ class ChannelRow extends DataClass implements Insertable<ChannelRow> {
     addedSec: addedSec.present ? addedSec.value : this.addedSec,
     command: command.present ? command.value : this.command,
     sort: sort ?? this.sort,
+    adult: adult ?? this.adult,
   );
   ChannelRow copyWithCompanion(ChannelsCompanion data) {
     return ChannelRow(
@@ -854,6 +935,7 @@ class ChannelRow extends DataClass implements Insertable<ChannelRow> {
       addedSec: data.addedSec.present ? data.addedSec.value : this.addedSec,
       command: data.command.present ? data.command.value : this.command,
       sort: data.sort.present ? data.sort.value : this.sort,
+      adult: data.adult.present ? data.adult.value : this.adult,
     );
   }
 
@@ -870,7 +952,8 @@ class ChannelRow extends DataClass implements Insertable<ChannelRow> {
           ..write('catchupDays: $catchupDays, ')
           ..write('addedSec: $addedSec, ')
           ..write('command: $command, ')
-          ..write('sort: $sort')
+          ..write('sort: $sort, ')
+          ..write('adult: $adult')
           ..write(')'))
         .toString();
   }
@@ -888,6 +971,7 @@ class ChannelRow extends DataClass implements Insertable<ChannelRow> {
     addedSec,
     command,
     sort,
+    adult,
   );
   @override
   bool operator ==(Object other) =>
@@ -903,7 +987,8 @@ class ChannelRow extends DataClass implements Insertable<ChannelRow> {
           other.catchupDays == this.catchupDays &&
           other.addedSec == this.addedSec &&
           other.command == this.command &&
-          other.sort == this.sort);
+          other.sort == this.sort &&
+          other.adult == this.adult);
 }
 
 class ChannelsCompanion extends UpdateCompanion<ChannelRow> {
@@ -918,6 +1003,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelRow> {
   final Value<int?> addedSec;
   final Value<String?> command;
   final Value<int> sort;
+  final Value<bool> adult;
   final Value<int> rowid;
   const ChannelsCompanion({
     this.panelId = const Value.absent(),
@@ -931,6 +1017,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelRow> {
     this.addedSec = const Value.absent(),
     this.command = const Value.absent(),
     this.sort = const Value.absent(),
+    this.adult = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ChannelsCompanion.insert({
@@ -945,6 +1032,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelRow> {
     this.addedSec = const Value.absent(),
     this.command = const Value.absent(),
     required int sort,
+    this.adult = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : panelId = Value(panelId),
        id = Value(id),
@@ -962,6 +1050,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelRow> {
     Expression<int>? addedSec,
     Expression<String>? command,
     Expression<int>? sort,
+    Expression<bool>? adult,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -976,6 +1065,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelRow> {
       if (addedSec != null) 'added_sec': addedSec,
       if (command != null) 'command': command,
       if (sort != null) 'sort': sort,
+      if (adult != null) 'adult': adult,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -992,6 +1082,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelRow> {
     Value<int?>? addedSec,
     Value<String?>? command,
     Value<int>? sort,
+    Value<bool>? adult,
     Value<int>? rowid,
   }) {
     return ChannelsCompanion(
@@ -1006,6 +1097,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelRow> {
       addedSec: addedSec ?? this.addedSec,
       command: command ?? this.command,
       sort: sort ?? this.sort,
+      adult: adult ?? this.adult,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1046,6 +1138,9 @@ class ChannelsCompanion extends UpdateCompanion<ChannelRow> {
     if (sort.present) {
       map['sort'] = Variable<int>(sort.value);
     }
+    if (adult.present) {
+      map['adult'] = Variable<bool>(adult.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1066,6 +1161,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelRow> {
           ..write('addedSec: $addedSec, ')
           ..write('command: $command, ')
           ..write('sort: $sort, ')
+          ..write('adult: $adult, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1197,6 +1293,19 @@ class $MoviesTable extends Movies with TableInfo<$MoviesTable, MovieRow> {
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _adultMeta = const VerificationMeta('adult');
+  @override
+  late final GeneratedColumn<bool> adult = GeneratedColumn<bool>(
+    'adult',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("adult" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     panelId,
@@ -1211,6 +1320,7 @@ class $MoviesTable extends Movies with TableInfo<$MoviesTable, MovieRow> {
     extension,
     command,
     sort,
+    adult,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1301,6 +1411,12 @@ class $MoviesTable extends Movies with TableInfo<$MoviesTable, MovieRow> {
     } else if (isInserting) {
       context.missing(_sortMeta);
     }
+    if (data.containsKey('adult')) {
+      context.handle(
+        _adultMeta,
+        adult.isAcceptableOrUnknown(data['adult']!, _adultMeta),
+      );
+    }
     return context;
   }
 
@@ -1358,6 +1474,10 @@ class $MoviesTable extends Movies with TableInfo<$MoviesTable, MovieRow> {
         DriftSqlType.int,
         data['${effectivePrefix}sort'],
       )!,
+      adult: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}adult'],
+      )!,
     );
   }
 
@@ -1380,6 +1500,7 @@ class MovieRow extends DataClass implements Insertable<MovieRow> {
   final String? extension;
   final String? command;
   final int sort;
+  final bool adult;
   const MovieRow({
     required this.panelId,
     required this.id,
@@ -1393,6 +1514,7 @@ class MovieRow extends DataClass implements Insertable<MovieRow> {
     this.extension,
     this.command,
     required this.sort,
+    required this.adult,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1425,6 +1547,7 @@ class MovieRow extends DataClass implements Insertable<MovieRow> {
       map['command'] = Variable<String>(command);
     }
     map['sort'] = Variable<int>(sort);
+    map['adult'] = Variable<bool>(adult);
     return map;
   }
 
@@ -1456,6 +1579,7 @@ class MovieRow extends DataClass implements Insertable<MovieRow> {
           ? const Value.absent()
           : Value(command),
       sort: Value(sort),
+      adult: Value(adult),
     );
   }
 
@@ -1477,6 +1601,7 @@ class MovieRow extends DataClass implements Insertable<MovieRow> {
       extension: serializer.fromJson<String?>(json['extension']),
       command: serializer.fromJson<String?>(json['command']),
       sort: serializer.fromJson<int>(json['sort']),
+      adult: serializer.fromJson<bool>(json['adult']),
     );
   }
   @override
@@ -1495,6 +1620,7 @@ class MovieRow extends DataClass implements Insertable<MovieRow> {
       'extension': serializer.toJson<String?>(extension),
       'command': serializer.toJson<String?>(command),
       'sort': serializer.toJson<int>(sort),
+      'adult': serializer.toJson<bool>(adult),
     };
   }
 
@@ -1511,6 +1637,7 @@ class MovieRow extends DataClass implements Insertable<MovieRow> {
     Value<String?> extension = const Value.absent(),
     Value<String?> command = const Value.absent(),
     int? sort,
+    bool? adult,
   }) => MovieRow(
     panelId: panelId ?? this.panelId,
     id: id ?? this.id,
@@ -1524,6 +1651,7 @@ class MovieRow extends DataClass implements Insertable<MovieRow> {
     extension: extension.present ? extension.value : this.extension,
     command: command.present ? command.value : this.command,
     sort: sort ?? this.sort,
+    adult: adult ?? this.adult,
   );
   MovieRow copyWithCompanion(MoviesCompanion data) {
     return MovieRow(
@@ -1541,6 +1669,7 @@ class MovieRow extends DataClass implements Insertable<MovieRow> {
       extension: data.extension.present ? data.extension.value : this.extension,
       command: data.command.present ? data.command.value : this.command,
       sort: data.sort.present ? data.sort.value : this.sort,
+      adult: data.adult.present ? data.adult.value : this.adult,
     );
   }
 
@@ -1558,7 +1687,8 @@ class MovieRow extends DataClass implements Insertable<MovieRow> {
           ..write('tmdbId: $tmdbId, ')
           ..write('extension: $extension, ')
           ..write('command: $command, ')
-          ..write('sort: $sort')
+          ..write('sort: $sort, ')
+          ..write('adult: $adult')
           ..write(')'))
         .toString();
   }
@@ -1577,6 +1707,7 @@ class MovieRow extends DataClass implements Insertable<MovieRow> {
     extension,
     command,
     sort,
+    adult,
   );
   @override
   bool operator ==(Object other) =>
@@ -1593,7 +1724,8 @@ class MovieRow extends DataClass implements Insertable<MovieRow> {
           other.tmdbId == this.tmdbId &&
           other.extension == this.extension &&
           other.command == this.command &&
-          other.sort == this.sort);
+          other.sort == this.sort &&
+          other.adult == this.adult);
 }
 
 class MoviesCompanion extends UpdateCompanion<MovieRow> {
@@ -1609,6 +1741,7 @@ class MoviesCompanion extends UpdateCompanion<MovieRow> {
   final Value<String?> extension;
   final Value<String?> command;
   final Value<int> sort;
+  final Value<bool> adult;
   final Value<int> rowid;
   const MoviesCompanion({
     this.panelId = const Value.absent(),
@@ -1623,6 +1756,7 @@ class MoviesCompanion extends UpdateCompanion<MovieRow> {
     this.extension = const Value.absent(),
     this.command = const Value.absent(),
     this.sort = const Value.absent(),
+    this.adult = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   MoviesCompanion.insert({
@@ -1638,6 +1772,7 @@ class MoviesCompanion extends UpdateCompanion<MovieRow> {
     this.extension = const Value.absent(),
     this.command = const Value.absent(),
     required int sort,
+    this.adult = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : panelId = Value(panelId),
        id = Value(id),
@@ -1656,6 +1791,7 @@ class MoviesCompanion extends UpdateCompanion<MovieRow> {
     Expression<String>? extension,
     Expression<String>? command,
     Expression<int>? sort,
+    Expression<bool>? adult,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1671,6 +1807,7 @@ class MoviesCompanion extends UpdateCompanion<MovieRow> {
       if (extension != null) 'extension': extension,
       if (command != null) 'command': command,
       if (sort != null) 'sort': sort,
+      if (adult != null) 'adult': adult,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1688,6 +1825,7 @@ class MoviesCompanion extends UpdateCompanion<MovieRow> {
     Value<String?>? extension,
     Value<String?>? command,
     Value<int>? sort,
+    Value<bool>? adult,
     Value<int>? rowid,
   }) {
     return MoviesCompanion(
@@ -1703,6 +1841,7 @@ class MoviesCompanion extends UpdateCompanion<MovieRow> {
       extension: extension ?? this.extension,
       command: command ?? this.command,
       sort: sort ?? this.sort,
+      adult: adult ?? this.adult,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1746,6 +1885,9 @@ class MoviesCompanion extends UpdateCompanion<MovieRow> {
     if (sort.present) {
       map['sort'] = Variable<int>(sort.value);
     }
+    if (adult.present) {
+      map['adult'] = Variable<bool>(adult.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1767,6 +1909,7 @@ class MoviesCompanion extends UpdateCompanion<MovieRow> {
           ..write('extension: $extension, ')
           ..write('command: $command, ')
           ..write('sort: $sort, ')
+          ..write('adult: $adult, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1907,6 +2050,19 @@ class $SeriesItemsTable extends SeriesItems
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _adultMeta = const VerificationMeta('adult');
+  @override
+  late final GeneratedColumn<bool> adult = GeneratedColumn<bool>(
+    'adult',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("adult" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     panelId,
@@ -1922,6 +2078,7 @@ class $SeriesItemsTable extends SeriesItems
     addedSec,
     tmdbId,
     sort,
+    adult,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2021,6 +2178,12 @@ class $SeriesItemsTable extends SeriesItems
     } else if (isInserting) {
       context.missing(_sortMeta);
     }
+    if (data.containsKey('adult')) {
+      context.handle(
+        _adultMeta,
+        adult.isAcceptableOrUnknown(data['adult']!, _adultMeta),
+      );
+    }
     return context;
   }
 
@@ -2082,6 +2245,10 @@ class $SeriesItemsTable extends SeriesItems
         DriftSqlType.int,
         data['${effectivePrefix}sort'],
       )!,
+      adult: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}adult'],
+      )!,
     );
   }
 
@@ -2107,6 +2274,7 @@ class SeriesRow extends DataClass implements Insertable<SeriesRow> {
   final int? addedSec;
   final int? tmdbId;
   final int sort;
+  final bool adult;
   const SeriesRow({
     required this.panelId,
     required this.id,
@@ -2121,6 +2289,7 @@ class SeriesRow extends DataClass implements Insertable<SeriesRow> {
     this.addedSec,
     this.tmdbId,
     required this.sort,
+    required this.adult,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2154,6 +2323,7 @@ class SeriesRow extends DataClass implements Insertable<SeriesRow> {
       map['tmdb_id'] = Variable<int>(tmdbId);
     }
     map['sort'] = Variable<int>(sort);
+    map['adult'] = Variable<bool>(adult);
     return map;
   }
 
@@ -2184,6 +2354,7 @@ class SeriesRow extends DataClass implements Insertable<SeriesRow> {
           ? const Value.absent()
           : Value(tmdbId),
       sort: Value(sort),
+      adult: Value(adult),
     );
   }
 
@@ -2206,6 +2377,7 @@ class SeriesRow extends DataClass implements Insertable<SeriesRow> {
       addedSec: serializer.fromJson<int?>(json['addedSec']),
       tmdbId: serializer.fromJson<int?>(json['tmdbId']),
       sort: serializer.fromJson<int>(json['sort']),
+      adult: serializer.fromJson<bool>(json['adult']),
     );
   }
   @override
@@ -2225,6 +2397,7 @@ class SeriesRow extends DataClass implements Insertable<SeriesRow> {
       'addedSec': serializer.toJson<int?>(addedSec),
       'tmdbId': serializer.toJson<int?>(tmdbId),
       'sort': serializer.toJson<int>(sort),
+      'adult': serializer.toJson<bool>(adult),
     };
   }
 
@@ -2242,6 +2415,7 @@ class SeriesRow extends DataClass implements Insertable<SeriesRow> {
     Value<int?> addedSec = const Value.absent(),
     Value<int?> tmdbId = const Value.absent(),
     int? sort,
+    bool? adult,
   }) => SeriesRow(
     panelId: panelId ?? this.panelId,
     id: id ?? this.id,
@@ -2256,6 +2430,7 @@ class SeriesRow extends DataClass implements Insertable<SeriesRow> {
     addedSec: addedSec.present ? addedSec.value : this.addedSec,
     tmdbId: tmdbId.present ? tmdbId.value : this.tmdbId,
     sort: sort ?? this.sort,
+    adult: adult ?? this.adult,
   );
   SeriesRow copyWithCompanion(SeriesItemsCompanion data) {
     return SeriesRow(
@@ -2276,6 +2451,7 @@ class SeriesRow extends DataClass implements Insertable<SeriesRow> {
       addedSec: data.addedSec.present ? data.addedSec.value : this.addedSec,
       tmdbId: data.tmdbId.present ? data.tmdbId.value : this.tmdbId,
       sort: data.sort.present ? data.sort.value : this.sort,
+      adult: data.adult.present ? data.adult.value : this.adult,
     );
   }
 
@@ -2294,7 +2470,8 @@ class SeriesRow extends DataClass implements Insertable<SeriesRow> {
           ..write('categoryId: $categoryId, ')
           ..write('addedSec: $addedSec, ')
           ..write('tmdbId: $tmdbId, ')
-          ..write('sort: $sort')
+          ..write('sort: $sort, ')
+          ..write('adult: $adult')
           ..write(')'))
         .toString();
   }
@@ -2314,6 +2491,7 @@ class SeriesRow extends DataClass implements Insertable<SeriesRow> {
     addedSec,
     tmdbId,
     sort,
+    adult,
   );
   @override
   bool operator ==(Object other) =>
@@ -2331,7 +2509,8 @@ class SeriesRow extends DataClass implements Insertable<SeriesRow> {
           other.categoryId == this.categoryId &&
           other.addedSec == this.addedSec &&
           other.tmdbId == this.tmdbId &&
-          other.sort == this.sort);
+          other.sort == this.sort &&
+          other.adult == this.adult);
 }
 
 class SeriesItemsCompanion extends UpdateCompanion<SeriesRow> {
@@ -2348,6 +2527,7 @@ class SeriesItemsCompanion extends UpdateCompanion<SeriesRow> {
   final Value<int?> addedSec;
   final Value<int?> tmdbId;
   final Value<int> sort;
+  final Value<bool> adult;
   final Value<int> rowid;
   const SeriesItemsCompanion({
     this.panelId = const Value.absent(),
@@ -2363,6 +2543,7 @@ class SeriesItemsCompanion extends UpdateCompanion<SeriesRow> {
     this.addedSec = const Value.absent(),
     this.tmdbId = const Value.absent(),
     this.sort = const Value.absent(),
+    this.adult = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SeriesItemsCompanion.insert({
@@ -2379,6 +2560,7 @@ class SeriesItemsCompanion extends UpdateCompanion<SeriesRow> {
     this.addedSec = const Value.absent(),
     this.tmdbId = const Value.absent(),
     required int sort,
+    this.adult = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : panelId = Value(panelId),
        id = Value(id),
@@ -2398,6 +2580,7 @@ class SeriesItemsCompanion extends UpdateCompanion<SeriesRow> {
     Expression<int>? addedSec,
     Expression<int>? tmdbId,
     Expression<int>? sort,
+    Expression<bool>? adult,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2414,6 +2597,7 @@ class SeriesItemsCompanion extends UpdateCompanion<SeriesRow> {
       if (addedSec != null) 'added_sec': addedSec,
       if (tmdbId != null) 'tmdb_id': tmdbId,
       if (sort != null) 'sort': sort,
+      if (adult != null) 'adult': adult,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2432,6 +2616,7 @@ class SeriesItemsCompanion extends UpdateCompanion<SeriesRow> {
     Value<int?>? addedSec,
     Value<int?>? tmdbId,
     Value<int>? sort,
+    Value<bool>? adult,
     Value<int>? rowid,
   }) {
     return SeriesItemsCompanion(
@@ -2448,6 +2633,7 @@ class SeriesItemsCompanion extends UpdateCompanion<SeriesRow> {
       addedSec: addedSec ?? this.addedSec,
       tmdbId: tmdbId ?? this.tmdbId,
       sort: sort ?? this.sort,
+      adult: adult ?? this.adult,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2494,6 +2680,9 @@ class SeriesItemsCompanion extends UpdateCompanion<SeriesRow> {
     if (sort.present) {
       map['sort'] = Variable<int>(sort.value);
     }
+    if (adult.present) {
+      map['adult'] = Variable<bool>(adult.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2516,6 +2705,7 @@ class SeriesItemsCompanion extends UpdateCompanion<SeriesRow> {
           ..write('addedSec: $addedSec, ')
           ..write('tmdbId: $tmdbId, ')
           ..write('sort: $sort, ')
+          ..write('adult: $adult, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4331,6 +4521,7 @@ typedef $$CategoriesTableCreateCompanionBuilder = CategoriesCompanion Function({
   required String name,
   Value<String?> parentId,
   required int sort,
+  Value<bool> adult,
   Value<int> rowid,
 });
 typedef $$CategoriesTableUpdateCompanionBuilder = CategoriesCompanion Function({
@@ -4340,6 +4531,7 @@ typedef $$CategoriesTableUpdateCompanionBuilder = CategoriesCompanion Function({
   Value<String> name,
   Value<String?> parentId,
   Value<int> sort,
+  Value<bool> adult,
   Value<int> rowid,
 });
 
@@ -4379,6 +4571,11 @@ class $$CategoriesTableFilterComposer
 
   ColumnFilters<int> get sort => $composableBuilder(
     column: $table.sort,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get adult => $composableBuilder(
+    column: $table.adult,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -4421,6 +4618,11 @@ class $$CategoriesTableOrderingComposer
     column: $table.sort,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get adult => $composableBuilder(
+    column: $table.adult,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CategoriesTableAnnotationComposer
@@ -4449,6 +4651,9 @@ class $$CategoriesTableAnnotationComposer
 
   GeneratedColumn<int> get sort =>
       $composableBuilder(column: $table.sort, builder: (column) => column);
+
+  GeneratedColumn<bool> get adult =>
+      $composableBuilder(column: $table.adult, builder: (column) => column);
 }
 
 class $$CategoriesTableTableManager
@@ -4488,6 +4693,7 @@ class $$CategoriesTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String?> parentId = const Value.absent(),
                 Value<int> sort = const Value.absent(),
+                Value<bool> adult = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CategoriesCompanion(
                 panelId: panelId,
@@ -4496,6 +4702,7 @@ class $$CategoriesTableTableManager
                 name: name,
                 parentId: parentId,
                 sort: sort,
+                adult: adult,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4506,6 +4713,7 @@ class $$CategoriesTableTableManager
                 required String name,
                 Value<String?> parentId = const Value.absent(),
                 required int sort,
+                Value<bool> adult = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CategoriesCompanion.insert(
                 panelId: panelId,
@@ -4514,6 +4722,7 @@ class $$CategoriesTableTableManager
                 name: name,
                 parentId: parentId,
                 sort: sort,
+                adult: adult,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -4559,6 +4768,7 @@ typedef $$ChannelsTableCreateCompanionBuilder = ChannelsCompanion Function({
   Value<int?> addedSec,
   Value<String?> command,
   required int sort,
+  Value<bool> adult,
   Value<int> rowid,
 });
 typedef $$ChannelsTableUpdateCompanionBuilder = ChannelsCompanion Function({
@@ -4573,6 +4783,7 @@ typedef $$ChannelsTableUpdateCompanionBuilder = ChannelsCompanion Function({
   Value<int?> addedSec,
   Value<String?> command,
   Value<int> sort,
+  Value<bool> adult,
   Value<int> rowid,
 });
 
@@ -4637,6 +4848,11 @@ class $$ChannelsTableFilterComposer
 
   ColumnFilters<int> get sort => $composableBuilder(
     column: $table.sort,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get adult => $composableBuilder(
+    column: $table.adult,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -4704,6 +4920,11 @@ class $$ChannelsTableOrderingComposer
     column: $table.sort,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get adult => $composableBuilder(
+    column: $table.adult,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ChannelsTableAnnotationComposer
@@ -4751,6 +4972,9 @@ class $$ChannelsTableAnnotationComposer
 
   GeneratedColumn<int> get sort =>
       $composableBuilder(column: $table.sort, builder: (column) => column);
+
+  GeneratedColumn<bool> get adult =>
+      $composableBuilder(column: $table.adult, builder: (column) => column);
 }
 
 class $$ChannelsTableTableManager
@@ -4792,6 +5016,7 @@ class $$ChannelsTableTableManager
                 Value<int?> addedSec = const Value.absent(),
                 Value<String?> command = const Value.absent(),
                 Value<int> sort = const Value.absent(),
+                Value<bool> adult = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ChannelsCompanion(
                 panelId: panelId,
@@ -4805,6 +5030,7 @@ class $$ChannelsTableTableManager
                 addedSec: addedSec,
                 command: command,
                 sort: sort,
+                adult: adult,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4820,6 +5046,7 @@ class $$ChannelsTableTableManager
                 Value<int?> addedSec = const Value.absent(),
                 Value<String?> command = const Value.absent(),
                 required int sort,
+                Value<bool> adult = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ChannelsCompanion.insert(
                 panelId: panelId,
@@ -4833,6 +5060,7 @@ class $$ChannelsTableTableManager
                 addedSec: addedSec,
                 command: command,
                 sort: sort,
+                adult: adult,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -4879,6 +5107,7 @@ typedef $$MoviesTableCreateCompanionBuilder = MoviesCompanion Function({
   Value<String?> extension,
   Value<String?> command,
   required int sort,
+  Value<bool> adult,
   Value<int> rowid,
 });
 typedef $$MoviesTableUpdateCompanionBuilder = MoviesCompanion Function({
@@ -4894,6 +5123,7 @@ typedef $$MoviesTableUpdateCompanionBuilder = MoviesCompanion Function({
   Value<String?> extension,
   Value<String?> command,
   Value<int> sort,
+  Value<bool> adult,
   Value<int> rowid,
 });
 
@@ -4962,6 +5192,11 @@ class $$MoviesTableFilterComposer extends Composer<_$CatalogDb, $MoviesTable> {
 
   ColumnFilters<int> get sort => $composableBuilder(
     column: $table.sort,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get adult => $composableBuilder(
+    column: $table.adult,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -5034,6 +5269,11 @@ class $$MoviesTableOrderingComposer
     column: $table.sort,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get adult => $composableBuilder(
+    column: $table.adult,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$MoviesTableAnnotationComposer
@@ -5082,6 +5322,9 @@ class $$MoviesTableAnnotationComposer
 
   GeneratedColumn<int> get sort =>
       $composableBuilder(column: $table.sort, builder: (column) => column);
+
+  GeneratedColumn<bool> get adult =>
+      $composableBuilder(column: $table.adult, builder: (column) => column);
 }
 
 class $$MoviesTableTableManager
@@ -5124,6 +5367,7 @@ class $$MoviesTableTableManager
                 Value<String?> extension = const Value.absent(),
                 Value<String?> command = const Value.absent(),
                 Value<int> sort = const Value.absent(),
+                Value<bool> adult = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MoviesCompanion(
                 panelId: panelId,
@@ -5138,6 +5382,7 @@ class $$MoviesTableTableManager
                 extension: extension,
                 command: command,
                 sort: sort,
+                adult: adult,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -5154,6 +5399,7 @@ class $$MoviesTableTableManager
                 Value<String?> extension = const Value.absent(),
                 Value<String?> command = const Value.absent(),
                 required int sort,
+                Value<bool> adult = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MoviesCompanion.insert(
                 panelId: panelId,
@@ -5168,6 +5414,7 @@ class $$MoviesTableTableManager
                 extension: extension,
                 command: command,
                 sort: sort,
+                adult: adult,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -5216,6 +5463,7 @@ typedef $$SeriesItemsTableCreateCompanionBuilder =
       Value<int?> addedSec,
       Value<int?> tmdbId,
       required int sort,
+      Value<bool> adult,
       Value<int> rowid,
     });
 typedef $$SeriesItemsTableUpdateCompanionBuilder =
@@ -5233,6 +5481,7 @@ typedef $$SeriesItemsTableUpdateCompanionBuilder =
       Value<int?> addedSec,
       Value<int?> tmdbId,
       Value<int> sort,
+      Value<bool> adult,
       Value<int> rowid,
     });
 
@@ -5307,6 +5556,11 @@ class $$SeriesItemsTableFilterComposer
 
   ColumnFilters<int> get sort => $composableBuilder(
     column: $table.sort,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get adult => $composableBuilder(
+    column: $table.adult,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -5384,6 +5638,11 @@ class $$SeriesItemsTableOrderingComposer
     column: $table.sort,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get adult => $composableBuilder(
+    column: $table.adult,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SeriesItemsTableAnnotationComposer
@@ -5437,6 +5696,9 @@ class $$SeriesItemsTableAnnotationComposer
 
   GeneratedColumn<int> get sort =>
       $composableBuilder(column: $table.sort, builder: (column) => column);
+
+  GeneratedColumn<bool> get adult =>
+      $composableBuilder(column: $table.adult, builder: (column) => column);
 }
 
 class $$SeriesItemsTableTableManager
@@ -5483,6 +5745,7 @@ class $$SeriesItemsTableTableManager
                 Value<int?> addedSec = const Value.absent(),
                 Value<int?> tmdbId = const Value.absent(),
                 Value<int> sort = const Value.absent(),
+                Value<bool> adult = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SeriesItemsCompanion(
                 panelId: panelId,
@@ -5498,6 +5761,7 @@ class $$SeriesItemsTableTableManager
                 addedSec: addedSec,
                 tmdbId: tmdbId,
                 sort: sort,
+                adult: adult,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -5515,6 +5779,7 @@ class $$SeriesItemsTableTableManager
                 Value<int?> addedSec = const Value.absent(),
                 Value<int?> tmdbId = const Value.absent(),
                 required int sort,
+                Value<bool> adult = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SeriesItemsCompanion.insert(
                 panelId: panelId,
@@ -5530,6 +5795,7 @@ class $$SeriesItemsTableTableManager
                 addedSec: addedSec,
                 tmdbId: tmdbId,
                 sort: sort,
+                adult: adult,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

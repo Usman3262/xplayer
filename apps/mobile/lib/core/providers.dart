@@ -24,8 +24,12 @@ final catalogRepositoryProvider = Provider<CatalogRepository>((ref) {
   // Phase 6.4: with a panel connected, every screen reads the user's panel
   // (local catalog + panel details + global-catalog artwork). The admin's
   // Home config decides the rails; content always comes from the panel.
-  ref.watch(catalogRevisionProvider);
-  final panel = ref.watch(panelsProvider).where((c) => c.isPrimary && c.enabled).firstOrNull;
+  // Stable per main panel: new content refreshes the lists below
+  // (catalogRevisionProvider), not the repository (keeps its caches).
+  final panelId = ref.watch(panelsProvider.select(
+    (l) => l.where((c) => c.isPrimary && c.enabled).firstOrNull?.id,
+  ));
+  final panel = panelId == null ? null : (id: panelId);
   if (panel != null) {
     final config = ref.watch(remoteConfigProvider);
     return PanelCatalogRepository(
@@ -74,14 +78,17 @@ final liveEpgProvider = FutureProvider.autoDispose
     });
 
 final homeFeedProvider = FutureProvider<HomeFeed>((ref) {
+  ref.watch(catalogRevisionProvider); // new synced content / artwork
   return ref.watch(catalogRepositoryProvider).getHomeFeed();
 });
 
 final moviesProvider = FutureProvider<List<MediaItem>>((ref) {
+  ref.watch(catalogRevisionProvider);
   return ref.watch(catalogRepositoryProvider).getMovies();
 });
 
 final seriesProvider = FutureProvider<List<MediaItem>>((ref) {
+  ref.watch(catalogRevisionProvider);
   return ref.watch(catalogRepositoryProvider).getSeries();
 });
 
@@ -91,6 +98,7 @@ final weeklyPicksProvider = FutureProvider<
     ({List<MediaItem> movies, List<MediaItem> series})>((ref) async {
   // "Recently Added" (client 2 Nov #4, was "Top Movies of the Week"): newest
   // first from the whole catalog, not only 4K. Same source as LG 6.1.11.
+  ref.watch(catalogRevisionProvider);
   final repo = ref.watch(catalogRepositoryProvider);
   Future<List<MediaItem>> newest(Future<List<MediaItem>> Function() load) async {
     try {
