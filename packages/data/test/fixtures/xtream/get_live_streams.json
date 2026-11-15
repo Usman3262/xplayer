@@ -1,0 +1,92 @@
+[
+ {
+  "num": 2,
+  "name": "AR: MBC ELIFE ᴿᴬᵂ",
+  "stream_type": "live",
+  "stream_id": 286044,
+  "stream_icon": "http://photo-tmdb.com/stalker_portal/misc/logos/320/13354.jpg?87240",
+  "epg_channel_id": "",
+  "added": "1753973016",
+  "is_adult": 0,
+  "category_id": "429",
+  "category_ids": [
+   429
+  ],
+  "custom_sid": null,
+  "tv_archive": 0,
+  "direct_source": "",
+  "tv_archive_duration": 0
+ },
+ {
+  "num": 3,
+  "name": "AR: MBC 1 ᴿᴬᵂ",
+  "stream_type": "live",
+  "stream_id": 286042,
+  "stream_icon": "http://photo-tmdb.com/stalker_portal/misc/logos/320/1205.jpg",
+  "epg_channel_id": "MBC1.ae",
+  "added": "1753973016",
+  "is_adult": 0,
+  "category_id": "429",
+  "category_ids": [
+   429
+  ],
+  "custom_sid": null,
+  "tv_archive": 0,
+  "direct_source": "",
+  "tv_archive_duration": 0
+ },
+ {
+  "num": 4,
+  "name": "AR: MBC 1 ᴴᴰ",
+  "stream_type": "live",
+  "stream_id": 286041,
+  "stream_icon": "http://photo-tmdb.com/stalker_portal/misc/logos/320/1205.jpg",
+  "epg_channel_id": "MBC1.ae",
+  "added": "1753973016",
+  "is_adult": 0,
+  "category_id": "429",
+  "category_ids": [
+   429
+  ],
+  "custom_sid": null,
+  "tv_archive": 0,
+  "direct_source": "",
+  "tv_archive_duration": 0
+ },
+ {
+  "num": 5,
+  "name": "AR: MBC 1",
+  "stream_type": "live",
+  "stream_id": 286040,
+  "stream_icon": "http://photo-tmdb.com/stalker_portal/misc/logos/320/1205.jpg",
+  "epg_channel_id": "MBC1.ae",
+  "added": "1753973016",
+  "is_adult": 0,
+  "category_id": "429",
+  "category_ids": [
+   429
+  ],
+  "custom_sid": null,
+  "tv_archive": 0,
+  "direct_source": "",
+  "tv_archive_duration": 0
+ },
+ {
+  "num": 6,
+  "name": "AR: MBC 1 USA ᴿᴬᵂ",
+  "stream_type": "live",
+  "stream_id": 286039,
+  "stream_icon": "http://photo-tmdb.com/stalker_portal/misc/logos/320/1205.jpg?1340",
+  "epg_channel_id": "MBC1.ae",
+  "added": "1753973016",
+  "is_adult": 0,
+  "category_id": "429",
+  "category_ids": [
+   429
+  ],
+  "custom_sid": null,
+  "tv_archive": 0,
+  "direct_source": "",
+  "tv_archive_duration": 0
+ }
+]

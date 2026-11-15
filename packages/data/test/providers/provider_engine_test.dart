@@ -135,7 +135,7 @@ void main() {
       expect(await kindFor(401), ProviderFailureKind.unauthorized);
       expect(await kindFor(403), ProviderFailureKind.unauthorized);
       expect(await kindFor(429), ProviderFailureKind.rateLimited);
-      expect(await kindFor(884), ProviderFailureKind.banned);
+      expect(await kindFor(884), ProviderFailureKind.unsupported);
       expect(await kindFor(503), ProviderFailureKind.server);
       expect(await kindFor(404), ProviderFailureKind.badResponse);
       expect(await kindFor(200, '<html>blocked</html>'), ProviderFailureKind.badResponse);

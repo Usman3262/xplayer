@@ -1,0 +1,10 @@
+{
+ "js": {
+  "id": null,
+  "cmd": "ffmpeg http://portal.example:80/play/live.php?mac=00:1A:79:00:00:00&stream=&extension=ts&play_token=Xr99VvIqwz&sn2="
+ },
+ "streamer_id": 0,
+ "link_id": 0,
+ "load": 0,
+ "error": ""
+}

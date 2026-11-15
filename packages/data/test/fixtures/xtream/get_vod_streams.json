@@ -1,0 +1,102 @@
+[
+ {
+  "num": 1,
+  "name": "4K-AR: طريق الوادي",
+  "stream_type": "movie",
+  "stream_id": 780853,
+  "stream_icon": "https://photo-tmdb.com/stalker_portal/screenshots/432/43130.jpg",
+  "rating": "8",
+  "rating_5based": 4,
+  "tmdb": "1077863",
+  "trailer": "",
+  "added": "1794417540",
+  "is_adult": 0,
+  "category_id": "156",
+  "category_ids": [
+   156
+  ],
+  "container_extension": "mkv",
+  "custom_sid": null,
+  "direct_source": ""
+ },
+ {
+  "num": 2,
+  "name": "4K-AR: يوميات سكر: صاحب الظل الطويل",
+  "stream_type": "movie",
+  "stream_id": 780117,
+  "stream_icon": "http://photo-tmdb.com/stalker_portal/screenshots/352/35165.jpg",
+  "rating": "5",
+  "rating_5based": 2.5,
+  "tmdb": "1180802",
+  "trailer": "nsmJC6iQpEA",
+  "added": "1794324300",
+  "is_adult": 0,
+  "category_id": "156",
+  "category_ids": [
+   156
+  ],
+  "container_extension": "mkv",
+  "custom_sid": null,
+  "direct_source": ""
+ },
+ {
+  "num": 3,
+  "name": "4K-AR: بوابة الصعود",
+  "stream_type": "movie",
+  "stream_id": 775511,
+  "stream_icon": "https://photo-tmdb.com/stalker_portal/screenshots/428/42704.jpg",
+  "rating": "6",
+  "rating_5based": 3,
+  "tmdb": "",
+  "trailer": "",
+  "added": "1793188135",
+  "is_adult": 0,
+  "category_id": "156",
+  "category_ids": [
+   156
+  ],
+  "container_extension": "mkv",
+  "custom_sid": null,
+  "direct_source": ""
+ },
+ {
+  "num": 4,
+  "name": "4K-AR: قفلة",
+  "stream_type": "movie",
+  "stream_id": 773263,
+  "stream_icon": "https://photo-tmdb.com/stalker_portal/screenshots/427/42606.jpg",
+  "rating": "5",
+  "rating_5based": 2.5,
+  "tmdb": "1428008",
+  "trailer": "YTCaruQE2e8",
+  "added": "1792770720",
+  "is_adult": 0,
+  "category_id": "156",
+  "category_ids": [
+   156
+  ],
+  "container_extension": "mkv",
+  "custom_sid": null,
+  "direct_source": ""
+ },
+ {
+  "num": 5,
+  "name": "4K-AR - مسالة حياة او موت",
+  "stream_type": "movie",
+  "stream_id": 772913,
+  "stream_icon": "https://photo-tmdb.com/stalker_portal/screenshots/427/42607.jpg",
+  "rating": "5",
+  "rating_5based": 2.5,
+  "tmdb": "1418982",
+  "trailer": "qLp1HmKqdFQ",
+  "added": "1792664100",
+  "is_adult": 0,
+  "category_id": "156",
+  "category_ids": [
+   156
+  ],
+  "container_extension": "mkv",
+  "custom_sid": null,
+  "direct_source": ""
+ }
+]

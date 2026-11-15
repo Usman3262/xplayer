@@ -1,0 +1,29 @@
+{
+ "user_info": {
+  "username": "USER",
+  "password": "PASS",
+  "auth": 1,
+  "status": "Active",
+  "exp_date": "1795298400",
+  "is_trial": "0",
+  "active_cons": "0",
+  "created_at": "1789941600",
+  "max_connections": "1",
+  "allowed_output_formats": [
+   "m3u8",
+   "ts",
+   "rtmp"
+  ]
+ },
+ "server_info": {
+  "url": "panel.example",
+  "port": "80",
+  "https_port": "",
+  "server_protocol": "http",
+  "rtmp_port": "8001",
+  "timezone": "Europe/Amsterdam",
+  "timestamp_now": 1794728774,
+  "time_now": "2026-11-15 08:46:14",
+  "process": true
+ }
+}

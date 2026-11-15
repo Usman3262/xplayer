@@ -1,0 +1,9 @@
+{
+ "js": {
+  "id": "2139117",
+  "cmd": "ffmpeg http://portal.example:80/play/movie.php?mac=00:1A:79:00:00:00&stream=2139117.mkv&play_token=BHZYvPhjeX&type=series&sn2=",
+  "load": "",
+  "subtitles": [],
+  "error": ""
+ }
+}

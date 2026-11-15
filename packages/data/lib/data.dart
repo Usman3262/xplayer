@@ -77,3 +77,7 @@ export 'src/providers/provider_models.dart';
 export 'src/providers/provider_adapter.dart';
 export 'src/providers/provider_http.dart';
 export 'src/providers/provider_mappers.dart';
+export 'src/providers/xtream/xtream_adapter.dart';
+export 'src/providers/m3u/m3u_parser.dart';
+export 'src/providers/m3u/m3u_adapter.dart';
+export 'src/providers/stalker/stalker_adapter.dart';

@@ -1,0 +1,128 @@
+[
+ {
+  "num": 1,
+  "name": "AR-EG: (قــــــريباً - الموسم الثاني) بيت بابا",
+  "series_id": 13801,
+  "cover": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/qTFHoGxcsqykxe3mFnFcvuCy9Ui.jpg",
+  "plot": "في إطار كوميدي، وبعد تقاعده من عمله كناظر لإحدى المدارس لسنوات طويلة، يتفرغ الناظر لرعاية عائلته، لكنه يكتشف الفوضى الكبيرة والخلل الذي أصبح من الصعب إصلاحه، ليكتشف أن إدارة شؤون الأسرة أصعب بكثير من إدارة مدرسة بأكملها",
+  "cast": "محمد أنور  محمد محمود  إنتصار  مريم الجندي  سامي مغاوري  هلا السعيد",
+  "director": "محمد عبدالرحمن حماقي",
+  "genre": "Drama / Comedy",
+  "releaseDate": "2026-01-11 (مصر)",
+  "release_date": "2026-01-11 (مصر)",
+  "last_modified": "1794426552",
+  "rating": "5",
+  "rating_5based": "2.5",
+  "backdrop_path": [
+   "https://image.tmdb.org/t/p/w1280/7BPNMdYEst3CJaVCut9WcZzQDsF.jpg"
+  ],
+  "youtube_trailer": "",
+  "tmdb": "309165",
+  "episode_run_time": "0",
+  "category_id": "1",
+  "category_ids": [
+   1
+  ]
+ },
+ {
+  "num": 2,
+  "name": "SH: (قــــــريباً ) عروق الملح",
+  "series_id": 18135,
+  "cover": "https://photo-tmdb.com/stalker_portal/screenshots/432/43165.jpg",
+  "plot": "مخترق إلكتروني يدخل في مواجهة مع شبكة إجرامية تستغل التكنولوجيا والفساد",
+  "cast": "تركي اليوسف حسن العسيري بدر محسن أيمن مطهر روان الطويرقي ريم العلي",
+  "director": "مجدي السميري",
+  "genre": "Drama",
+  "releaseDate": "2026 (المملكة العربية السعودية)",
+  "release_date": "2026 (المملكة العربية السعودية)",
+  "last_modified": "1794653983",
+  "rating": "0",
+  "rating_5based": "0",
+  "backdrop_path": [
+   "https://photo-tmdb.com/stalker_portal/screenshots/432/43166.jpg"
+  ],
+  "youtube_trailer": "",
+  "tmdb": "0",
+  "episode_run_time": "0",
+  "category_id": "1",
+  "category_ids": [
+   1
+  ]
+ },
+ {
+  "num": 3,
+  "name": "WIT: (قــــــريباً ) سكرة الحب",
+  "series_id": 18131,
+  "cover": "https://photo-tmdb.com/stalker_portal/screenshots/357/35671.jpg",
+  "plot": "تدور الأحداث في إطار درامي رومانسي، مركّزة على شخصيات تواجه صراعات متنوعة. يسلط العمل الضوء على قصص من عاشوا الحروب في سوريا ولبنان، وتأثير تلك التجارب على حياتهم وشخصياتهم",
+  "cast": "محمد الأحمد  هيا مرعشلي  رشا بلال  سارة أبي كنعان  ديمة الجندي  جمال العلي",
+  "director": "مروان بركات",
+  "genre": "Drama",
+  "releaseDate": "2025-03-01 (لبنان)",
+  "release_date": "2025-03-01 (لبنان)",
+  "last_modified": "1794313574",
+  "rating": "0",
+  "rating_5based": "0",
+  "backdrop_path": [
+   "https://photo-tmdb.com/stalker_portal/screenshots/357/35672.jpg"
+  ],
+  "youtube_trailer": "",
+  "tmdb": "283981",
+  "episode_run_time": "0",
+  "category_id": "1",
+  "category_ids": [
+   1
+  ]
+ },
+ {
+  "num": 4,
+  "name": "AR-DZ: اجونس 404",
+  "series_id": 18115,
+  "cover": "https://photo-tmdb.com/stalker_portal/screenshots/430/42982.jpg",
+  "plot": "تدور الأحداث حول موسيقار، يعيش حياة زوجية تبدو مستقرة مع زوجته، سيدة الأعمال القوية مالكة شركة كبرى. ورغم اتفاقهما على عدم الإنجاب، تخفي الزوجة رغبة عميقة في تكوين أسرة. لكن حياتها تنقلب رأسًا على عقب عندما تكتشف خيانة زوجها وزواجه سرًا من امرأة أخرى، فتجد نفسها في مواجهة صدمة قاسية تدفعها إلى خوض صراع نفسي بين الألم واستعادة كرامتها، بينما تتصاعد الأحداث نحو مواجهة حاسمة قد تقودها إلى الانتقام",
+  "cast": "عمر ثايري نسرين بلحاج مريم أيت حاج فيصل قاصدي ميرا تاشفين أيمن ميمو رشيد بن قذيفة",
+  "director": "سامي فعور",
+  "genre": "Comedy",
+  "releaseDate": "2026-10-29 (الجزائر)",
+  "release_date": "2026-10-29 (الجزائر)",
+  "last_modified": "1794690484",
+  "rating": "6",
+  "rating_5based": "3",
+  "backdrop_path": [
+   "https://photo-tmdb.com/stalker_portal/screenshots/430/42983.jpg"
+  ],
+  "youtube_trailer": "",
+  "tmdb": "340559",
+  "episode_run_time": "0",
+  "category_id": "1",
+  "category_ids": [
+   1
+  ]
+ },
+ {
+  "num": 5,
+  "name": "AR-IRQ: ليل البنفسج",
+  "series_id": 14650,
+  "cover": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/7f5G7qApofcAqMZ3Q0SzTNJqQt6.jpg",
+  "plot": "في لحظةٍ كان من المفترض أن يزهر فيها الفرح، ومن قلب ثياب العيد البيضاء، تولدُ حكايةُ 'ليل البنفسج' حين تتحول شرارة الدم إلى قدرٍ محتوم. فمع مقتل 'سلام'، ينطفئ الضياء ويبدأ فصلٌ من الانتقام لا يرحم، حيث تتشحُ الأيام بسواد الثأر",
+  "cast": "مصطفى الربيعي  رشا رعد  وسام ضياء  علاء الابراهيمي  سامر دشر",
+  "director": "علي فاضل",
+  "genre": "Thriller",
+  "releaseDate": "2026-02-19 (العراق)",
+  "release_date": "2026-02-19 (العراق)",
+  "last_modified": "1794702826",
+  "rating": "7",
+  "rating_5based": "3.5",
+  "backdrop_path": [
+   "https://image.tmdb.org/t/p/w1280/p6I5Ho63fPiTHVkgyQ8lE1mMXBL.jpg",
+   "https://image.tmdb.org/t/p/w1280/iyHwoCEIIpDcxeNsqo1MdoQuAwX.jpg"
+  ],
+  "youtube_trailer": "",
+  "tmdb": "313314",
+  "episode_run_time": "0",
+  "category_id": "1",
+  "category_ids": [
+   1
+  ]
+ }
+]

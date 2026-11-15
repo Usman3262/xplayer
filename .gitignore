@@ -47,3 +47,5 @@ neo-channel-tester.html
 
 # Flutter app backend settings (public URL + publishable key; still local-only)
 env/app.json
+
+env/test_panels.json

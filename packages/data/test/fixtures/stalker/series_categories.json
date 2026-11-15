@@ -1,0 +1,2338 @@
+{
+ "js": [
+  {
+   "id": "*",
+   "title": "All",
+   "alias": "*",
+   "censored": 0
+  },
+  {
+   "id": "1914",
+   "title": "⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ مسلسلات عربية",
+   "alias": "⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ مسلسلات عربية",
+   "censored": 0
+  },
+  {
+   "id": "885",
+   "title": "مسلسلات عربية فائقة الوضوح",
+   "alias": "مسلسلات عربية فائقة الوضوح",
+   "censored": 0
+  },
+  {
+   "id": "1737",
+   "title": "مسلسلات شاهد فائقة الوضوح",
+   "alias": "مسلسلات شاهد فائقة الوضوح",
+   "censored": 0
+  },
+  {
+   "id": "1735",
+   "title": "مسلسلات تود فائقة الوضوح",
+   "alias": "مسلسلات تود فائقة الوضوح",
+   "censored": 0
+  },
+  {
+   "id": "2440",
+   "title": "مسلسلات واتش ات فائقة الوضوح",
+   "alias": "مسلسلات واتش ات فائقة الوضوح",
+   "censored": 0
+  },
+  {
+   "id": "1812",
+   "title": "مسلسلات تركية فائقة الوضوح",
+   "alias": "مسلسلات تركية فائقة الوضوح",
+   "censored": 0
+  },
+  {
+   "id": "2127",
+   "title": "برامج عربية فائقة الوضوح",
+   "alias": "برامج عربية فائقة الوضوح",
+   "censored": 0
+  },
+  {
+   "id": "1913",
+   "title": "ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ مسلسلات عربية",
+   "alias": "ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ مسلسلات عربية",
+   "censored": 0
+  },
+  {
+   "id": "383",
+   "title": "يعرض الآن عربي",
+   "alias": "يعرض الآن عربي",
+   "censored": 0
+  },
+  {
+   "id": "384",
+   "title": "يعرض الآن تركي مترجم",
+   "alias": "يعرض الآن تركي مترجم",
+   "censored": 0
+  },
+  {
+   "id": "1234",
+   "title": "يعرض الآن تركي مدبلج",
+   "alias": "يعرض الآن تركي مدبلج",
+   "censored": 0
+  },
+  {
+   "id": "589",
+   "title": "يعرض الآن أجنبي",
+   "alias": "يعرض الآن أجنبي",
+   "censored": 0
+  },
+  {
+   "id": "623",
+   "title": "يعرض الآن آسيوي",
+   "alias": "يعرض الآن آسيوي",
+   "censored": 0
+  },
+  {
+   "id": "2022",
+   "title": "يعرض الان هندي",
+   "alias": "يعرض الان هندي",
+   "censored": 0
+  },
+  {
+   "id": "658",
+   "title": "يعرض الآن انمي",
+   "alias": "يعرض الآن انمي",
+   "censored": 0
+  },
+  {
+   "id": "2203",
+   "title": "يعرض الان برامج",
+   "alias": "يعرض الان برامج",
+   "censored": 0
+  },
+  {
+   "id": "886",
+   "title": "2026 رمضانك فائق الوضوح",
+   "alias": "2026 رمضانك فائق الوضوح",
+   "censored": 0
+  },
+  {
+   "id": "505",
+   "title": "رمضانك سوري لبناني 2026",
+   "alias": "رمضانك سوري لبناني 2026",
+   "censored": 0
+  },
+  {
+   "id": "504",
+   "title": "رمضانك مصري 2026",
+   "alias": "رمضانك مصري 2026",
+   "censored": 0
+  },
+  {
+   "id": "503",
+   "title": "رمضانك عراقي خليجي 2026",
+   "alias": "رمضانك عراقي خليجي 2026",
+   "censored": 0
+  },
+  {
+   "id": "502",
+   "title": "رمضانك مغربي 2026",
+   "alias": "رمضانك مغربي 2026",
+   "censored": 0
+  },
+  {
+   "id": "645",
+   "title": "رمضانك تونسي جزائري ليبي 2026",
+   "alias": "رمضانك تونسي جزائري ليبي 2026",
+   "censored": 0
+  },
+  {
+   "id": "1120",
+   "title": "2026 رمضانك أردني فلسطيني",
+   "alias": "2026 رمضانك أردني فلسطيني",
+   "censored": 0
+  },
+  {
+   "id": "2179",
+   "title": "رمضانك يمني 2026",
+   "alias": "رمضانك يمني 2026",
+   "censored": 0
+  },
+  {
+   "id": "644",
+   "title": "رمضان أطفال 2026",
+   "alias": "رمضان أطفال 2026",
+   "censored": 0
+  },
+  {
+   "id": "501",
+   "title": "برامج رمضان 2026",
+   "alias": "برامج رمضان 2026",
+   "censored": 0
+  },
+  {
+   "id": "786",
+   "title": "مسلسلات مدبلجة",
+   "alias": "مسلسلات مدبلجة",
+   "censored": 0
+  },
+  {
+   "id": "2187",
+   "title": "مسلسلات عربية قصيرة",
+   "alias": "مسلسلات عربية قصيرة",
+   "censored": 0
+  },
+  {
+   "id": "2442",
+   "title": "مترجمة ai مسلسلات قصيرة",
+   "alias": "مترجمة ai مسلسلات قصيرة",
+   "censored": 0
+  },
+  {
+   "id": "2443",
+   "title": "مدبلجة ai مسلسلات قصيرة",
+   "alias": "مدبلجة ai مسلسلات قصيرة",
+   "censored": 0
+  },
+  {
+   "id": "1193",
+   "title": "مسلسلات شاهد الأصلية",
+   "alias": "مسلسلات شاهد الأصلية",
+   "censored": 0
+  },
+  {
+   "id": "1194",
+   "title": "مسلسلات واتش ات الأصلية",
+   "alias": "مسلسلات واتش ات الأصلية",
+   "censored": 0
+  },
+  {
+   "id": "1198",
+   "title": "مسلسلات تود الاصلية",
+   "alias": "مسلسلات تود الاصلية",
+   "censored": 0
+  },
+  {
+   "id": "1195",
+   "title": "مسلسلات فيو الأصلية",
+   "alias": "مسلسلات فيو الأصلية",
+   "censored": 0
+  },
+  {
+   "id": "724",
+   "title": "مسلسلات الحارة الشامية",
+   "alias": "مسلسلات الحارة الشامية",
+   "censored": 0
+  },
+  {
+   "id": "347",
+   "title": "مسلسلات سورية لبنانية",
+   "alias": "مسلسلات سورية لبنانية",
+   "censored": 0
+  },
+  {
+   "id": "370",
+   "title": "مسلسلات خليجية",
+   "alias": "مسلسلات خليجية",
+   "censored": 0
+  },
+  {
+   "id": "1300",
+   "title": "مسلسلات عراقية",
+   "alias": "مسلسلات عراقية",
+   "censored": 0
+  },
+  {
+   "id": "369",
+   "title": "مسلسلات مصريه",
+   "alias": "مسلسلات مصريه",
+   "censored": 0
+  },
+  {
+   "id": "371",
+   "title": "مسلسلات مغربية",
+   "alias": "مسلسلات مغربية",
+   "censored": 0
+  },
+  {
+   "id": "1709",
+   "title": "مسلسلات تونسية",
+   "alias": "مسلسلات تونسية",
+   "censored": 0
+  },
+  {
+   "id": "1118",
+   "title": "مسلسلات جزائري ليبي",
+   "alias": "مسلسلات جزائري ليبي",
+   "censored": 0
+  },
+  {
+   "id": "1787",
+   "title": "مسلسلات يمنيه",
+   "alias": "مسلسلات يمنيه",
+   "censored": 0
+  },
+  {
+   "id": "1121",
+   "title": "مسلسلات أردني فلسطيني",
+   "alias": "مسلسلات أردني فلسطيني",
+   "censored": 0
+  },
+  {
+   "id": "536",
+   "title": "مسلسلات بدوية",
+   "alias": "مسلسلات بدوية",
+   "censored": 0
+  },
+  {
+   "id": "788",
+   "title": "مسلسلات طقوس مسيحية",
+   "alias": "مسلسلات طقوس مسيحية",
+   "censored": 0
+  },
+  {
+   "id": "78",
+   "title": "مسلسلات تركية مترجمة",
+   "alias": "مسلسلات تركية مترجمة",
+   "censored": 0
+  },
+  {
+   "id": "436",
+   "title": "مسلسلات تركية مدبلجة",
+   "alias": "مسلسلات تركية مدبلجة",
+   "censored": 0
+  },
+  {
+   "id": "785",
+   "title": "مسلسلات روسيه مترجمة",
+   "alias": "مسلسلات روسيه مترجمة",
+   "censored": 0
+  },
+  {
+   "id": "468",
+   "title": "مسلسلات هندية مدبلجة",
+   "alias": "مسلسلات هندية مدبلجة",
+   "censored": 0
+  },
+  {
+   "id": "1804",
+   "title": "مسلسلات هندية مترجمة",
+   "alias": "مسلسلات هندية مترجمة",
+   "censored": 0
+  },
+  {
+   "id": "401",
+   "title": "مسلسلات أجنبيه فائقة الوضوح",
+   "alias": "مسلسلات أجنبيه فائقة الوضوح",
+   "censored": 0
+  },
+  {
+   "id": "2175",
+   "title": "مسلسلات أجنبيه 2026",
+   "alias": "مسلسلات أجنبيه 2026",
+   "censored": 0
+  },
+  {
+   "id": "697",
+   "title": "مسلسلات أجنبيه 2025",
+   "alias": "مسلسلات أجنبيه 2025",
+   "censored": 0
+  },
+  {
+   "id": "693",
+   "title": "مسلسلات أجنبيه 2024",
+   "alias": "مسلسلات أجنبيه 2024",
+   "censored": 0
+  },
+  {
+   "id": "80",
+   "title": "مسلسلات أجنبيه 2023",
+   "alias": "مسلسلات أجنبيه 2023",
+   "censored": 0
+  },
+  {
+   "id": "694",
+   "title": "مسلسلات أجنبيه 2022",
+   "alias": "مسلسلات أجنبيه 2022",
+   "censored": 0
+  },
+  {
+   "id": "695",
+   "title": "مسلسلات أجنبيه 2021",
+   "alias": "مسلسلات أجنبيه 2021",
+   "censored": 0
+  },
+  {
+   "id": "696",
+   "title": "مسلسلات أجنبيه 2020",
+   "alias": "مسلسلات أجنبيه 2020",
+   "censored": 0
+  },
+  {
+   "id": "698",
+   "title": "مسلسلات أجنبيه 2019",
+   "alias": "مسلسلات أجنبيه 2019",
+   "censored": 0
+  },
+  {
+   "id": "700",
+   "title": "مسلسلات أجنبيه 2018",
+   "alias": "مسلسلات أجنبيه 2018",
+   "censored": 0
+  },
+  {
+   "id": "699",
+   "title": "مسلسلات أجنبية قديمة",
+   "alias": "مسلسلات أجنبية قديمة",
+   "censored": 0
+  },
+  {
+   "id": "2280",
+   "title": "مسلسلات اجنبية قصيرة مدبلجة",
+   "alias": "مسلسلات اجنبية قصيرة مدبلجة",
+   "censored": 0
+  },
+  {
+   "id": "2275",
+   "title": "مسلسلات اجنبية قصيرة مترجمة",
+   "alias": "مسلسلات اجنبية قصيرة مترجمة",
+   "censored": 0
+  },
+  {
+   "id": "2282",
+   "title": "مسلسلات ألمانية 2026",
+   "alias": "مسلسلات ألمانية 2026",
+   "censored": 0
+  },
+  {
+   "id": "1832",
+   "title": "مسلسلات ألمانية 2025",
+   "alias": "مسلسلات ألمانية 2025",
+   "censored": 0
+  },
+  {
+   "id": "1833",
+   "title": "مسلسلات ألمانية 2024",
+   "alias": "مسلسلات ألمانية 2024",
+   "censored": 0
+  },
+  {
+   "id": "1834",
+   "title": "مسلسلات ألمانية 2023",
+   "alias": "مسلسلات ألمانية 2023",
+   "censored": 0
+  },
+  {
+   "id": "1835",
+   "title": "مسلسلات ألمانية 2022",
+   "alias": "مسلسلات ألمانية 2022",
+   "censored": 0
+  },
+  {
+   "id": "385",
+   "title": "مسلسلات ألمانية قديمة",
+   "alias": "مسلسلات ألمانية قديمة",
+   "censored": 0
+  },
+  {
+   "id": "464",
+   "title": "مسلسلات أسيوية مترجمة",
+   "alias": "مسلسلات أسيوية مترجمة",
+   "censored": 0
+  },
+  {
+   "id": "1869",
+   "title": "مسلسلات أسيوية مدبلجة",
+   "alias": "مسلسلات أسيوية مدبلجة",
+   "censored": 0
+  },
+  {
+   "id": "2276",
+   "title": "مسلسلات اسيوية قصيرة مترجمة",
+   "alias": "مسلسلات اسيوية قصيرة مترجمة",
+   "censored": 0
+  },
+  {
+   "id": "2277",
+   "title": "مسلسلات اسيوية قصيرة مدبلجة",
+   "alias": "مسلسلات اسيوية قصيرة مدبلجة",
+   "censored": 0
+  },
+  {
+   "id": "1197",
+   "title": "مسلسلات شاهد كيدز",
+   "alias": "مسلسلات شاهد كيدز",
+   "censored": 0
+  },
+  {
+   "id": "592",
+   "title": "مسلسلات أطفال مترجمة",
+   "alias": "مسلسلات أطفال مترجمة",
+   "censored": 0
+  },
+  {
+   "id": "1235",
+   "title": "مسلسلات أطفال مدبلجة",
+   "alias": "مسلسلات أطفال مدبلجة",
+   "censored": 0
+  },
+  {
+   "id": "1813",
+   "title": "مسلسلات اطفال اسلامية",
+   "alias": "مسلسلات اطفال اسلامية",
+   "censored": 0
+  },
+  {
+   "id": "1308",
+   "title": "مسلسلات كارتون زمان",
+   "alias": "مسلسلات كارتون زمان",
+   "censored": 0
+  },
+  {
+   "id": "1439",
+   "title": "مسلسلات أطفال مغربية",
+   "alias": "مسلسلات أطفال مغربية",
+   "censored": 0
+  },
+  {
+   "id": "2055",
+   "title": "مسلسلات اطفال تونسية",
+   "alias": "مسلسلات اطفال تونسية",
+   "censored": 0
+  },
+  {
+   "id": "2053",
+   "title": "مسلسلات كرتون للكبار مترجمة",
+   "alias": "مسلسلات كرتون للكبار مترجمة",
+   "censored": 0
+  },
+  {
+   "id": "2409",
+   "title": "مسلسلات كرتون للكبارمدبلجة",
+   "alias": "مسلسلات كرتون للكبارمدبلجة",
+   "censored": 0
+  },
+  {
+   "id": "1358",
+   "title": "مسلسلات انمي فائقة الوضوح",
+   "alias": "مسلسلات انمي فائقة الوضوح",
+   "censored": 0
+  },
+  {
+   "id": "206",
+   "title": "مسلسلات انمي مترجمة",
+   "alias": "مسلسلات انمي مترجمة",
+   "censored": 0
+  },
+  {
+   "id": "1249",
+   "title": "مسلسلات انمي مدبلجة",
+   "alias": "مسلسلات انمي مدبلجة",
+   "censored": 0
+  },
+  {
+   "id": "2189",
+   "title": "مسلسلات انمي صيني",
+   "alias": "مسلسلات انمي صيني",
+   "censored": 0
+  },
+  {
+   "id": "2309",
+   "title": "مسلسلات انمي قصيرة مترجمة",
+   "alias": "مسلسلات انمي قصيرة مترجمة",
+   "censored": 0
+  },
+  {
+   "id": "1755",
+   "title": "ديسكفري + مدبلج",
+   "alias": "ديسكفري + مدبلج",
+   "censored": 0
+  },
+  {
+   "id": "1302",
+   "title": "مسلسلات ناشيونال جيوغرافيك",
+   "alias": "مسلسلات ناشيونال جيوغرافيك",
+   "censored": 0
+  },
+  {
+   "id": "488",
+   "title": "مسلسلات وثائقية مترجمة",
+   "alias": "مسلسلات وثائقية مترجمة",
+   "censored": 0
+  },
+  {
+   "id": "2007",
+   "title": "مسلسلات وثائقية مدبلجة",
+   "alias": "مسلسلات وثائقية مدبلجة",
+   "censored": 0
+  },
+  {
+   "id": "1438",
+   "title": "مسلسلات وثائقيه مغربيه",
+   "alias": "مسلسلات وثائقيه مغربيه",
+   "censored": 0
+  },
+  {
+   "id": "2422",
+   "title": "فوازير",
+   "alias": "فوازير",
+   "censored": 0
+  },
+  {
+   "id": "141",
+   "title": "برامج منوعه",
+   "alias": "برامج منوعه",
+   "censored": 0
+  },
+  {
+   "id": "1850",
+   "title": "برامج المشهد",
+   "alias": "برامج المشهد",
+   "censored": 0
+  },
+  {
+   "id": "1526",
+   "title": "الجزيرة 360",
+   "alias": "الجزيرة 360",
+   "censored": 0
+  },
+  {
+   "id": "1486",
+   "title": "بودكاست",
+   "alias": "بودكاست",
+   "censored": 0
+  },
+  {
+   "id": "416",
+   "title": "مسرحيات",
+   "alias": "مسرحيات",
+   "censored": 0
+  },
+  {
+   "id": "1596",
+   "title": "مسلسلات اسلامية",
+   "alias": "مسلسلات اسلامية",
+   "censored": 0
+  },
+  {
+   "id": "350",
+   "title": "منوعات دينية",
+   "alias": "منوعات دينية",
+   "censored": 0
+  },
+  {
+   "id": "544",
+   "title": "مصارعة حرة",
+   "alias": "مصارعة حرة",
+   "censored": 0
+  },
+  {
+   "id": "1474",
+   "title": "أحدث المباريات",
+   "alias": "أحدث المباريات",
+   "censored": 0
+  },
+  {
+   "id": "2167",
+   "title": "FIFA+ SERIES",
+   "alias": "FIFA+ SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1315",
+   "title": "OSN+ SERIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "OSN+ SERIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "1149",
+   "title": "CRUNCHYROLL SERIES (MULTI-SUBS)",
+   "alias": "CRUNCHYROLL SERIES (MULTI-SUBS)",
+   "censored": 0
+  },
+  {
+   "id": "1154",
+   "title": "ASIA SERIES (MULTI-SUBS)",
+   "alias": "ASIA SERIES (MULTI-SUBS)",
+   "censored": 0
+  },
+  {
+   "id": "899",
+   "title": "DISCOVERY+ SERIES MENA",
+   "alias": "DISCOVERY+ SERIES MENA",
+   "censored": 0
+  },
+  {
+   "id": "427",
+   "title": "NETFLIX SERIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "alias": "NETFLIX SERIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "censored": 0
+  },
+  {
+   "id": "428",
+   "title": "NETFLIX KIDS ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "alias": "NETFLIX KIDS ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "censored": 0
+  },
+  {
+   "id": "1973",
+   "title": "NETFLIX SERIES ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "NETFLIX SERIES ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "138",
+   "title": "NETFLIX  SERIES",
+   "alias": "NETFLIX  SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1722",
+   "title": "NETFLIX REALITY",
+   "alias": "NETFLIX REALITY",
+   "censored": 0
+  },
+  {
+   "id": "2180",
+   "title": "NETFLIX STAND-UP COMEDY",
+   "alias": "NETFLIX STAND-UP COMEDY",
+   "censored": 0
+  },
+  {
+   "id": "2070",
+   "title": "NETFLIX ADULT-SWIM",
+   "alias": "NETFLIX ADULT-SWIM",
+   "censored": 0
+  },
+  {
+   "id": "2250",
+   "title": "NETFLIX PODCAST",
+   "alias": "NETFLIX PODCAST",
+   "censored": 0
+  },
+  {
+   "id": "1660",
+   "title": "NETFLIX DOCU-SERIES",
+   "alias": "NETFLIX DOCU-SERIES",
+   "censored": 0
+  },
+  {
+   "id": "386",
+   "title": "NETFLIX ASIA",
+   "alias": "NETFLIX ASIA",
+   "censored": 0
+  },
+  {
+   "id": "2072",
+   "title": "NETFLIX WWE",
+   "alias": "NETFLIX WWE",
+   "censored": 0
+  },
+  {
+   "id": "519",
+   "title": "NETFLIX ANIME",
+   "alias": "NETFLIX ANIME",
+   "censored": 0
+  },
+  {
+   "id": "213",
+   "title": "NETFLIX KIDS",
+   "alias": "NETFLIX KIDS",
+   "censored": 0
+  },
+  {
+   "id": "761",
+   "title": "DISNEY+ SERIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "alias": "DISNEY+ SERIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "censored": 0
+  },
+  {
+   "id": "2295",
+   "title": "DISNEY+ ASIA SERIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "alias": "DISNEY+ ASIA SERIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "censored": 0
+  },
+  {
+   "id": "2181",
+   "title": "DISNEY+ DOCU-SERIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "alias": "DISNEY+ DOCU-SERIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "censored": 0
+  },
+  {
+   "id": "762",
+   "title": "DISNEY+ KIDS SERIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "alias": "DISNEY+ KIDS SERIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "censored": 0
+  },
+  {
+   "id": "908",
+   "title": "DISNEY+ SERIES",
+   "alias": "DISNEY+ SERIES",
+   "censored": 0
+  },
+  {
+   "id": "2294",
+   "title": "DISNEY+ ASIA SERIES",
+   "alias": "DISNEY+ ASIA SERIES",
+   "censored": 0
+  },
+  {
+   "id": "2394",
+   "title": "DISNEY+ ADULT SWIM",
+   "alias": "DISNEY+ ADULT SWIM",
+   "censored": 0
+  },
+  {
+   "id": "486",
+   "title": "DISNEY+ DOCU-SERIES",
+   "alias": "DISNEY+ DOCU-SERIES",
+   "censored": 0
+  },
+  {
+   "id": "2391",
+   "title": "DISNEY+ REALITY",
+   "alias": "DISNEY+ REALITY",
+   "censored": 0
+  },
+  {
+   "id": "2249",
+   "title": "DISNEY+ PODCAST",
+   "alias": "DISNEY+ PODCAST",
+   "censored": 0
+  },
+  {
+   "id": "322",
+   "title": "DISNEY+ KIDS SERIES",
+   "alias": "DISNEY+ KIDS SERIES",
+   "censored": 0
+  },
+  {
+   "id": "434",
+   "title": "APPLE+ SERIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "alias": "APPLE+ SERIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "censored": 0
+  },
+  {
+   "id": "435",
+   "title": "APPLE+ KIDS ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "alias": "APPLE+ KIDS ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "censored": 0
+  },
+  {
+   "id": "1053",
+   "title": "APPLE+ DOCU-SERIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "alias": "APPLE+ DOCU-SERIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "censored": 0
+  },
+  {
+   "id": "323",
+   "title": "APPLE+ SERIES",
+   "alias": "APPLE+ SERIES",
+   "censored": 0
+  },
+  {
+   "id": "324",
+   "title": "APPLE+ KIDS",
+   "alias": "APPLE+ KIDS",
+   "censored": 0
+  },
+  {
+   "id": "1052",
+   "title": "APPLE+ DOCU-SERIES",
+   "alias": "APPLE+ DOCU-SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1004",
+   "title": "AMAZON SERIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "AMAZON SERIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "2316",
+   "title": "AMAZON REALITY ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "AMAZON REALITY ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "1005",
+   "title": "AMAZON KIDS ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "AMAZON KIDS ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "1032",
+   "title": "AMAZON DOCU-SERIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "AMAZON DOCU-SERIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "497",
+   "title": "AMAZON SERIES",
+   "alias": "AMAZON SERIES",
+   "censored": 0
+  },
+  {
+   "id": "498",
+   "title": "AMAZON KIDS",
+   "alias": "AMAZON KIDS",
+   "censored": 0
+  },
+  {
+   "id": "1042",
+   "title": "AMAZON REALITY",
+   "alias": "AMAZON REALITY",
+   "censored": 0
+  },
+  {
+   "id": "1851",
+   "title": "HBO MAX SERIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "HBO MAX SERIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "1852",
+   "title": "HBO MAX SERIES",
+   "alias": "HBO MAX SERIES",
+   "censored": 0
+  },
+  {
+   "id": "2372",
+   "title": "HBO MAX PODCAST",
+   "alias": "HBO MAX PODCAST",
+   "censored": 0
+  },
+  {
+   "id": "1854",
+   "title": "HBO MAX (ADULT SWIM)",
+   "alias": "HBO MAX (ADULT SWIM)",
+   "censored": 0
+  },
+  {
+   "id": "1855",
+   "title": "HBO MAX DOCU-SERIES",
+   "alias": "HBO MAX DOCU-SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1031",
+   "title": "AMAZON DOCU-SERIES",
+   "alias": "AMAZON DOCU-SERIES",
+   "censored": 0
+  },
+  {
+   "id": "526",
+   "title": "DISCOVERY+ SERIES",
+   "alias": "DISCOVERY+ SERIES",
+   "censored": 0
+  },
+  {
+   "id": "617",
+   "title": "VIAPLAY SERIES",
+   "alias": "VIAPLAY SERIES",
+   "censored": 0
+  },
+  {
+   "id": "618",
+   "title": "VIAPLAY KIDS",
+   "alias": "VIAPLAY KIDS",
+   "censored": 0
+  },
+  {
+   "id": "2378",
+   "title": "JOYN SERIES",
+   "alias": "JOYN SERIES",
+   "censored": 0
+  },
+  {
+   "id": "2380",
+   "title": "JOYN REALITY SERIES",
+   "alias": "JOYN REALITY SERIES",
+   "censored": 0
+  },
+  {
+   "id": "2381",
+   "title": "JOYN TV SHOW",
+   "alias": "JOYN TV SHOW",
+   "censored": 0
+  },
+  {
+   "id": "2379",
+   "title": "JOYN DOKU-SERIES",
+   "alias": "JOYN DOKU-SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1081",
+   "title": "SKY",
+   "alias": "SKY",
+   "censored": 0
+  },
+  {
+   "id": "1080",
+   "title": "SHOWTIME",
+   "alias": "SHOWTIME",
+   "censored": 0
+  },
+  {
+   "id": "1078",
+   "title": "PARAMOUNT+",
+   "alias": "PARAMOUNT+",
+   "censored": 0
+  },
+  {
+   "id": "1079",
+   "title": "PEACOCK",
+   "alias": "PEACOCK",
+   "censored": 0
+  },
+  {
+   "id": "1077",
+   "title": "NICKELODEON",
+   "alias": "NICKELODEON",
+   "censored": 0
+  },
+  {
+   "id": "1611",
+   "title": "MARVEL SERIES 3840P (MULTI)",
+   "alias": "MARVEL SERIES 3840P (MULTI)",
+   "censored": 0
+  },
+  {
+   "id": "1610",
+   "title": "MARVEL SERIES (MULTI)",
+   "alias": "MARVEL SERIES (MULTI)",
+   "censored": 0
+  },
+  {
+   "id": "1270",
+   "title": "ENGLISH SERIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "ENGLISH SERIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "1898",
+   "title": "ENGLISH SERIES ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "ENGLISH SERIES ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "156",
+   "title": "ENGLISH SERIES",
+   "alias": "ENGLISH SERIES",
+   "censored": 0
+  },
+  {
+   "id": "480",
+   "title": "ENGLISH SERIES (TR)",
+   "alias": "ENGLISH SERIES (TR)",
+   "censored": 0
+  },
+  {
+   "id": "2264",
+   "title": "ENGLISH REALITY SERIES",
+   "alias": "ENGLISH REALITY SERIES",
+   "censored": 0
+  },
+  {
+   "id": "216",
+   "title": "ENGLISH KIDS",
+   "alias": "ENGLISH KIDS",
+   "censored": 0
+  },
+  {
+   "id": "2151",
+   "title": "TURKSIH SERIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "TURKSIH SERIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "2281",
+   "title": "TURKISH TV SHOW",
+   "alias": "TURKISH TV SHOW",
+   "censored": 0
+  },
+  {
+   "id": "1400",
+   "title": "TURKISH ATV SERIES",
+   "alias": "TURKISH ATV SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1405",
+   "title": "TURKISH SHOWTV SERIES",
+   "alias": "TURKISH SHOWTV SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1402",
+   "title": "TURKISH KANALD SERIES",
+   "alias": "TURKISH KANALD SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1401",
+   "title": "TURKISH TV8 SERIES",
+   "alias": "TURKISH TV8 SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1403",
+   "title": "TURKISH TABII SERIES",
+   "alias": "TURKISH TABII SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1404",
+   "title": "TURKISH EXXEN SERIES",
+   "alias": "TURKISH EXXEN SERIES",
+   "censored": 0
+  },
+  {
+   "id": "540",
+   "title": "TURKISH YERLI DIZILER",
+   "alias": "TURKISH YERLI DIZILER",
+   "censored": 0
+  },
+  {
+   "id": "1367",
+   "title": "TURKISH BLUTV SERIES",
+   "alias": "TURKISH BLUTV SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1369",
+   "title": "TURKISH BLUTV ÇOCUKLAR",
+   "alias": "TURKISH BLUTV ÇOCUKLAR",
+   "censored": 0
+  },
+  {
+   "id": "1600",
+   "title": "TURKISH NOW TV SERIES",
+   "alias": "TURKISH NOW TV SERIES",
+   "censored": 0
+  },
+  {
+   "id": "2184",
+   "title": "TURKISH GAIN ORIJINAL",
+   "alias": "TURKISH GAIN ORIJINAL",
+   "censored": 0
+  },
+  {
+   "id": "2288",
+   "title": "TURKISH YABANCI",
+   "alias": "TURKISH YABANCI",
+   "censored": 0
+  },
+  {
+   "id": "2263",
+   "title": "TURKISH NETFLIX",
+   "alias": "TURKISH NETFLIX",
+   "censored": 0
+  },
+  {
+   "id": "2289",
+   "title": "TURKISH ANIME",
+   "alias": "TURKISH ANIME",
+   "censored": 0
+  },
+  {
+   "id": "95",
+   "title": "MALTA DRAMA",
+   "alias": "MALTA DRAMA",
+   "censored": 0
+  },
+  {
+   "id": "726",
+   "title": "GREECE INTERNATIONAL SERIES",
+   "alias": "GREECE INTERNATIONAL SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1048",
+   "title": "GREECE TURKISH SERIES",
+   "alias": "GREECE TURKISH SERIES",
+   "censored": 0
+  },
+  {
+   "id": "2234",
+   "title": "GREECE ANIME",
+   "alias": "GREECE ANIME",
+   "censored": 0
+  },
+  {
+   "id": "727",
+   "title": "GREECE KIDS",
+   "alias": "GREECE KIDS",
+   "censored": 0
+  },
+  {
+   "id": "795",
+   "title": "GREEK SERIES TV",
+   "alias": "GREEK SERIES TV",
+   "censored": 0
+  },
+  {
+   "id": "1650",
+   "title": "GREEK REALITY SHOWS",
+   "alias": "GREEK REALITY SHOWS",
+   "censored": 0
+  },
+  {
+   "id": "2193",
+   "title": "ITALY SERIE ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "ITALY SERIE ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "160",
+   "title": "ITALY SERIE",
+   "alias": "ITALY SERIE",
+   "censored": 0
+  },
+  {
+   "id": "1936",
+   "title": "ITALY ANIME",
+   "alias": "ITALY ANIME",
+   "censored": 0
+  },
+  {
+   "id": "1331",
+   "title": "ITALY DISNEY+",
+   "alias": "ITALY DISNEY+",
+   "censored": 0
+  },
+  {
+   "id": "215",
+   "title": "ITALY BAMBINI",
+   "alias": "ITALY BAMBINI",
+   "censored": 0
+  },
+  {
+   "id": "2043",
+   "title": "ITALY DOCUMENTARIO",
+   "alias": "ITALY DOCUMENTARIO",
+   "censored": 0
+  },
+  {
+   "id": "1785",
+   "title": "AFRICA IROKO TV SERIES",
+   "alias": "AFRICA IROKO TV SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1818",
+   "title": "AFRICA CINAF TV SERIES",
+   "alias": "AFRICA CINAF TV SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1681",
+   "title": "FRANCE SERIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "FRANCE SERIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "1741",
+   "title": "FRANCE ANIMATION SERIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "FRANCE ANIMATION SERIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "153",
+   "title": "FRANCE SÉRIES",
+   "alias": "FRANCE SÉRIES",
+   "censored": 0
+  },
+  {
+   "id": "1205",
+   "title": "FRANCE DERNIER AJOUT",
+   "alias": "FRANCE DERNIER AJOUT",
+   "censored": 0
+  },
+  {
+   "id": "1723",
+   "title": "FRANCE REALITY SHOW",
+   "alias": "FRANCE REALITY SHOW",
+   "censored": 0
+  },
+  {
+   "id": "1708",
+   "title": "FRANCE VOSTFR",
+   "alias": "FRANCE VOSTFR",
+   "censored": 0
+  },
+  {
+   "id": "1724",
+   "title": "FRANCE NETFLIX 2025",
+   "alias": "FRANCE NETFLIX 2025",
+   "censored": 0
+  },
+  {
+   "id": "628",
+   "title": "FRANCE NETFLIX",
+   "alias": "FRANCE NETFLIX",
+   "censored": 0
+  },
+  {
+   "id": "1104",
+   "title": "FRANCE FOX+",
+   "alias": "FRANCE FOX+",
+   "censored": 0
+  },
+  {
+   "id": "1628",
+   "title": "FRANCE DRAMA",
+   "alias": "FRANCE DRAMA",
+   "censored": 0
+  },
+  {
+   "id": "1625",
+   "title": "FRANCE ACTION",
+   "alias": "FRANCE ACTION",
+   "censored": 0
+  },
+  {
+   "id": "1622",
+   "title": "FRANCE COMEDIE",
+   "alias": "FRANCE COMEDIE",
+   "censored": 0
+  },
+  {
+   "id": "1691",
+   "title": "FRANCE ASIA SERIES",
+   "alias": "FRANCE ASIA SERIES",
+   "censored": 0
+  },
+  {
+   "id": "874",
+   "title": "FRANCE DOCUMENTAIRE",
+   "alias": "FRANCE DOCUMENTAIRE",
+   "censored": 0
+  },
+  {
+   "id": "214",
+   "title": "FRANCE ENFANTS",
+   "alias": "FRANCE ENFANTS",
+   "censored": 0
+  },
+  {
+   "id": "610",
+   "title": "FRANCE ANIME",
+   "alias": "FRANCE ANIME",
+   "censored": 0
+  },
+  {
+   "id": "732",
+   "title": "QUÉBEC SERIES",
+   "alias": "QUÉBEC SERIES",
+   "censored": 0
+  },
+  {
+   "id": "733",
+   "title": "QUÉBEC ANIMATION",
+   "alias": "QUÉBEC ANIMATION",
+   "censored": 0
+  },
+  {
+   "id": "1036",
+   "title": "QUÉBEC DOCUMENTAIRE",
+   "alias": "QUÉBEC DOCUMENTAIRE",
+   "censored": 0
+  },
+  {
+   "id": "710",
+   "title": "ALBANIA SERIALE",
+   "alias": "ALBANIA SERIALE",
+   "censored": 0
+  },
+  {
+   "id": "1583",
+   "title": "INDIA WEB SERIE ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "INDIA WEB SERIE ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "145",
+   "title": "INDIA SERIES",
+   "alias": "INDIA SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1494",
+   "title": "INDIA EN DUBBED",
+   "alias": "INDIA EN DUBBED",
+   "censored": 0
+  },
+  {
+   "id": "1500",
+   "title": "INDIAN DAILY SOAP",
+   "alias": "INDIAN DAILY SOAP",
+   "censored": 0
+  },
+  {
+   "id": "2114",
+   "title": "INDIA ANIMATION SERIES WEB",
+   "alias": "INDIA ANIMATION SERIES WEB",
+   "censored": 0
+  },
+  {
+   "id": "1481",
+   "title": "HINDI DUBBED (KOREAN)",
+   "alias": "HINDI DUBBED (KOREAN)",
+   "censored": 0
+  },
+  {
+   "id": "1671",
+   "title": "HINDI TV SHOWS",
+   "alias": "HINDI TV SHOWS",
+   "censored": 0
+  },
+  {
+   "id": "1683",
+   "title": "HINDI WEB SERIES",
+   "alias": "HINDI WEB SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1548",
+   "title": "HINDI TAMIL",
+   "alias": "HINDI TAMIL",
+   "censored": 0
+  },
+  {
+   "id": "1585",
+   "title": "HINDI ULLU",
+   "alias": "HINDI ULLU",
+   "censored": 0
+  },
+  {
+   "id": "1499",
+   "title": "HINDI TURKISH DUBBED URDU",
+   "alias": "HINDI TURKISH DUBBED URDU",
+   "censored": 0
+  },
+  {
+   "id": "2248",
+   "title": "SOMALIA ARABIC SERIES",
+   "alias": "SOMALIA ARABIC SERIES",
+   "censored": 0
+  },
+  {
+   "id": "2246",
+   "title": "SOMALIA ENGLISH SERIES",
+   "alias": "SOMALIA ENGLISH SERIES",
+   "censored": 0
+  },
+  {
+   "id": "2247",
+   "title": "SOMALIA TURKISH SERIES",
+   "alias": "SOMALIA TURKISH SERIES",
+   "censored": 0
+  },
+  {
+   "id": "2241",
+   "title": "SOMALIA HINDI SERIES",
+   "alias": "SOMALIA HINDI SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1309",
+   "title": "PAKISTAN HUMTV",
+   "alias": "PAKISTAN HUMTV",
+   "censored": 0
+  },
+  {
+   "id": "1318",
+   "title": "PAKISTAN GREEN TV",
+   "alias": "PAKISTAN GREEN TV",
+   "censored": 0
+  },
+  {
+   "id": "1595",
+   "title": "PAKISTAN DRAMA",
+   "alias": "PAKISTAN DRAMA",
+   "censored": 0
+  },
+  {
+   "id": "211",
+   "title": "NETHERLANDS SERIE",
+   "alias": "NETHERLANDS SERIE",
+   "censored": 0
+  },
+  {
+   "id": "1711",
+   "title": "NETHERLANDS NPO+",
+   "alias": "NETHERLANDS NPO+",
+   "censored": 0
+  },
+  {
+   "id": "1890",
+   "title": "NETHERLANDS SKY SHOWTIME",
+   "alias": "NETHERLANDS SKY SHOWTIME",
+   "censored": 0
+  },
+  {
+   "id": "1796",
+   "title": "NETHERLANDS AMAZON PRIME",
+   "alias": "NETHERLANDS AMAZON PRIME",
+   "censored": 0
+  },
+  {
+   "id": "1066",
+   "title": "NETHERLANDS VIAPLAY",
+   "alias": "NETHERLANDS VIAPLAY",
+   "censored": 0
+  },
+  {
+   "id": "212",
+   "title": "NETHERLANDS KINDEREN",
+   "alias": "NETHERLANDS KINDEREN",
+   "censored": 0
+  },
+  {
+   "id": "744",
+   "title": "VIDEOLAND SERIES (NL)",
+   "alias": "VIDEOLAND SERIES (NL)",
+   "censored": 0
+  },
+  {
+   "id": "1350",
+   "title": "VIDEOLAND KID (NL)",
+   "alias": "VIDEOLAND KID (NL)",
+   "censored": 0
+  },
+  {
+   "id": "1000",
+   "title": "BELGIUM SERIES (NL)",
+   "alias": "BELGIUM SERIES (NL)",
+   "censored": 0
+  },
+  {
+   "id": "1001",
+   "title": "BELGIUM REALITY (NL)",
+   "alias": "BELGIUM REALITY (NL)",
+   "censored": 0
+  },
+  {
+   "id": "1002",
+   "title": "BELGIUM KIDS (NL)",
+   "alias": "BELGIUM KIDS (NL)",
+   "censored": 0
+  },
+  {
+   "id": "1003",
+   "title": "BELGIUM DOCU-SERIES (NL)",
+   "alias": "BELGIUM DOCU-SERIES (NL)",
+   "censored": 0
+  },
+  {
+   "id": "1010",
+   "title": "BELGIUM SERIES (FR)",
+   "alias": "BELGIUM SERIES (FR)",
+   "censored": 0
+  },
+  {
+   "id": "1012",
+   "title": "BELGIUM KIDS (FR)",
+   "alias": "BELGIUM KIDS (FR)",
+   "censored": 0
+  },
+  {
+   "id": "756",
+   "title": "GERMANY SERIE ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "GERMANY SERIE ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "2383",
+   "title": "GERMANY DV ⁴ᴷ ᴴᴰᴿ",
+   "alias": "GERMANY DV ⁴ᴷ ᴴᴰᴿ",
+   "censored": 0
+  },
+  {
+   "id": "2418",
+   "title": "GERMANY NETFLIX DV ⁴ᴷ ᴴᴰᴿ",
+   "alias": "GERMANY NETFLIX DV ⁴ᴷ ᴴᴰᴿ",
+   "censored": 0
+  },
+  {
+   "id": "2037",
+   "title": "GERMANY PRIME ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "GERMANY PRIME ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "2093",
+   "title": "GERMANY APPLE ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "GERMANY APPLE ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "2360",
+   "title": "GERMANY PARAMOUNT+ ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "alias": "GERMANY PARAMOUNT+ ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "censored": 0
+  },
+  {
+   "id": "2141",
+   "title": "GERMANY PARAMOUNT+ & MTV STUDIOS ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "GERMANY PARAMOUNT+ & MTV STUDIOS ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "2365",
+   "title": "GERMANY SHOWTIME ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "alias": "GERMANY SHOWTIME ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "censored": 0
+  },
+  {
+   "id": "209",
+   "title": "GERMANY SERIE",
+   "alias": "GERMANY SERIE",
+   "censored": 0
+  },
+  {
+   "id": "630",
+   "title": "GERMANY NETFLIX",
+   "alias": "GERMANY NETFLIX",
+   "censored": 0
+  },
+  {
+   "id": "1659",
+   "title": "GERMANY KIDS NETFLIX",
+   "alias": "GERMANY KIDS NETFLIX",
+   "censored": 0
+  },
+  {
+   "id": "1395",
+   "title": "GERMANY ANIME NETFLIX",
+   "alias": "GERMANY ANIME NETFLIX",
+   "censored": 0
+  },
+  {
+   "id": "1492",
+   "title": "GERMANY APPLE+",
+   "alias": "GERMANY APPLE+",
+   "censored": 0
+  },
+  {
+   "id": "1236",
+   "title": "GERMANY PRIME",
+   "alias": "GERMANY PRIME",
+   "censored": 0
+  },
+  {
+   "id": "2190",
+   "title": "GERMANY HBO MAX",
+   "alias": "GERMANY HBO MAX",
+   "censored": 0
+  },
+  {
+   "id": "847",
+   "title": "GERMANY PARAMOUNT+",
+   "alias": "GERMANY PARAMOUNT+",
+   "censored": 0
+  },
+  {
+   "id": "2364",
+   "title": "GERMANY SHOWTIME",
+   "alias": "GERMANY SHOWTIME",
+   "censored": 0
+  },
+  {
+   "id": "2015",
+   "title": "GERMANY ZDF MEDIATHEK",
+   "alias": "GERMANY ZDF MEDIATHEK",
+   "censored": 0
+  },
+  {
+   "id": "1974",
+   "title": "GERMANY RTL+",
+   "alias": "GERMANY RTL+",
+   "censored": 0
+  },
+  {
+   "id": "1136",
+   "title": "GERMANY MARVEL STUDIOS",
+   "alias": "GERMANY MARVEL STUDIOS",
+   "censored": 0
+  },
+  {
+   "id": "951",
+   "title": "GERMANY REALITY TV SHOW",
+   "alias": "GERMANY REALITY TV SHOW",
+   "censored": 0
+  },
+  {
+   "id": "817",
+   "title": "GERMANY DOKUMENTATION",
+   "alias": "GERMANY DOKUMENTATION",
+   "censored": 0
+  },
+  {
+   "id": "210",
+   "title": "GERMANY KINDER",
+   "alias": "GERMANY KINDER",
+   "censored": 0
+  },
+  {
+   "id": "663",
+   "title": "GERMANY ANIME",
+   "alias": "GERMANY ANIME",
+   "censored": 0
+  },
+  {
+   "id": "900",
+   "title": "GERMANY ANIME SUBS",
+   "alias": "GERMANY ANIME SUBS",
+   "censored": 0
+  },
+  {
+   "id": "643",
+   "title": "POLSKA SERIA",
+   "alias": "POLSKA SERIA",
+   "censored": 0
+  },
+  {
+   "id": "1529",
+   "title": "VIAPLAY POLSKA SERIA",
+   "alias": "VIAPLAY POLSKA SERIA",
+   "censored": 0
+  },
+  {
+   "id": "2192",
+   "title": "ESPAÑA SERIES ⁴ᴷ ᴴᴰᴿ ᴰᴼᴸᴮʸ ⱽᴵˢᴵÓᴺ",
+   "alias": "ESPAÑA SERIES ⁴ᴷ ᴴᴰᴿ ᴰᴼᴸᴮʸ ⱽᴵˢᴵÓᴺ",
+   "censored": 0
+  },
+  {
+   "id": "1256",
+   "title": "ESPAÑA SERIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "ESPAÑA SERIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "1894",
+   "title": "ESPAÑA SERIES ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "ESPAÑA SERIES ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "562",
+   "title": "ESPAÑA SERIES",
+   "alias": "ESPAÑA SERIES",
+   "censored": 0
+  },
+  {
+   "id": "2011",
+   "title": "ESPAÑA SERIES SUBTITLES",
+   "alias": "ESPAÑA SERIES SUBTITLES",
+   "censored": 0
+  },
+  {
+   "id": "563",
+   "title": "ESPAÑA INFANTILES",
+   "alias": "ESPAÑA INFANTILES",
+   "censored": 0
+  },
+  {
+   "id": "1213",
+   "title": "ESPAÑA ANIMACIÓN",
+   "alias": "ESPAÑA ANIMACIÓN",
+   "censored": 0
+  },
+  {
+   "id": "677",
+   "title": "ESPAÑA TELENOVELAS",
+   "alias": "ESPAÑA TELENOVELAS",
+   "censored": 0
+  },
+  {
+   "id": "893",
+   "title": "ESPAÑA NETFLIX",
+   "alias": "ESPAÑA NETFLIX",
+   "censored": 0
+  },
+  {
+   "id": "896",
+   "title": "ESPAÑA AMAZON PRIME",
+   "alias": "ESPAÑA AMAZON PRIME",
+   "censored": 0
+  },
+  {
+   "id": "894",
+   "title": "ESPAÑA DISNEY+",
+   "alias": "ESPAÑA DISNEY+",
+   "censored": 0
+  },
+  {
+   "id": "895",
+   "title": "ESPAÑA APPLE TV+",
+   "alias": "ESPAÑA APPLE TV+",
+   "censored": 0
+  },
+  {
+   "id": "897",
+   "title": "ESPAÑA PARAMOUNT+",
+   "alias": "ESPAÑA PARAMOUNT+",
+   "censored": 0
+  },
+  {
+   "id": "1434",
+   "title": "ESPAÑA SKYSHOWTIME",
+   "alias": "ESPAÑA SKYSHOWTIME",
+   "censored": 0
+  },
+  {
+   "id": "1436",
+   "title": "ESPAÑA ATRESPLAYER - STARZ - RTVE",
+   "alias": "ESPAÑA ATRESPLAYER - STARZ - RTVE",
+   "censored": 0
+  },
+  {
+   "id": "1814",
+   "title": "ESPAÑA VIX PREMIUM",
+   "alias": "ESPAÑA VIX PREMIUM",
+   "censored": 0
+  },
+  {
+   "id": "1209",
+   "title": "ESPAÑA MOVISTAR",
+   "alias": "ESPAÑA MOVISTAR",
+   "censored": 0
+  },
+  {
+   "id": "1324",
+   "title": "ESPAÑA HULU",
+   "alias": "ESPAÑA HULU",
+   "censored": 0
+  },
+  {
+   "id": "1085",
+   "title": "ESPAÑA HBO MAX",
+   "alias": "ESPAÑA HBO MAX",
+   "censored": 0
+  },
+  {
+   "id": "2155",
+   "title": "ESPAÑA SERIES NOVELA TURCAS",
+   "alias": "ESPAÑA SERIES NOVELA TURCAS",
+   "censored": 0
+  },
+  {
+   "id": "683",
+   "title": "ESPAÑA REALITY TV SHOWS",
+   "alias": "ESPAÑA REALITY TV SHOWS",
+   "censored": 0
+  },
+  {
+   "id": "673",
+   "title": "ESPAÑA DOCUMENTAL",
+   "alias": "ESPAÑA DOCUMENTAL",
+   "censored": 0
+  },
+  {
+   "id": "1190",
+   "title": "LATINO SERIE",
+   "alias": "LATINO SERIE",
+   "censored": 0
+  },
+  {
+   "id": "1191",
+   "title": "LATINO NIÑAS",
+   "alias": "LATINO NIÑAS",
+   "censored": 0
+  },
+  {
+   "id": "1889",
+   "title": "PT/BR SERIE ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "PT/BR SERIE ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "857",
+   "title": "PT/BR SERIE",
+   "alias": "PT/BR SERIE",
+   "censored": 0
+  },
+  {
+   "id": "851",
+   "title": "PT/BR NETFLIX",
+   "alias": "PT/BR NETFLIX",
+   "censored": 0
+  },
+  {
+   "id": "853",
+   "title": "PT/BR DISNEY+",
+   "alias": "PT/BR DISNEY+",
+   "censored": 0
+  },
+  {
+   "id": "852",
+   "title": "PT/BR APPLE TV+",
+   "alias": "PT/BR APPLE TV+",
+   "censored": 0
+  },
+  {
+   "id": "854",
+   "title": "PT/BR AMAZON PRIME",
+   "alias": "PT/BR AMAZON PRIME",
+   "censored": 0
+  },
+  {
+   "id": "864",
+   "title": "PT/BR PARAMOUNT+",
+   "alias": "PT/BR PARAMOUNT+",
+   "censored": 0
+  },
+  {
+   "id": "1341",
+   "title": "PT/BR - SHOWTIME",
+   "alias": "PT/BR - SHOWTIME",
+   "censored": 0
+  },
+  {
+   "id": "1397",
+   "title": "PT/BR HBO MAX",
+   "alias": "PT/BR HBO MAX",
+   "censored": 0
+  },
+  {
+   "id": "1407",
+   "title": "PT/BR STAR WARS",
+   "alias": "PT/BR STAR WARS",
+   "censored": 0
+  },
+  {
+   "id": "1349",
+   "title": "PT/BR MARVEL STUDIOS",
+   "alias": "PT/BR MARVEL STUDIOS",
+   "censored": 0
+  },
+  {
+   "id": "1370",
+   "title": "PT/BR GLOBOPLAY",
+   "alias": "PT/BR GLOBOPLAY",
+   "censored": 0
+  },
+  {
+   "id": "855",
+   "title": "PT/BR ANIMAÇÃO",
+   "alias": "PT/BR ANIMAÇÃO",
+   "censored": 0
+  },
+  {
+   "id": "2031",
+   "title": "PT/BR DOCUMENTARIO",
+   "alias": "PT/BR DOCUMENTARIO",
+   "censored": 0
+  },
+  {
+   "id": "394",
+   "title": "PERSIAN SERIES",
+   "alias": "PERSIAN SERIES",
+   "censored": 0
+  },
+  {
+   "id": "2450",
+   "title": "PERSIAN انگلیسی دوبله",
+   "alias": "PERSIAN انگلیسی دوبله",
+   "censored": 0
+  },
+  {
+   "id": "712",
+   "title": "PERSIAN انگلیسی",
+   "alias": "PERSIAN انگلیسی",
+   "censored": 0
+  },
+  {
+   "id": "753",
+   "title": "PERSIAN ترکی",
+   "alias": "PERSIAN ترکی",
+   "censored": 0
+  },
+  {
+   "id": "2066",
+   "title": "PERSIAN ترکی دوبله",
+   "alias": "PERSIAN ترکی دوبله",
+   "censored": 0
+  },
+  {
+   "id": "2026",
+   "title": "PERSIAN کره ای",
+   "alias": "PERSIAN کره ای",
+   "censored": 0
+  },
+  {
+   "id": "1157",
+   "title": "PERSIAN نوستالژی",
+   "alias": "PERSIAN نوستالژی",
+   "censored": 0
+  },
+  {
+   "id": "1211",
+   "title": "PERSIAN انیمه",
+   "alias": "PERSIAN انیمه",
+   "censored": 0
+  },
+  {
+   "id": "1057",
+   "title": "KURDISH BADINI",
+   "alias": "KURDISH BADINI",
+   "censored": 0
+  },
+  {
+   "id": "1248",
+   "title": "KURDISH CARTOON BADINI",
+   "alias": "KURDISH CARTOON BADINI",
+   "censored": 0
+  },
+  {
+   "id": "1148",
+   "title": "KURDISH SORANI",
+   "alias": "KURDISH SORANI",
+   "censored": 0
+  },
+  {
+   "id": "1247",
+   "title": "KURDISH CARTOON SORANI",
+   "alias": "KURDISH CARTOON SORANI",
+   "censored": 0
+  },
+  {
+   "id": "1931",
+   "title": "HEBREW EN SERIES",
+   "alias": "HEBREW EN SERIES",
+   "censored": 0
+  },
+  {
+   "id": "2416",
+   "title": "HEBREW EN תוכנית ריאליטי ודוקומנטרי",
+   "alias": "HEBREW EN תוכנית ריאליטי ודוקומנטרי",
+   "censored": 0
+  },
+  {
+   "id": "1932",
+   "title": "HEBREW EN KIDS SERIES",
+   "alias": "HEBREW EN KIDS SERIES",
+   "censored": 0
+  },
+  {
+   "id": "2046",
+   "title": "HEBREW TR סדרות טורקיות",
+   "alias": "HEBREW TR סדרות טורקיות",
+   "censored": 0
+  },
+  {
+   "id": "1618",
+   "title": "HEBREW דיסני+ סדרות",
+   "alias": "HEBREW דיסני+ סדרות",
+   "censored": 0
+  },
+  {
+   "id": "1129",
+   "title": "HEBREW המהדורות האחרונות",
+   "alias": "HEBREW המהדורות האחרונות",
+   "censored": 0
+  },
+  {
+   "id": "1471",
+   "title": "HEBREW MAKO +",
+   "alias": "HEBREW MAKO +",
+   "censored": 0
+  },
+  {
+   "id": "1555",
+   "title": "HEBREW KAN BOX 11",
+   "alias": "HEBREW KAN BOX 11",
+   "censored": 0
+  },
+  {
+   "id": "1130",
+   "title": "HEBREW ישן",
+   "alias": "HEBREW ישן",
+   "censored": 0
+  },
+  {
+   "id": "1261",
+   "title": "HEBREW אנימציה",
+   "alias": "HEBREW אנימציה",
+   "censored": 0
+  },
+  {
+   "id": "1703",
+   "title": "HEBREW נטפליקס בעברית",
+   "alias": "HEBREW נטפליקס בעברית",
+   "censored": 0
+  },
+  {
+   "id": "2201",
+   "title": "HEBREW KOR דרמות אסייתיות",
+   "alias": "HEBREW KOR דרמות אסייתיות",
+   "censored": 0
+  },
+  {
+   "id": "2230",
+   "title": "ROMANIAN SERIES",
+   "alias": "ROMANIAN SERIES",
+   "censored": 0
+  },
+  {
+   "id": "2267",
+   "title": "ROMANIAN VOYO SERIES",
+   "alias": "ROMANIAN VOYO SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1388",
+   "title": "BULGARIYA SERIAL",
+   "alias": "BULGARIYA SERIAL",
+   "censored": 0
+  },
+  {
+   "id": "1837",
+   "title": "HUNGARY TV-SOROZAT",
+   "alias": "HUNGARY TV-SOROZAT",
+   "censored": 0
+  },
+  {
+   "id": "1046",
+   "title": "RUSSAIN SERIES",
+   "alias": "RUSSAIN SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1184",
+   "title": "AFRICA SERIES",
+   "alias": "AFRICA SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1183",
+   "title": "SOUTH AFRICA SERIES",
+   "alias": "SOUTH AFRICA SERIES",
+   "censored": 0
+  },
+  {
+   "id": "233",
+   "title": "CHINA ANIMATION",
+   "alias": "CHINA ANIMATION",
+   "censored": 0
+  },
+  {
+   "id": "914",
+   "title": "PHILIPPINES SERIES",
+   "alias": "PHILIPPINES SERIES",
+   "censored": 0
+  },
+  {
+   "id": "2260",
+   "title": "PHILIPPINES TAGALOG DUB SERIES",
+   "alias": "PHILIPPINES TAGALOG DUB SERIES",
+   "censored": 0
+  },
+  {
+   "id": "2259",
+   "title": "PHILIPPINES TAGALOG SUB SERIES",
+   "alias": "PHILIPPINES TAGALOG SUB SERIES",
+   "censored": 0
+  },
+  {
+   "id": "2439",
+   "title": "PHILIPPINES ANIME TAGALOG DUBBED",
+   "alias": "PHILIPPINES ANIME TAGALOG DUBBED",
+   "censored": 0
+  },
+  {
+   "id": "2298",
+   "title": "PHILIPPINES MICRO SERIES",
+   "alias": "PHILIPPINES MICRO SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1264",
+   "title": "NORDIC SERIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "NORDIC SERIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "1265",
+   "title": "NORDIC KIDS ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "NORDIC KIDS ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "1892",
+   "title": "NORDIC SERIE ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "NORDIC SERIE ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "204",
+   "title": "NORDIC SERIES",
+   "alias": "NORDIC SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1917",
+   "title": "NORDIC SKY SHOWTIME",
+   "alias": "NORDIC SKY SHOWTIME",
+   "censored": 0
+  },
+  {
+   "id": "1907",
+   "title": "NORDIC PRIME VIDEO",
+   "alias": "NORDIC PRIME VIDEO",
+   "censored": 0
+  },
+  {
+   "id": "1908",
+   "title": "NORDIC APPLE TV+",
+   "alias": "NORDIC APPLE TV+",
+   "censored": 0
+  },
+  {
+   "id": "1909",
+   "title": "NORDIC DISNEY+",
+   "alias": "NORDIC DISNEY+",
+   "censored": 0
+  },
+  {
+   "id": "1910",
+   "title": "NORDIC HBO MAX",
+   "alias": "NORDIC HBO MAX",
+   "censored": 0
+  },
+  {
+   "id": "1911",
+   "title": "NORDIC NETFLIX",
+   "alias": "NORDIC NETFLIX",
+   "censored": 0
+  },
+  {
+   "id": "1912",
+   "title": "NORDIC VIAPLAY",
+   "alias": "NORDIC VIAPLAY",
+   "censored": 0
+  },
+  {
+   "id": "1733",
+   "title": "NORDIC ANIME",
+   "alias": "NORDIC ANIME",
+   "censored": 0
+  },
+  {
+   "id": "208",
+   "title": "NORDIC KIDS",
+   "alias": "NORDIC KIDS",
+   "censored": 0
+  },
+  {
+   "id": "96",
+   "title": "SVENSK SERIE",
+   "alias": "SVENSK SERIE",
+   "censored": 0
+  },
+  {
+   "id": "1902",
+   "title": "SVENSK TV4 PLAY",
+   "alias": "SVENSK TV4 PLAY",
+   "censored": 0
+  },
+  {
+   "id": "775",
+   "title": "SVENSKA BARN",
+   "alias": "SVENSKA BARN",
+   "censored": 0
+  },
+  {
+   "id": "2120",
+   "title": "DANSK SERIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "DANSK SERIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "776",
+   "title": "DANSK SERIE",
+   "alias": "DANSK SERIE",
+   "censored": 0
+  },
+  {
+   "id": "1906",
+   "title": "DANSK TV2 PLAY",
+   "alias": "DANSK TV2 PLAY",
+   "censored": 0
+  },
+  {
+   "id": "777",
+   "title": "DANSKE BØRN",
+   "alias": "DANSKE BØRN",
+   "censored": 0
+  },
+  {
+   "id": "809",
+   "title": "NORSK SERIE",
+   "alias": "NORSK SERIE",
+   "censored": 0
+  },
+  {
+   "id": "1903",
+   "title": "NORSK NRK",
+   "alias": "NORSK NRK",
+   "censored": 0
+  },
+  {
+   "id": "1904",
+   "title": "NORSK TV2 PLAY",
+   "alias": "NORSK TV2 PLAY",
+   "censored": 0
+  },
+  {
+   "id": "1905",
+   "title": "NORSK VGTV",
+   "alias": "NORSK VGTV",
+   "censored": 0
+  },
+  {
+   "id": "810",
+   "title": "NORSK BARN",
+   "alias": "NORSK BARN",
+   "censored": 0
+  },
+  {
+   "id": "811",
+   "title": "SUOMI SARJA",
+   "alias": "SUOMI SARJA",
+   "censored": 0
+  },
+  {
+   "id": "1919",
+   "title": "SUOMI MTV KATSOMO",
+   "alias": "SUOMI MTV KATSOMO",
+   "censored": 0
+  },
+  {
+   "id": "1921",
+   "title": "SUOMI YLE AREENA",
+   "alias": "SUOMI YLE AREENA",
+   "censored": 0
+  },
+  {
+   "id": "1918",
+   "title": "SUOMI RUUTU",
+   "alias": "SUOMI RUUTU",
+   "censored": 0
+  },
+  {
+   "id": "812",
+   "title": "SUOMEN LAPSET",
+   "alias": "SUOMEN LAPSET",
+   "censored": 0
+  },
+  {
+   "id": "1612",
+   "title": "ÍSLANDS SERIES",
+   "alias": "ÍSLANDS SERIES",
+   "censored": 0
+  },
+  {
+   "id": "1508",
+   "title": "ÍSLANDS VIAPLAY RÖÐ",
+   "alias": "ÍSLANDS VIAPLAY RÖÐ",
+   "censored": 0
+  }
+ ]
+}

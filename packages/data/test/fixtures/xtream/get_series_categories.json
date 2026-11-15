@@ -1,0 +1,32 @@
+[
+ {
+  "category_id": "1",
+  "category_name": "يعرض الآن عربي",
+  "parent_id": 0
+ },
+ {
+  "category_id": "2",
+  "category_name": "يعرض الآن تركي مترجم ☪",
+  "parent_id": 0
+ },
+ {
+  "category_id": "73",
+  "category_name": "يعرض الآن تركي مدبلج ☪",
+  "parent_id": 0
+ },
+ {
+  "category_id": "3",
+  "category_name": "يعرض الأن أجنبي",
+  "parent_id": 0
+ },
+ {
+  "category_id": "4",
+  "category_name": "يعرض الآن أسيوي",
+  "parent_id": 0
+ },
+ {
+  "category_id": "824",
+  "category_name": "يعرض الان هندي",
+  "parent_id": 0
+ }
+]

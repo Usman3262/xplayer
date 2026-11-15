@@ -1,0 +1,2692 @@
+{
+ "js": [
+  {
+   "id": "*",
+   "title": "All",
+   "alias": "*",
+   "censored": 0
+  },
+  {
+   "id": "1652",
+   "title": "IN - NEW RELEASE",
+   "alias": "IN - NEW RELEASE",
+   "censored": 0
+  },
+  {
+   "id": "1923",
+   "title": "TOP MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "TOP MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "92",
+   "title": "TOP MOVIES BLURAY (MULTI-SUBS)",
+   "alias": "TOP MOVIES BLURAY (MULTI-SUBS)",
+   "censored": 0
+  },
+  {
+   "id": "99",
+   "title": "TOP KIDS BLURAY (MULTI-SUBS)",
+   "alias": "TOP KIDS BLURAY (MULTI-SUBS)",
+   "censored": 0
+  },
+  {
+   "id": "1704",
+   "title": "ASIA MOVIES (MULTI-SUBS)",
+   "alias": "ASIA MOVIES (MULTI-SUBS)",
+   "censored": 0
+  },
+  {
+   "id": "1925",
+   "title": "NETFLIX MOVIES DOLBY AUDIO",
+   "alias": "NETFLIX MOVIES DOLBY AUDIO",
+   "censored": 0
+  },
+  {
+   "id": "219",
+   "title": "NETFLIX MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "alias": "NETFLIX MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "censored": 0
+  },
+  {
+   "id": "2177",
+   "title": "NETFLIX STAND-UP COMEDY",
+   "alias": "NETFLIX STAND-UP COMEDY",
+   "censored": 0
+  },
+  {
+   "id": "1661",
+   "title": "NETFLIX DOCU-MOVIES",
+   "alias": "NETFLIX DOCU-MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "410",
+   "title": "NETFLIX ASIA",
+   "alias": "NETFLIX ASIA",
+   "censored": 0
+  },
+  {
+   "id": "137",
+   "title": "NETFLIX MOVIES",
+   "alias": "NETFLIX MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "285",
+   "title": "NETFLIX KIDS",
+   "alias": "NETFLIX KIDS",
+   "censored": 0
+  },
+  {
+   "id": "664",
+   "title": "NETFLIX ANIMI",
+   "alias": "NETFLIX ANIMI",
+   "censored": 0
+  },
+  {
+   "id": "220",
+   "title": "NETFLIX KIDS ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "alias": "NETFLIX KIDS ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "censored": 0
+  },
+  {
+   "id": "2261",
+   "title": "NETFLIX MUSIC",
+   "alias": "NETFLIX MUSIC",
+   "censored": 0
+  },
+  {
+   "id": "437",
+   "title": "NETFLIX HEVC",
+   "alias": "NETFLIX HEVC",
+   "censored": 0
+  },
+  {
+   "id": "1007",
+   "title": "AMAZON MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "AMAZON MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "440",
+   "title": "AMAZON MOVIES",
+   "alias": "AMAZON MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "1035",
+   "title": "AMAZON DOCU-MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "AMAZON DOCU-MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "1034",
+   "title": "AMAZON DOCU-MOVIES",
+   "alias": "AMAZON DOCU-MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "992",
+   "title": "AMAZON KIDS",
+   "alias": "AMAZON KIDS",
+   "censored": 0
+  },
+  {
+   "id": "2052",
+   "title": "JAMES BOND 007",
+   "alias": "JAMES BOND 007",
+   "censored": 0
+  },
+  {
+   "id": "1006",
+   "title": "AMAZON KIDS ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "AMAZON KIDS ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "1069",
+   "title": "DISNEY+ MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "alias": "DISNEY+ MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "censored": 0
+  },
+  {
+   "id": "1070",
+   "title": "DISNEY+ KIDS MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "alias": "DISNEY+ KIDS MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "censored": 0
+  },
+  {
+   "id": "2297",
+   "title": "DISNEY+ DOCU-MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "alias": "DISNEY+ DOCU-MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "censored": 0
+  },
+  {
+   "id": "325",
+   "title": "DISNEY+ MOVIES",
+   "alias": "DISNEY+ MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "326",
+   "title": "DISNEY+ KIDS MOVIES",
+   "alias": "DISNEY+ KIDS MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "2351",
+   "title": "DISNEY+ STAND-UP COMEDY",
+   "alias": "DISNEY+ STAND-UP COMEDY",
+   "censored": 0
+  },
+  {
+   "id": "2296",
+   "title": "DISNEY+ DOCU-MOVIES",
+   "alias": "DISNEY+ DOCU-MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "432",
+   "title": "APPLE+ KIDS ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "alias": "APPLE+ KIDS ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "censored": 0
+  },
+  {
+   "id": "328",
+   "title": "APPLE+ KIDS",
+   "alias": "APPLE+ KIDS",
+   "censored": 0
+  },
+  {
+   "id": "431",
+   "title": "APPLE+ MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "alias": "APPLE+ MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᵒˡᵇʸ ⱽᶦˢᶦᵒⁿ",
+   "censored": 0
+  },
+  {
+   "id": "327",
+   "title": "APPLE+ MOVIES",
+   "alias": "APPLE+ MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "763",
+   "title": "DISCOVERY+ MOVIES",
+   "alias": "DISCOVERY+ MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "758",
+   "title": "VIAPLAY MOVIES",
+   "alias": "VIAPLAY MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "759",
+   "title": "VIAPLAY KIDS",
+   "alias": "VIAPLAY KIDS",
+   "censored": 0
+  },
+  {
+   "id": "1074",
+   "title": "DREAMWORKS ANIMATION",
+   "alias": "DREAMWORKS ANIMATION",
+   "censored": 0
+  },
+  {
+   "id": "1076",
+   "title": "UNIVERSAL",
+   "alias": "UNIVERSAL",
+   "censored": 0
+  },
+  {
+   "id": "1075",
+   "title": "PARAMOUNT PICTURES",
+   "alias": "PARAMOUNT PICTURES",
+   "censored": 0
+  },
+  {
+   "id": "1536",
+   "title": "MARVEL MOVIES 3840P (MULTI)",
+   "alias": "MARVEL MOVIES 3840P (MULTI)",
+   "censored": 0
+  },
+  {
+   "id": "1535",
+   "title": "MARVEL MOVIES (MULTI)",
+   "alias": "MARVEL MOVIES (MULTI)",
+   "censored": 0
+  },
+  {
+   "id": "163",
+   "title": "EN - NEW RELEASE",
+   "alias": "EN - NEW RELEASE",
+   "censored": 0
+  },
+  {
+   "id": "269",
+   "title": "EN - CHRISTMAS",
+   "alias": "EN - CHRISTMAS",
+   "censored": 0
+  },
+  {
+   "id": "274",
+   "title": "EN - COMEDY",
+   "alias": "EN - COMEDY",
+   "censored": 0
+  },
+  {
+   "id": "119",
+   "title": "EN - 2020 & OLD",
+   "alias": "EN - 2020 & OLD",
+   "censored": 0
+  },
+  {
+   "id": "288",
+   "title": "EN - ROMANCE",
+   "alias": "EN - ROMANCE",
+   "censored": 0
+  },
+  {
+   "id": "275",
+   "title": "EN - ACTION",
+   "alias": "EN - ACTION",
+   "censored": 0
+  },
+  {
+   "id": "273",
+   "title": "EN - HORROR",
+   "alias": "EN - HORROR",
+   "censored": 0
+  },
+  {
+   "id": "309",
+   "title": "EN - ADVENTURE",
+   "alias": "EN - ADVENTURE",
+   "censored": 0
+  },
+  {
+   "id": "282",
+   "title": "EN - THRILLER",
+   "alias": "EN - THRILLER",
+   "censored": 0
+  },
+  {
+   "id": "310",
+   "title": "EN - WWE",
+   "alias": "EN - WWE",
+   "censored": 0
+  },
+  {
+   "id": "192",
+   "title": "EN - DOCUMENTARIES",
+   "alias": "EN - DOCUMENTARIES",
+   "censored": 0
+  },
+  {
+   "id": "287",
+   "title": "EN - DRAMA",
+   "alias": "EN - DRAMA",
+   "censored": 0
+  },
+  {
+   "id": "173",
+   "title": "EN - KIDS",
+   "alias": "EN - KIDS",
+   "censored": 0
+  },
+  {
+   "id": "429",
+   "title": "EN - MANGA/ANIME",
+   "alias": "EN - MANGA/ANIME",
+   "censored": 0
+  },
+  {
+   "id": "170",
+   "title": "EN - Biblical",
+   "alias": "EN - Biblical",
+   "censored": 0
+  },
+  {
+   "id": "387",
+   "title": "EN - UFC",
+   "alias": "EN - UFC",
+   "censored": 0
+  },
+  {
+   "id": "272",
+   "title": "EN - CONCERTS",
+   "alias": "EN - CONCERTS",
+   "censored": 0
+  },
+  {
+   "id": "281",
+   "title": "EN - SCIENCE FICTION",
+   "alias": "EN - SCIENCE FICTION",
+   "censored": 0
+  },
+  {
+   "id": "241",
+   "title": "EN - WESTERNS",
+   "alias": "EN - WESTERNS",
+   "censored": 0
+  },
+  {
+   "id": "289",
+   "title": "EN - MUSICAL",
+   "alias": "EN - MUSICAL",
+   "censored": 0
+  },
+  {
+   "id": "2048",
+   "title": "EN - FAMILY",
+   "alias": "EN - FAMILY",
+   "censored": 0
+  },
+  {
+   "id": "1939",
+   "title": "EN - ITALIAN SUB ENG",
+   "alias": "EN - ITALIAN SUB ENG",
+   "censored": 0
+  },
+  {
+   "id": "217",
+   "title": "EN - MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "EN - MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "388",
+   "title": "EN - BOXING",
+   "alias": "EN - BOXING",
+   "censored": 0
+  },
+  {
+   "id": "1453",
+   "title": "EN - IMDB TOP 250",
+   "alias": "EN - IMDB TOP 250",
+   "censored": 0
+  },
+  {
+   "id": "218",
+   "title": "EN - KIDS ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "EN - KIDS ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "225",
+   "title": "EN - COLLECTIONS",
+   "alias": "EN - COLLECTIONS",
+   "censored": 0
+  },
+  {
+   "id": "439",
+   "title": "EN - WORKOUT",
+   "alias": "EN - WORKOUT",
+   "censored": 0
+  },
+  {
+   "id": "904",
+   "title": "CHRISTIAN MOVIES",
+   "alias": "CHRISTIAN MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "636",
+   "title": "SOCCER BASKETBALL",
+   "alias": "SOCCER BASKETBALL",
+   "censored": 0
+  },
+  {
+   "id": "635",
+   "title": "SOCCER AMERICAN FOOTBALL",
+   "alias": "SOCCER AMERICAN FOOTBALL",
+   "censored": 0
+  },
+  {
+   "id": "641",
+   "title": "SOCCER UFC",
+   "alias": "SOCCER UFC",
+   "censored": 0
+  },
+  {
+   "id": "638",
+   "title": "SOCCER HOCKEY",
+   "alias": "SOCCER HOCKEY",
+   "censored": 0
+  },
+  {
+   "id": "634",
+   "title": "SOCCER FOOTBALL",
+   "alias": "SOCCER FOOTBALL",
+   "censored": 0
+  },
+  {
+   "id": "639",
+   "title": "SOCCER RUGBY",
+   "alias": "SOCCER RUGBY",
+   "censored": 0
+  },
+  {
+   "id": "637",
+   "title": "SOCCER BASEBALL",
+   "alias": "SOCCER BASEBALL",
+   "censored": 0
+  },
+  {
+   "id": "642",
+   "title": "SOCCER FORMULA 1",
+   "alias": "SOCCER FORMULA 1",
+   "censored": 0
+  },
+  {
+   "id": "640",
+   "title": "SOCCER AFL",
+   "alias": "SOCCER AFL",
+   "censored": 0
+  },
+  {
+   "id": "425",
+   "title": "DE - FILME ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "DE - FILME ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "169",
+   "title": "DE - FILME 2025/2026",
+   "alias": "DE - FILME 2025/2026",
+   "censored": 0
+  },
+  {
+   "id": "627",
+   "title": "DE - NETFLIX PRODUKTION",
+   "alias": "DE - NETFLIX PRODUKTION",
+   "censored": 0
+  },
+  {
+   "id": "117",
+   "title": "DE - FILME 1940/2024",
+   "alias": "DE - FILME 1940/2024",
+   "censored": 0
+  },
+  {
+   "id": "611",
+   "title": "DE - ANIME FILME",
+   "alias": "DE - ANIME FILME",
+   "censored": 0
+  },
+  {
+   "id": "2417",
+   "title": "DE - ²¹⁶⁰ᵖ DV ᴴᴰᴿ¹⁰/PLUS",
+   "alias": "DE - ²¹⁶⁰ᵖ DV ᴴᴰᴿ¹⁰/PLUS",
+   "censored": 0
+  },
+  {
+   "id": "134",
+   "title": "DE - KINDER FILME",
+   "alias": "DE - KINDER FILME",
+   "censored": 0
+  },
+  {
+   "id": "655",
+   "title": "DE - APPLE+ FILME PRODUKTION",
+   "alias": "DE - APPLE+ FILME PRODUKTION",
+   "censored": 0
+  },
+  {
+   "id": "1114",
+   "title": "DE - BLURAY FILME ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "DE - BLURAY FILME ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "816",
+   "title": "DE - DOKUMENTATION",
+   "alias": "DE - DOKUMENTATION",
+   "censored": 0
+  },
+  {
+   "id": "873",
+   "title": "DE - AMAZON PRIME PRODUKTION",
+   "alias": "DE - AMAZON PRIME PRODUKTION",
+   "censored": 0
+  },
+  {
+   "id": "1170",
+   "title": "DE - FUSSBALL",
+   "alias": "DE - FUSSBALL",
+   "censored": 0
+  },
+  {
+   "id": "2169",
+   "title": "DE - WEIHNACHTS FILME",
+   "alias": "DE - WEIHNACHTS FILME",
+   "censored": 0
+  },
+  {
+   "id": "846",
+   "title": "DE - BOLLYWOOD",
+   "alias": "DE - BOLLYWOOD",
+   "censored": 0
+  },
+  {
+   "id": "660",
+   "title": "DE - ANIME ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "DE - ANIME ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "1524",
+   "title": "DE - WESTERN",
+   "alias": "DE - WESTERN",
+   "censored": 0
+  },
+  {
+   "id": "1217",
+   "title": "DE - ANIME MOVIES SUBS",
+   "alias": "DE - ANIME MOVIES SUBS",
+   "censored": 0
+  },
+  {
+   "id": "426",
+   "title": "DE - KINDER FILME ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "DE - KINDER FILME ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "652",
+   "title": "DE - DISNEY+ PRODUKTION",
+   "alias": "DE - DISNEY+ PRODUKTION",
+   "censored": 0
+  },
+  {
+   "id": "1740",
+   "title": "DE -  BUD SPENCER & TERENCE HILL",
+   "alias": "DE -  BUD SPENCER & TERENCE HILL",
+   "censored": 0
+  },
+  {
+   "id": "1250",
+   "title": "DE - FILME 3D",
+   "alias": "DE - FILME 3D",
+   "censored": 0
+  },
+  {
+   "id": "1251",
+   "title": "DE - KINDER 3D",
+   "alias": "DE - KINDER 3D",
+   "censored": 0
+  },
+  {
+   "id": "657",
+   "title": "DE - IMDB TOP 100",
+   "alias": "DE - IMDB TOP 100",
+   "censored": 0
+  },
+  {
+   "id": "869",
+   "title": "DE - JAMES BOND 007",
+   "alias": "DE - JAMES BOND 007",
+   "censored": 0
+  },
+  {
+   "id": "858",
+   "title": "DE - STUDIO GHIBLI",
+   "alias": "DE - STUDIO GHIBLI",
+   "censored": 0
+  },
+  {
+   "id": "648",
+   "title": "DE - MARVEL VS DC",
+   "alias": "DE - MARVEL VS DC",
+   "censored": 0
+  },
+  {
+   "id": "1204",
+   "title": "DE - FORMULA 1",
+   "alias": "DE - FORMULA 1",
+   "censored": 0
+  },
+  {
+   "id": "1173",
+   "title": "DE - WRESTLING",
+   "alias": "DE - WRESTLING",
+   "censored": 0
+  },
+  {
+   "id": "249",
+   "title": "IT - DRAMMA/ROMANCE",
+   "alias": "IT - DRAMMA/ROMANCE",
+   "censored": 0
+  },
+  {
+   "id": "114",
+   "title": "IT - FILM 2024-2026",
+   "alias": "IT - FILM 2024-2026",
+   "censored": 0
+  },
+  {
+   "id": "247",
+   "title": "IT - ANIMAZIONE",
+   "alias": "IT - ANIMAZIONE",
+   "censored": 0
+  },
+  {
+   "id": "2042",
+   "title": "IT - DOCUMENTARIO",
+   "alias": "IT - DOCUMENTARIO",
+   "censored": 0
+  },
+  {
+   "id": "251",
+   "title": "IT - HORROR/THRILLER",
+   "alias": "IT - HORROR/THRILLER",
+   "censored": 0
+  },
+  {
+   "id": "1937",
+   "title": "IT - ANIME",
+   "alias": "IT - ANIME",
+   "censored": 0
+  },
+  {
+   "id": "250",
+   "title": "IT - COMMEDIA",
+   "alias": "IT - COMMEDIA",
+   "censored": 0
+  },
+  {
+   "id": "2269",
+   "title": "IT - WESTERN",
+   "alias": "IT - WESTERN",
+   "censored": 0
+  },
+  {
+   "id": "244",
+   "title": "IT - 4K MOVIES",
+   "alias": "IT - 4K MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "207",
+   "title": "IT - FILM 1990-2023",
+   "alias": "IT - FILM 1990-2023",
+   "censored": 0
+  },
+  {
+   "id": "248",
+   "title": "IT - CLASSICO",
+   "alias": "IT - CLASSICO",
+   "censored": 0
+  },
+  {
+   "id": "240",
+   "title": "IT - AVVENTURA/AZIONE",
+   "alias": "IT - AVVENTURA/AZIONE",
+   "censored": 0
+  },
+  {
+   "id": "2270",
+   "title": "IT - BIOGRAFICO",
+   "alias": "IT - BIOGRAFICO",
+   "censored": 0
+  },
+  {
+   "id": "252",
+   "title": "IT - FANTASTICO/FANTASCIENZA",
+   "alias": "IT - FANTASTICO/FANTASCIENZA",
+   "censored": 0
+  },
+  {
+   "id": "1797",
+   "title": "NL - AMAZON PRIME",
+   "alias": "NL - AMAZON PRIME",
+   "censored": 0
+  },
+  {
+   "id": "168",
+   "title": "NL - BIOSCOOP",
+   "alias": "NL - BIOSCOOP",
+   "censored": 0
+  },
+  {
+   "id": "737",
+   "title": "NL - VIDEOLAND",
+   "alias": "NL - VIDEOLAND",
+   "censored": 0
+  },
+  {
+   "id": "1749",
+   "title": "NL - KERST FILMS",
+   "alias": "NL - KERST FILMS",
+   "censored": 0
+  },
+  {
+   "id": "86",
+   "title": "NL - KINDEREN",
+   "alias": "NL - KINDEREN",
+   "censored": 0
+  },
+  {
+   "id": "2152",
+   "title": "NL - SHOWTIME",
+   "alias": "NL - SHOWTIME",
+   "censored": 0
+  },
+  {
+   "id": "84",
+   "title": "NL - 2022 & OUD",
+   "alias": "NL - 2022 & OUD",
+   "censored": 0
+  },
+  {
+   "id": "1712",
+   "title": "NL - NPO+",
+   "alias": "NL - NPO+",
+   "censored": 0
+  },
+  {
+   "id": "1581",
+   "title": "NL - VIDEOLAND KIDS",
+   "alias": "NL - VIDEOLAND KIDS",
+   "censored": 0
+  },
+  {
+   "id": "227",
+   "title": "NL - BIOSCOOP ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "NL - BIOSCOOP ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "228",
+   "title": "NL - KINDEREN ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "NL - KINDEREN ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "1041",
+   "title": "BE - DOCU-MOVIES (NL)",
+   "alias": "BE - DOCU-MOVIES (NL)",
+   "censored": 0
+  },
+  {
+   "id": "133",
+   "title": "PT/BR - FILMES 2025-2026",
+   "alias": "PT/BR - FILMES 2025-2026",
+   "censored": 0
+  },
+  {
+   "id": "1363",
+   "title": "PT/BR - AÇÃO",
+   "alias": "PT/BR - AÇÃO",
+   "censored": 0
+  },
+  {
+   "id": "1361",
+   "title": "PT/BR - TERROR",
+   "alias": "PT/BR - TERROR",
+   "censored": 0
+  },
+  {
+   "id": "850",
+   "title": "PT/BR - DOCUMENTACAO",
+   "alias": "PT/BR - DOCUMENTACAO",
+   "censored": 0
+  },
+  {
+   "id": "848",
+   "title": "PT/BR - FILMES 1960-2023",
+   "alias": "PT/BR - FILMES 1960-2023",
+   "censored": 0
+  },
+  {
+   "id": "260",
+   "title": "PT/BR - ANIMAÇÃO",
+   "alias": "PT/BR - ANIMAÇÃO",
+   "censored": 0
+  },
+  {
+   "id": "859",
+   "title": "PT/BR - NETFLIX",
+   "alias": "PT/BR - NETFLIX",
+   "censored": 0
+  },
+  {
+   "id": "1364",
+   "title": "PT/BR - SUSPENSE",
+   "alias": "PT/BR - SUSPENSE",
+   "censored": 0
+  },
+  {
+   "id": "862",
+   "title": "PT/BR - AMAZON PRIME",
+   "alias": "PT/BR - AMAZON PRIME",
+   "censored": 0
+  },
+  {
+   "id": "861",
+   "title": "PT/BR - APPLE TV+",
+   "alias": "PT/BR - APPLE TV+",
+   "censored": 0
+  },
+  {
+   "id": "2178",
+   "title": "ES - PELÍCULAS 2026",
+   "alias": "ES - PELÍCULAS 2026",
+   "censored": 0
+  },
+  {
+   "id": "1274",
+   "title": "ES - PELÍCULAS ANTIGUAS Y SAGAS",
+   "alias": "ES - PELÍCULAS ANTIGUAS Y SAGAS",
+   "censored": 0
+  },
+  {
+   "id": "128",
+   "title": "ES - PELÍCULAS",
+   "alias": "ES - PELÍCULAS",
+   "censored": 0
+  },
+  {
+   "id": "1718",
+   "title": "ES - PELÍCULAS 2025",
+   "alias": "ES - PELÍCULAS 2025",
+   "censored": 0
+  },
+  {
+   "id": "205",
+   "title": "ES - INFANTILES Y FAMILIAS",
+   "alias": "ES - INFANTILES Y FAMILIAS",
+   "censored": 0
+  },
+  {
+   "id": "682",
+   "title": "ES - DOCUMENTALES",
+   "alias": "ES - DOCUMENTALES",
+   "censored": 0
+  },
+  {
+   "id": "1260",
+   "title": "ES - PELÍCULAS TERROR",
+   "alias": "ES - PELÍCULAS TERROR",
+   "censored": 0
+  },
+  {
+   "id": "1150",
+   "title": "ES - PELÍCULAS 2024",
+   "alias": "ES - PELÍCULAS 2024",
+   "censored": 0
+  },
+  {
+   "id": "2136",
+   "title": "ES - PELÍCULAS DE NAVIDAD",
+   "alias": "ES - PELÍCULAS DE NAVIDAD",
+   "censored": 0
+  },
+  {
+   "id": "1489",
+   "title": "ES - PELÍCULAS ANIMACION",
+   "alias": "ES - PELÍCULAS ANIMACION",
+   "censored": 0
+  },
+  {
+   "id": "1365",
+   "title": "ES - PELÍCULAS CLASICO",
+   "alias": "ES - PELÍCULAS CLASICO",
+   "censored": 0
+  },
+  {
+   "id": "1893",
+   "title": "ES - PELÍCULAS ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "ES - PELÍCULAS ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "2240",
+   "title": "ES - PELÍCULAS SUBTITLES",
+   "alias": "ES - PELÍCULAS SUBTITLES",
+   "censored": 0
+  },
+  {
+   "id": "2148",
+   "title": "ES - PELÍCULAS ⁴ᴷ ᴴᴰᴿ ᴰᴼᴸᴮʸ ⱽᴵˢᴵÓᴺ",
+   "alias": "ES - PELÍCULAS ⁴ᴷ ᴴᴰᴿ ᴰᴼᴸᴮʸ ⱽᴵˢᴵÓᴺ",
+   "censored": 0
+  },
+  {
+   "id": "2154",
+   "title": "ES - PARTIDOS DE LALIGA",
+   "alias": "ES - PARTIDOS DE LALIGA",
+   "censored": 0
+  },
+  {
+   "id": "887",
+   "title": "ES - PELÍCULAS ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "ES - PELÍCULAS ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "2106",
+   "title": "ES - MOTOGP",
+   "alias": "ES - MOTOGP",
+   "censored": 0
+  },
+  {
+   "id": "2105",
+   "title": "ES - FORMULA 1",
+   "alias": "ES - FORMULA 1",
+   "censored": 0
+  },
+  {
+   "id": "888",
+   "title": "ES - NETFLIX",
+   "alias": "ES - NETFLIX",
+   "censored": 0
+  },
+  {
+   "id": "1146",
+   "title": "ES - PRIME+",
+   "alias": "ES - PRIME+",
+   "censored": 0
+  },
+  {
+   "id": "1188",
+   "title": "LA - PELÍCULAS",
+   "alias": "LA - PELÍCULAS",
+   "censored": 0
+  },
+  {
+   "id": "1189",
+   "title": "LA - INFANTILES",
+   "alias": "LA - INFANTILES",
+   "censored": 0
+  },
+  {
+   "id": "2293",
+   "title": "LA - ANIME",
+   "alias": "LA - ANIME",
+   "censored": 0
+  },
+  {
+   "id": "1819",
+   "title": "AF - CINAF TV",
+   "alias": "AF - CINAF TV",
+   "censored": 0
+  },
+  {
+   "id": "1803",
+   "title": "AF - IBAKA TV",
+   "alias": "AF - IBAKA TV",
+   "censored": 0
+  },
+  {
+   "id": "1784",
+   "title": "AF - IROKO TV",
+   "alias": "AF - IROKO TV",
+   "censored": 0
+  },
+  {
+   "id": "2174",
+   "title": "FR - FILM ⁴ᴷ ᴴᴰᴿ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "FR - FILM ⁴ᴷ ᴴᴰᴿ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "2398",
+   "title": "FR - ANIMATION ⁴ᴷ ᴴᴰᴿ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "FR - ANIMATION ⁴ᴷ ᴴᴰᴿ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "1098",
+   "title": "FR - DOCUMENTAIRS",
+   "alias": "FR - DOCUMENTAIRS",
+   "censored": 0
+  },
+  {
+   "id": "1093",
+   "title": "FR - LE DRENIER AJOUTEE",
+   "alias": "FR - LE DRENIER AJOUTEE",
+   "censored": 0
+  },
+  {
+   "id": "400",
+   "title": "FR - ENFANTS",
+   "alias": "FR - ENFANTS",
+   "censored": 0
+  },
+  {
+   "id": "1720",
+   "title": "FR - NETFLIX 2025",
+   "alias": "FR - NETFLIX 2025",
+   "censored": 0
+  },
+  {
+   "id": "791",
+   "title": "FR - ACTION",
+   "alias": "FR - ACTION",
+   "censored": 0
+  },
+  {
+   "id": "793",
+   "title": "FR - COMEDIE",
+   "alias": "FR - COMEDIE",
+   "censored": 0
+  },
+  {
+   "id": "1100",
+   "title": "FR - MUSIQUE",
+   "alias": "FR - MUSIQUE",
+   "censored": 0
+  },
+  {
+   "id": "792",
+   "title": "FR - DRAME",
+   "alias": "FR - DRAME",
+   "censored": 0
+  },
+  {
+   "id": "794",
+   "title": "FR - HORREUR",
+   "alias": "FR - HORREUR",
+   "censored": 0
+  },
+  {
+   "id": "868",
+   "title": "FR - THRILLER",
+   "alias": "FR - THRILLER",
+   "censored": 0
+  },
+  {
+   "id": "1829",
+   "title": "FR - FILM CAM",
+   "alias": "FR - FILM CAM",
+   "censored": 0
+  },
+  {
+   "id": "126",
+   "title": "FR - 2021 ANCIEN FILM",
+   "alias": "FR - 2021 ANCIEN FILM",
+   "censored": 0
+  },
+  {
+   "id": "1699",
+   "title": "FR - VOSTFR",
+   "alias": "FR - VOSTFR",
+   "censored": 0
+  },
+  {
+   "id": "1097",
+   "title": "FR - CRIME",
+   "alias": "FR - CRIME",
+   "censored": 0
+  },
+  {
+   "id": "1752",
+   "title": "FR - FILM 1940-1980",
+   "alias": "FR - FILM 1940-1980",
+   "censored": 0
+  },
+  {
+   "id": "1556",
+   "title": "FR - FANTASTIQUE AVENTURE",
+   "alias": "FR - FANTASTIQUE AVENTURE",
+   "censored": 0
+  },
+  {
+   "id": "1101",
+   "title": "FR - SCIENCE-FICTION",
+   "alias": "FR - SCIENCE-FICTION",
+   "censored": 0
+  },
+  {
+   "id": "1360",
+   "title": "FR - GUERRE FILMS",
+   "alias": "FR - GUERRE FILMS",
+   "censored": 0
+  },
+  {
+   "id": "1541",
+   "title": "FR - ACTEURS FRANCAIS",
+   "alias": "FR - ACTEURS FRANCAIS",
+   "censored": 0
+  },
+  {
+   "id": "1579",
+   "title": "FR - HISTORIQUE BIOPIC",
+   "alias": "FR - HISTORIQUE BIOPIC",
+   "censored": 0
+  },
+  {
+   "id": "790",
+   "title": "FR - ANIMEE",
+   "alias": "FR - ANIMEE",
+   "censored": 0
+  },
+  {
+   "id": "1285",
+   "title": "FR - FILM 2022",
+   "alias": "FR - FILM 2022",
+   "censored": 0
+  },
+  {
+   "id": "1895",
+   "title": "FR - LE DRENIER AJOUTEE ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "FR - LE DRENIER AJOUTEE ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "629",
+   "title": "FR - NETFLIX FILMS",
+   "alias": "FR - NETFLIX FILMS",
+   "censored": 0
+  },
+  {
+   "id": "171",
+   "title": "FR - FILM ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "FR - FILM ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "172",
+   "title": "FR - ENFANTS ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "FR - ENFANTS ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "1549",
+   "title": "FR - ART MARTIAUX",
+   "alias": "FR - ART MARTIAUX",
+   "censored": 0
+  },
+  {
+   "id": "1685",
+   "title": "FR - FILMS EN SAGA ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "FR - FILMS EN SAGA ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "2038",
+   "title": "FR - EXCLUSIVITÉ",
+   "alias": "FR - EXCLUSIVITÉ",
+   "censored": 0
+  },
+  {
+   "id": "2075",
+   "title": "FR - AUDIO-DESCRIPTION",
+   "alias": "FR - AUDIO-DESCRIPTION",
+   "censored": 0
+  },
+  {
+   "id": "1284",
+   "title": "FR - FILM 2023",
+   "alias": "FR - FILM 2023",
+   "censored": 0
+  },
+  {
+   "id": "1719",
+   "title": "FR - FILM 2024",
+   "alias": "FR - FILM 2024",
+   "censored": 0
+  },
+  {
+   "id": "1545",
+   "title": "FR - ASIATIQUE",
+   "alias": "FR - ASIATIQUE",
+   "censored": 0
+  },
+  {
+   "id": "1669",
+   "title": "FR - PARAMOUNT+",
+   "alias": "FR - PARAMOUNT+",
+   "censored": 0
+  },
+  {
+   "id": "1552",
+   "title": "FR - DISNEY",
+   "alias": "FR - DISNEY",
+   "censored": 0
+  },
+  {
+   "id": "1542",
+   "title": "FR - BOX OFFICE",
+   "alias": "FR - BOX OFFICE",
+   "censored": 0
+  },
+  {
+   "id": "1537",
+   "title": "FR - AMAZONE",
+   "alias": "FR - AMAZONE",
+   "censored": 0
+  },
+  {
+   "id": "1525",
+   "title": "FR - MANGA",
+   "alias": "FR - MANGA",
+   "censored": 0
+  },
+  {
+   "id": "1423",
+   "title": "FR - COMBAT FILMS",
+   "alias": "FR - COMBAT FILMS",
+   "censored": 0
+  },
+  {
+   "id": "1282",
+   "title": "FR - RUGBY",
+   "alias": "FR - RUGBY",
+   "censored": 0
+  },
+  {
+   "id": "730",
+   "title": "QC - FILMS VIEILLE",
+   "alias": "QC - FILMS VIEILLE",
+   "censored": 0
+  },
+  {
+   "id": "729",
+   "title": "QC - FILMS NOUVELLE VERSION",
+   "alias": "QC - FILMS NOUVELLE VERSION",
+   "censored": 0
+  },
+  {
+   "id": "818",
+   "title": "QC - DOCUMENTAIRE",
+   "alias": "QC - DOCUMENTAIRE",
+   "censored": 0
+  },
+  {
+   "id": "971",
+   "title": "QC - SPECTACLES",
+   "alias": "QC - SPECTACLES",
+   "censored": 0
+  },
+  {
+   "id": "731",
+   "title": "QC - ANIMATION",
+   "alias": "QC - ANIMATION",
+   "censored": 0
+  },
+  {
+   "id": "843",
+   "title": "QC - NOËL",
+   "alias": "QC - NOËL",
+   "censored": 0
+  },
+  {
+   "id": "735",
+   "title": "QC - NETFLIX",
+   "alias": "QC - NETFLIX",
+   "censored": 0
+  },
+  {
+   "id": "1283",
+   "title": "FR - WRC",
+   "alias": "FR - WRC",
+   "censored": 0
+  },
+  {
+   "id": "1279",
+   "title": "FR - GOLF",
+   "alias": "FR - GOLF",
+   "censored": 0
+  },
+  {
+   "id": "1277",
+   "title": "FR - FOOTBALL",
+   "alias": "FR - FOOTBALL",
+   "censored": 0
+  },
+  {
+   "id": "1276",
+   "title": "FR - F1",
+   "alias": "FR - F1",
+   "censored": 0
+  },
+  {
+   "id": "1280",
+   "title": "FR - MOTO",
+   "alias": "FR - MOTO",
+   "censored": 0
+  },
+  {
+   "id": "1275",
+   "title": "FR - CYCLISME",
+   "alias": "FR - CYCLISME",
+   "censored": 0
+  },
+  {
+   "id": "1281",
+   "title": "FR - BASKETBALL",
+   "alias": "FR - BASKETBALL",
+   "censored": 0
+  },
+  {
+   "id": "1278",
+   "title": "FR - HANDBALL",
+   "alias": "FR - HANDBALL",
+   "censored": 0
+  },
+  {
+   "id": "127",
+   "title": "PL - KINO",
+   "alias": "PL - KINO",
+   "censored": 0
+  },
+  {
+   "id": "653",
+   "title": "PL - FILMY 4K",
+   "alias": "PL - FILMY 4K",
+   "censored": 0
+  },
+  {
+   "id": "313",
+   "title": "PL - DZIECI",
+   "alias": "PL - DZIECI",
+   "censored": 0
+  },
+  {
+   "id": "654",
+   "title": "PL - KIDS 4K",
+   "alias": "PL - KIDS 4K",
+   "censored": 0
+  },
+  {
+   "id": "1686",
+   "title": "PL - ŚWIĄTECZNIE",
+   "alias": "PL - ŚWIĄTECZNIE",
+   "censored": 0
+  },
+  {
+   "id": "135",
+   "title": "GR - ΚΙΝΗΜΑΤΟΓΡΑΦΟΣ",
+   "alias": "GR - ΚΙΝΗΜΑΤΟΓΡΑΦΟΣ",
+   "censored": 0
+  },
+  {
+   "id": "2374",
+   "title": "GR - FORMULA 1",
+   "alias": "GR - FORMULA 1",
+   "censored": 0
+  },
+  {
+   "id": "2067",
+   "title": "GR - NEW RELEASES",
+   "alias": "GR - NEW RELEASES",
+   "censored": 0
+  },
+  {
+   "id": "815",
+   "title": "GR - ΠΑΙΔΙΚΑ",
+   "alias": "GR - ΠΑΙΔΙΚΑ",
+   "censored": 0
+  },
+  {
+   "id": "1167",
+   "title": "GR - NETFLIX",
+   "alias": "GR - NETFLIX",
+   "censored": 0
+  },
+  {
+   "id": "1158",
+   "title": "GR - PRIME AMAZON",
+   "alias": "GR - PRIME AMAZON",
+   "censored": 0
+  },
+  {
+   "id": "1159",
+   "title": "GR - DISNEY+",
+   "alias": "GR - DISNEY+",
+   "censored": 0
+  },
+  {
+   "id": "1366",
+   "title": "GR - ΕΛΛΗΝΙΚΕΣ ΤΑΙΝΕΣ",
+   "alias": "GR - ΕΛΛΗΝΙΚΕΣ ΤΑΙΝΕΣ",
+   "censored": 0
+  },
+  {
+   "id": "1165",
+   "title": "GR - DOCUMENTARY",
+   "alias": "GR - DOCUMENTARY",
+   "censored": 0
+  },
+  {
+   "id": "1019",
+   "title": "GR - CHRISTMAS MOVIES",
+   "alias": "GR - CHRISTMAS MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "1164",
+   "title": "GR - APPLE+",
+   "alias": "GR - APPLE+",
+   "censored": 0
+  },
+  {
+   "id": "1155",
+   "title": "GR - GREEK THEATER",
+   "alias": "GR - GREEK THEATER",
+   "censored": 0
+  },
+  {
+   "id": "2300",
+   "title": "GR - MARVEL MOVIES",
+   "alias": "GR - MARVEL MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "1018",
+   "title": "GR - ΚΑΡΑΟΚΕ",
+   "alias": "GR - ΚΑΡΑΟΚΕ",
+   "censored": 0
+  },
+  {
+   "id": "2166",
+   "title": "GR - HORROR",
+   "alias": "GR - HORROR",
+   "censored": 0
+  },
+  {
+   "id": "2403",
+   "title": "GR - TURKISH MOVIES",
+   "alias": "GR - TURKISH MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "2233",
+   "title": "GR - HBO MAX",
+   "alias": "GR - HBO MAX",
+   "censored": 0
+  },
+  {
+   "id": "2232",
+   "title": "GR - ANIME",
+   "alias": "GR - ANIME",
+   "censored": 0
+  },
+  {
+   "id": "2366",
+   "title": "GR - FIFA WORLD CUP 2026",
+   "alias": "GR - FIFA WORLD CUP 2026",
+   "censored": 0
+  },
+  {
+   "id": "2336",
+   "title": "IL - HEBREW DOCU-MOVIES",
+   "alias": "IL - HEBREW DOCU-MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "1933",
+   "title": "IL - HEBREW EN MOVIES",
+   "alias": "IL - HEBREW EN MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "1934",
+   "title": "IL - HEBREW EN KIDS MOVIES",
+   "alias": "IL - HEBREW EN KIDS MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "1778",
+   "title": "IL - FREE TV - סרטים",
+   "alias": "IL - FREE TV - סרטים",
+   "censored": 0
+  },
+  {
+   "id": "1621",
+   "title": "IL - דיסני+ סרטים",
+   "alias": "IL - דיסני+ סרטים",
+   "censored": 0
+  },
+  {
+   "id": "1147",
+   "title": "IL - סרטים 2023 + האחרון",
+   "alias": "IL - סרטים 2023 + האחרון",
+   "censored": 0
+  },
+  {
+   "id": "1219",
+   "title": "IL - סרטים 2022 + ישן",
+   "alias": "IL - סרטים 2022 + ישן",
+   "censored": 0
+  },
+  {
+   "id": "231",
+   "title": "NORDIC FILM  ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "NORDIC FILM  ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "2424",
+   "title": "NORDIC ⁴ᴷ ᴴᴰᴿ",
+   "alias": "NORDIC ⁴ᴷ ᴴᴰᴿ",
+   "censored": 0
+  },
+  {
+   "id": "232",
+   "title": "NORDIC BARN ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "NORDIC BARN ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "314",
+   "title": "NORDIC FILM NEW RELEASE",
+   "alias": "NORDIC FILM NEW RELEASE",
+   "censored": 0
+  },
+  {
+   "id": "312",
+   "title": "NORDIC KIDS",
+   "alias": "NORDIC KIDS",
+   "censored": 0
+  },
+  {
+   "id": "1181",
+   "title": "NORDIC MUSIC",
+   "alias": "NORDIC MUSIC",
+   "censored": 0
+  },
+  {
+   "id": "139",
+   "title": "NORDIC FILM 2022 & OLD",
+   "alias": "NORDIC FILM 2022 & OLD",
+   "censored": 0
+  },
+  {
+   "id": "167",
+   "title": "SVENSKA NYA UTGÅVAN",
+   "alias": "SVENSKA NYA UTGÅVAN",
+   "censored": 0
+  },
+  {
+   "id": "1817",
+   "title": "NORDIC SPORT",
+   "alias": "NORDIC SPORT",
+   "censored": 0
+  },
+  {
+   "id": "1084",
+   "title": "NORDIC BECK COMPLETE",
+   "alias": "NORDIC BECK COMPLETE",
+   "censored": 0
+  },
+  {
+   "id": "1891",
+   "title": "NORDIC FILM ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "NORDIC FILM ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "90",
+   "title": "SVENSKA 2020 & GAMMAL",
+   "alias": "SVENSKA 2020 & GAMMAL",
+   "censored": 0
+  },
+  {
+   "id": "91",
+   "title": "SVENSKA BARN",
+   "alias": "SVENSKA BARN",
+   "censored": 0
+  },
+  {
+   "id": "1200",
+   "title": "SVENSKA AUDIOBOOKS",
+   "alias": "SVENSKA AUDIOBOOKS",
+   "censored": 0
+  },
+  {
+   "id": "146",
+   "title": "DANSKE FILM",
+   "alias": "DANSKE FILM",
+   "censored": 0
+  },
+  {
+   "id": "845",
+   "title": "DANSKE BØRN",
+   "alias": "DANSKE BØRN",
+   "censored": 0
+  },
+  {
+   "id": "996",
+   "title": "NORGE FILM",
+   "alias": "NORGE FILM",
+   "censored": 0
+  },
+  {
+   "id": "997",
+   "title": "NORGE BARN",
+   "alias": "NORGE BARN",
+   "censored": 0
+  },
+  {
+   "id": "2156",
+   "title": "NORGE FILM ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "NORGE FILM ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "999",
+   "title": "SUOMEN ELOKUVAT",
+   "alias": "SUOMEN ELOKUVAT",
+   "censored": 0
+  },
+  {
+   "id": "998",
+   "title": "SUOMEN LAPSET",
+   "alias": "SUOMEN LAPSET",
+   "censored": 0
+  },
+  {
+   "id": "1617",
+   "title": "ÍSLANDS MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "alias": "ÍSLANDS MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ",
+   "censored": 0
+  },
+  {
+   "id": "1613",
+   "title": "ÍSLANDS MOVIES",
+   "alias": "ÍSLANDS MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "1510",
+   "title": "VIAPLAY ÍSLANDS KVIKMYNDIR",
+   "alias": "VIAPLAY ÍSLANDS KVIKMYNDIR",
+   "censored": 0
+  },
+  {
+   "id": "1512",
+   "title": "VIAPLAY ÍSLANDS KRAKKAR",
+   "alias": "VIAPLAY ÍSLANDS KRAKKAR",
+   "censored": 0
+  },
+  {
+   "id": "81",
+   "title": "RU - MOVIES",
+   "alias": "RU - MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "1664",
+   "title": "RU - NEW RELEASE",
+   "alias": "RU - NEW RELEASE",
+   "censored": 0
+  },
+  {
+   "id": "1663",
+   "title": "RU - RUSSIAN 2025&OLD",
+   "alias": "RU - RUSSIAN 2025&OLD",
+   "censored": 0
+  },
+  {
+   "id": "1105",
+   "title": "RU - KIDS",
+   "alias": "RU - KIDS",
+   "censored": 0
+  },
+  {
+   "id": "89",
+   "title": "MT - MOVIES",
+   "alias": "MT - MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "1373",
+   "title": "BG - БЪЛГАРИЯ ФИЛМ",
+   "alias": "BG - БЪЛГАРИЯ ФИЛМ",
+   "censored": 0
+  },
+  {
+   "id": "1382",
+   "title": "BG - ПОСЛЕДНИ ДОПЪЛНЕНИЯ",
+   "alias": "BG - ПОСЛЕДНИ ДОПЪЛНЕНИЯ",
+   "censored": 0
+  },
+  {
+   "id": "1372",
+   "title": "BG - БЪЛГАРИЯ ДЕЦА",
+   "alias": "BG - БЪЛГАРИЯ ДЕЦА",
+   "censored": 0
+  },
+  {
+   "id": "113",
+   "title": "BG - MOMVIES",
+   "alias": "BG - MOMVIES",
+   "censored": 0
+  },
+  {
+   "id": "2268",
+   "title": "RO - VOYO",
+   "alias": "RO - VOYO",
+   "censored": 0
+  },
+  {
+   "id": "136",
+   "title": "RO - MOVIES",
+   "alias": "RO - MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "140",
+   "title": "AL - FILMA 24/25",
+   "alias": "AL - FILMA 24/25",
+   "censored": 0
+  },
+  {
+   "id": "754",
+   "title": "AL - ARKIVA 1980/2023",
+   "alias": "AL - ARKIVA 1980/2023",
+   "censored": 0
+  },
+  {
+   "id": "1562",
+   "title": "AL - PËR FËMIJË",
+   "alias": "AL - PËR FËMIJË",
+   "censored": 0
+  },
+  {
+   "id": "1924",
+   "title": "AL - FILMA SHQIPTAR",
+   "alias": "AL - FILMA SHQIPTAR",
+   "censored": 0
+  },
+  {
+   "id": "87",
+   "title": "EX - MOVIES",
+   "alias": "EX - MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "1246",
+   "title": "KU - CARTOON SORANI",
+   "alias": "KU - CARTOON SORANI",
+   "censored": 0
+  },
+  {
+   "id": "1245",
+   "title": "KU - CARTOON BADINI",
+   "alias": "KU - CARTOON BADINI",
+   "censored": 0
+  },
+  {
+   "id": "1207",
+   "title": "KU - SORANI",
+   "alias": "KU - SORANI",
+   "censored": 0
+  },
+  {
+   "id": "1208",
+   "title": "KU - BADINI",
+   "alias": "KU - BADINI",
+   "censored": 0
+  },
+  {
+   "id": "82",
+   "title": "KU - KURDISH MOVIES SUB",
+   "alias": "KU - KURDISH MOVIES SUB",
+   "censored": 0
+  },
+  {
+   "id": "122",
+   "title": "TR - SINEMA",
+   "alias": "TR - SINEMA",
+   "censored": 0
+  },
+  {
+   "id": "2305",
+   "title": "TR - NETFLIX",
+   "alias": "TR - NETFLIX",
+   "censored": 0
+  },
+  {
+   "id": "116",
+   "title": "TR - COCUK FILM",
+   "alias": "TR - COCUK FILM",
+   "censored": 0
+  },
+  {
+   "id": "2359",
+   "title": "TR - YERLİ FİLMLER",
+   "alias": "TR - YERLİ FİLMLER",
+   "censored": 0
+  },
+  {
+   "id": "2292",
+   "title": "TR - ANIME",
+   "alias": "TR - ANIME",
+   "censored": 0
+  },
+  {
+   "id": "2412",
+   "title": "TR - MOVIES ⁴ᴷ ᴴᴰᴿ",
+   "alias": "TR - MOVIES ⁴ᴷ ᴴᴰᴿ",
+   "censored": 0
+  },
+  {
+   "id": "1272",
+   "title": "TR - FİLMLER ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "TR - FİLMLER ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "1273",
+   "title": "TR - ÇOCUK ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "TR - ÇOCUK ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "2272",
+   "title": "TR - HBO MAX & BLUTV FILMLERI",
+   "alias": "TR - HBO MAX & BLUTV FILMLERI",
+   "censored": 0
+  },
+  {
+   "id": "671",
+   "title": "TR - ALT YAZI",
+   "alias": "TR - ALT YAZI",
+   "censored": 0
+  },
+  {
+   "id": "770",
+   "title": "TR - IMD FILMER",
+   "alias": "TR - IMD FILMER",
+   "censored": 0
+  },
+  {
+   "id": "123",
+   "title": "TR - YESIL CAM SINEMA",
+   "alias": "TR - YESIL CAM SINEMA",
+   "censored": 0
+  },
+  {
+   "id": "382",
+   "title": "FOR ADULTS",
+   "alias": "FOR ADULTS",
+   "censored": 1
+  },
+  {
+   "id": "83",
+   "title": "IR - PERSIAN SUB/DUB",
+   "alias": "IR - PERSIAN SUB/DUB",
+   "censored": 0
+  },
+  {
+   "id": "723",
+   "title": "IR - PERSIAN کارتون",
+   "alias": "IR - PERSIAN کارتون",
+   "censored": 0
+  },
+  {
+   "id": "389",
+   "title": "IR - PERSIAN MOVIES",
+   "alias": "IR - PERSIAN MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "871",
+   "title": "IR - PERSIAN کلاسیک دوبله",
+   "alias": "IR - PERSIAN کلاسیک دوبله",
+   "censored": 0
+  },
+  {
+   "id": "1009",
+   "title": "IR - PERSIAN قدیمی",
+   "alias": "IR - PERSIAN قدیمی",
+   "censored": 0
+  },
+  {
+   "id": "2125",
+   "title": "SO - BOLLYWOOD",
+   "alias": "SO - BOLLYWOOD",
+   "censored": 0
+  },
+  {
+   "id": "2124",
+   "title": "SO - HOLLYWOOD",
+   "alias": "SO - HOLLYWOOD",
+   "censored": 0
+  },
+  {
+   "id": "190",
+   "title": "IN - TAMIL",
+   "alias": "IN - TAMIL",
+   "censored": 0
+  },
+  {
+   "id": "191",
+   "title": "IN - TELUGU",
+   "alias": "IN - TELUGU",
+   "censored": 0
+  },
+  {
+   "id": "1325",
+   "title": "IN - KANNADA",
+   "alias": "IN - KANNADA",
+   "censored": 0
+  },
+  {
+   "id": "1938",
+   "title": "IN - HINDI ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "IN - HINDI ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "1651",
+   "title": "IN - EN HINDI",
+   "alias": "IN - EN HINDI",
+   "censored": 0
+  },
+  {
+   "id": "189",
+   "title": "IN - PUNJABI",
+   "alias": "IN - PUNJABI",
+   "censored": 0
+  },
+  {
+   "id": "222",
+   "title": "IN - MALAYALAM",
+   "alias": "IN - MALAYALAM",
+   "censored": 0
+  },
+  {
+   "id": "88",
+   "title": "IN - HINDI",
+   "alias": "IN - HINDI",
+   "censored": 0
+  },
+  {
+   "id": "1662",
+   "title": "IN - CAM & NEW RELEASE",
+   "alias": "IN - CAM & NEW RELEASE",
+   "censored": 0
+  },
+  {
+   "id": "2116",
+   "title": "IN - ANIMATION",
+   "alias": "IN - ANIMATION",
+   "censored": 0
+  },
+  {
+   "id": "223",
+   "title": "IN - KIDS",
+   "alias": "IN - KIDS",
+   "censored": 0
+  },
+  {
+   "id": "270",
+   "title": "IN - MARATHI",
+   "alias": "IN - MARATHI",
+   "censored": 0
+  },
+  {
+   "id": "1166",
+   "title": "PK - PAKISTANI MOVIES",
+   "alias": "PK - PAKISTANI MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "1597",
+   "title": "IN - GUJARATI MOVIES",
+   "alias": "IN - GUJARATI MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "1482",
+   "title": "IN - KOREAN HINDI DABBLING",
+   "alias": "IN - KOREAN HINDI DABBLING",
+   "censored": 0
+  },
+  {
+   "id": "1598",
+   "title": "IN - GUJARATI NATAK",
+   "alias": "IN - GUJARATI NATAK",
+   "censored": 0
+  },
+  {
+   "id": "773",
+   "title": "IN - BOLLYWOOD'S",
+   "alias": "IN - BOLLYWOOD'S",
+   "censored": 0
+  },
+  {
+   "id": "1352",
+   "title": "BN - BENGALI",
+   "alias": "BN - BENGALI",
+   "censored": 0
+  },
+  {
+   "id": "1169",
+   "title": "PK - NAATS",
+   "alias": "PK - NAATS",
+   "censored": 0
+  },
+  {
+   "id": "1182",
+   "title": "PK - KIDS",
+   "alias": "PK - KIDS",
+   "censored": 0
+  },
+  {
+   "id": "1168",
+   "title": "PK -  NAATS NASHEED",
+   "alias": "PK -  NAATS NASHEED",
+   "censored": 0
+  },
+  {
+   "id": "276",
+   "title": "BR - MOVIES",
+   "alias": "BR - MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "277",
+   "title": "BR - KIDS",
+   "alias": "BR - KIDS",
+   "censored": 0
+  },
+  {
+   "id": "1045",
+   "title": "CN - CHINA FILM",
+   "alias": "CN - CHINA FILM",
+   "censored": 0
+  },
+  {
+   "id": "2339",
+   "title": "PH - PHILIPPINES REQUESTS",
+   "alias": "PH - PHILIPPINES REQUESTS",
+   "censored": 0
+  },
+  {
+   "id": "2237",
+   "title": "PH - OLD MOVIES",
+   "alias": "PH - OLD MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "913",
+   "title": "PH - PHILIPPINES FILM",
+   "alias": "PH - PHILIPPINES FILM",
+   "censored": 0
+  },
+  {
+   "id": "2236",
+   "title": "PH - RATED R",
+   "alias": "PH - RATED R",
+   "censored": 0
+  },
+  {
+   "id": "2238",
+   "title": "PH - TAGALOG DUB MOVIES",
+   "alias": "PH - TAGALOG DUB MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "2255",
+   "title": "PH - TAGALOG SUB MOVIES",
+   "alias": "PH - TAGALOG SUB MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "2256",
+   "title": "PH - EVENTS",
+   "alias": "PH - EVENTS",
+   "censored": 0
+  },
+  {
+   "id": "1682",
+   "title": "JP - NETFLIX",
+   "alias": "JP - NETFLIX",
+   "censored": 0
+  },
+  {
+   "id": "1670",
+   "title": "JP - JAPANESE FILM",
+   "alias": "JP - JAPANESE FILM",
+   "censored": 0
+  },
+  {
+   "id": "1317",
+   "title": "OSN+ MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "alias": "OSN+ MOVIES ⁴ᴷ ³⁸⁴⁰ᴾ",
+   "censored": 0
+  },
+  {
+   "id": "915",
+   "title": "أفلام عربية فائقة الوضوح",
+   "alias": "أفلام عربية فائقة الوضوح",
+   "censored": 0
+  },
+  {
+   "id": "66",
+   "title": "أفلام أجنبية قديمه",
+   "alias": "أفلام أجنبية قديمه",
+   "censored": 0
+  },
+  {
+   "id": "1868",
+   "title": "ستاند اب كوميدي",
+   "alias": "ستاند اب كوميدي",
+   "censored": 0
+  },
+  {
+   "id": "1915",
+   "title": "⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ افلام عربية",
+   "alias": "⁴ᴷ ³⁸⁴⁰ᴾ ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ افلام عربية",
+   "censored": 0
+  },
+  {
+   "id": "2274",
+   "title": "مسرحيات فائقة الوضوح",
+   "alias": "مسرحيات فائقة الوضوح",
+   "censored": 0
+  },
+  {
+   "id": "1916",
+   "title": "ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ افلام عربية",
+   "alias": "ᴰᴼᴸᴮʸ ᴬᵁᴰᴵᴼ افلام عربية",
+   "censored": 0
+  },
+  {
+   "id": "2345",
+   "title": "ستاند اب كوميدي عربي",
+   "alias": "ستاند اب كوميدي عربي",
+   "censored": 0
+  },
+  {
+   "id": "692",
+   "title": "أفلام نجوم العرب",
+   "alias": "أفلام نجوم العرب",
+   "censored": 0
+  },
+  {
+   "id": "1460",
+   "title": "افلام عادل امام",
+   "alias": "افلام عادل امام",
+   "censored": 0
+  },
+  {
+   "id": "1445",
+   "title": "أفلام احمد حلمي",
+   "alias": "أفلام احمد حلمي",
+   "censored": 0
+  },
+  {
+   "id": "1447",
+   "title": "أفلام احمد عز",
+   "alias": "أفلام احمد عز",
+   "censored": 0
+  },
+  {
+   "id": "1446",
+   "title": "أفلام كريم عبد العزيز",
+   "alias": "أفلام كريم عبد العزيز",
+   "censored": 0
+  },
+  {
+   "id": "1448",
+   "title": "أفلام احمد السقا",
+   "alias": "أفلام احمد السقا",
+   "censored": 0
+  },
+  {
+   "id": "1449",
+   "title": "أفلام محمد هنيدي",
+   "alias": "أفلام محمد هنيدي",
+   "censored": 0
+  },
+  {
+   "id": "1464",
+   "title": "افلام هاني رمزي",
+   "alias": "افلام هاني رمزي",
+   "censored": 0
+  },
+  {
+   "id": "1465",
+   "title": "افلام دريد لحام",
+   "alias": "افلام دريد لحام",
+   "censored": 0
+  },
+  {
+   "id": "669",
+   "title": "أفلام عربية حديثه",
+   "alias": "أفلام عربية حديثه",
+   "censored": 0
+  },
+  {
+   "id": "76",
+   "title": "أفلام عربية قديمه",
+   "alias": "أفلام عربية قديمه",
+   "censored": 0
+  },
+  {
+   "id": "451",
+   "title": "أفلام شاهد الأصلية",
+   "alias": "أفلام شاهد الأصلية",
+   "censored": 0
+  },
+  {
+   "id": "1698",
+   "title": "أفلام شامية",
+   "alias": "أفلام شامية",
+   "censored": 0
+  },
+  {
+   "id": "1697",
+   "title": "أفلام مصرية",
+   "alias": "أفلام مصرية",
+   "censored": 0
+  },
+  {
+   "id": "1696",
+   "title": "أفلام خليجية",
+   "alias": "أفلام خليجية",
+   "censored": 0
+  },
+  {
+   "id": "1242",
+   "title": "أفلام مغربية",
+   "alias": "أفلام مغربية",
+   "censored": 0
+  },
+  {
+   "id": "1254",
+   "title": "أفلام تونسيه",
+   "alias": "أفلام تونسيه",
+   "censored": 0
+  },
+  {
+   "id": "1266",
+   "title": "أفلام جزائرية",
+   "alias": "أفلام جزائرية",
+   "censored": 0
+  },
+  {
+   "id": "1271",
+   "title": "أفلام ليبيا",
+   "alias": "أفلام ليبيا",
+   "censored": 0
+  },
+  {
+   "id": "670",
+   "title": "أفلام عربية كلاسيك",
+   "alias": "أفلام عربية كلاسيك",
+   "censored": 0
+  },
+  {
+   "id": "525",
+   "title": "أفلام مدبلجة للعربية",
+   "alias": "أفلام مدبلجة للعربية",
+   "censored": 0
+  },
+  {
+   "id": "157",
+   "title": "أفلام كوميديه",
+   "alias": "أفلام كوميديه",
+   "censored": 0
+  },
+  {
+   "id": "906",
+   "title": "افلام تعرض في السينما العربية",
+   "alias": "افلام تعرض في السينما العربية",
+   "censored": 0
+  },
+  {
+   "id": "787",
+   "title": "افلام مسيحية",
+   "alias": "افلام مسيحية",
+   "censored": 0
+  },
+  {
+   "id": "1478",
+   "title": "مسرحيات مصرية",
+   "alias": "مسرحيات مصرية",
+   "censored": 0
+  },
+  {
+   "id": "1479",
+   "title": "مسرحيات خليجية",
+   "alias": "مسرحيات خليجية",
+   "censored": 0
+  },
+  {
+   "id": "158",
+   "title": "مسرحيات عربيه",
+   "alias": "مسرحيات عربيه",
+   "censored": 0
+  },
+  {
+   "id": "1480",
+   "title": "مسرحيات مغربية",
+   "alias": "مسرحيات مغربية",
+   "censored": 0
+  },
+  {
+   "id": "403",
+   "title": "أفلام أجنبيه فائقة الوضوح",
+   "alias": "أفلام أجنبيه فائقة الوضوح",
+   "censored": 0
+  },
+  {
+   "id": "2079",
+   "title": "افلام هندية فائقة الوضوح",
+   "alias": "افلام هندية فائقة الوضوح",
+   "censored": 0
+  },
+  {
+   "id": "2039",
+   "title": "افلام اجنبية ترند",
+   "alias": "افلام اجنبية ترند",
+   "censored": 0
+  },
+  {
+   "id": "2111",
+   "title": "سلاسل الافلام",
+   "alias": "سلاسل الافلام",
+   "censored": 0
+  },
+  {
+   "id": "2428",
+   "title": "أفلام أجنبية 2027",
+   "alias": "أفلام أجنبية 2027",
+   "censored": 0
+  },
+  {
+   "id": "2040",
+   "title": "أفلام أجنبية 2026",
+   "alias": "أفلام أجنبية 2026",
+   "censored": 0
+  },
+  {
+   "id": "2149",
+   "title": "أفلام أسيوية 2026",
+   "alias": "أفلام أسيوية 2026",
+   "censored": 0
+  },
+  {
+   "id": "1705",
+   "title": "أفلام أجنبية 2025",
+   "alias": "أفلام أجنبية 2025",
+   "censored": 0
+  },
+  {
+   "id": "1058",
+   "title": "أفلام أجنبية 2024",
+   "alias": "أفلام أجنبية 2024",
+   "censored": 0
+  },
+  {
+   "id": "609",
+   "title": "أفلام أجنبية 2023",
+   "alias": "أفلام أجنبية 2023",
+   "censored": 0
+  },
+  {
+   "id": "408",
+   "title": "أفلام أجنبية 2022",
+   "alias": "أفلام أجنبية 2022",
+   "censored": 0
+  },
+  {
+   "id": "404",
+   "title": "أفلام أجنبية 2021",
+   "alias": "أفلام أجنبية 2021",
+   "censored": 0
+  },
+  {
+   "id": "405",
+   "title": "أفلام أجنبية 2020",
+   "alias": "أفلام أجنبية 2020",
+   "censored": 0
+  },
+  {
+   "id": "406",
+   "title": "أفلام أجنبية 2019",
+   "alias": "أفلام أجنبية 2019",
+   "censored": 0
+  },
+  {
+   "id": "407",
+   "title": "أفلام أجنبية 2018",
+   "alias": "أفلام أجنبية 2018",
+   "censored": 0
+  },
+  {
+   "id": "345",
+   "title": "أفلام هندية قديمه",
+   "alias": "أفلام هندية قديمه",
+   "censored": 0
+  },
+  {
+   "id": "1082",
+   "title": "افلام تعرض في السينما الاجنبية",
+   "alias": "افلام تعرض في السينما الاجنبية",
+   "censored": 0
+  },
+  {
+   "id": "1623",
+   "title": "أفلام الكريسماس",
+   "alias": "أفلام الكريسماس",
+   "censored": 0
+  },
+  {
+   "id": "2410",
+   "title": "افلام اسيوية فائقة الوضوح",
+   "alias": "افلام اسيوية فائقة الوضوح",
+   "censored": 0
+  },
+  {
+   "id": "1706",
+   "title": "أفلام أسيوية 2025",
+   "alias": "أفلام أسيوية 2025",
+   "censored": 0
+  },
+  {
+   "id": "1092",
+   "title": "أفلام أسيوية 2024",
+   "alias": "أفلام أسيوية 2024",
+   "censored": 0
+  },
+  {
+   "id": "615",
+   "title": "أفلام أسيوية 2023",
+   "alias": "أفلام أسيوية 2023",
+   "censored": 0
+  },
+  {
+   "id": "524",
+   "title": "أفلام آسيوية 2022",
+   "alias": "أفلام آسيوية 2022",
+   "censored": 0
+  },
+  {
+   "id": "1123",
+   "title": "أفلام أسيوية قديمه",
+   "alias": "أفلام أسيوية قديمه",
+   "censored": 0
+  },
+  {
+   "id": "2150",
+   "title": "أفلام هندية 2026",
+   "alias": "أفلام هندية 2026",
+   "censored": 0
+  },
+  {
+   "id": "1707",
+   "title": "أفلام هندية 2025",
+   "alias": "أفلام هندية 2025",
+   "censored": 0
+  },
+  {
+   "id": "1099",
+   "title": "أفلام هندية 2024",
+   "alias": "أفلام هندية 2024",
+   "censored": 0
+  },
+  {
+   "id": "616",
+   "title": "أفلام هندية 2023",
+   "alias": "أفلام هندية 2023",
+   "censored": 0
+  },
+  {
+   "id": "1359",
+   "title": "أفلام هندية مدبلجة",
+   "alias": "أفلام هندية مدبلجة",
+   "censored": 0
+  },
+  {
+   "id": "2191",
+   "title": "افلام اميتاب باتشان",
+   "alias": "افلام اميتاب باتشان",
+   "censored": 0
+  },
+  {
+   "id": "1238",
+   "title": "أفلام ألمانيه 2026-2027",
+   "alias": "أفلام ألمانيه 2026-2027",
+   "censored": 0
+  },
+  {
+   "id": "1237",
+   "title": "أفلام ألمانيه 2025",
+   "alias": "أفلام ألمانيه 2025",
+   "censored": 0
+  },
+  {
+   "id": "495",
+   "title": "أفلام ألمانيه 2024",
+   "alias": "أفلام ألمانيه 2024",
+   "censored": 0
+  },
+  {
+   "id": "1240",
+   "title": "أفلام ألمانيه 2023",
+   "alias": "أفلام ألمانيه 2023",
+   "censored": 0
+  },
+  {
+   "id": "1239",
+   "title": "أفلام ألمانيه قديمه",
+   "alias": "أفلام ألمانيه قديمه",
+   "censored": 0
+  },
+  {
+   "id": "533",
+   "title": "أفلام رعب",
+   "alias": "أفلام رعب",
+   "censored": 0
+  },
+  {
+   "id": "2278",
+   "title": "افلام فرنسية مترجمة",
+   "alias": "افلام فرنسية مترجمة",
+   "censored": 0
+  },
+  {
+   "id": "863",
+   "title": "أفلام أطفال فائقة الوضوح",
+   "alias": "أفلام أطفال فائقة الوضوح",
+   "censored": 0
+  },
+  {
+   "id": "1233",
+   "title": "أفلام اطفال مدبلجة",
+   "alias": "أفلام اطفال مدبلجة",
+   "censored": 0
+  },
+  {
+   "id": "147",
+   "title": "أفلام اطفال مترجمة",
+   "alias": "أفلام اطفال مترجمة",
+   "censored": 0
+  },
+  {
+   "id": "659",
+   "title": "افلام انمي مترجمة",
+   "alias": "افلام انمي مترجمة",
+   "censored": 0
+  },
+  {
+   "id": "2311",
+   "title": "افلام انمي مدبلجة",
+   "alias": "افلام انمي مدبلجة",
+   "censored": 0
+  },
+  {
+   "id": "339",
+   "title": "افلام تركية مترجمة",
+   "alias": "افلام تركية مترجمة",
+   "censored": 0
+  },
+  {
+   "id": "2051",
+   "title": "افلام تركية مدبلجة",
+   "alias": "افلام تركية مدبلجة",
+   "censored": 0
+  },
+  {
+   "id": "1599",
+   "title": "أفلام اسلامية",
+   "alias": "أفلام اسلامية",
+   "censored": 0
+  },
+  {
+   "id": "474",
+   "title": "افلام وثائقية مترجمة",
+   "alias": "افلام وثائقية مترجمة",
+   "censored": 0
+  },
+  {
+   "id": "2006",
+   "title": "افلام وثائقية مدبلجة",
+   "alias": "افلام وثائقية مدبلجة",
+   "censored": 0
+  },
+  {
+   "id": "1582",
+   "title": "الجزيرة الوثائقية",
+   "alias": "الجزيرة الوثائقية",
+   "censored": 0
+  },
+  {
+   "id": "85",
+   "title": "رياضه متنوعه",
+   "alias": "رياضه متنوعه",
+   "censored": 0
+  },
+  {
+   "id": "2168",
+   "title": "FIFA+ MOVIES",
+   "alias": "FIFA+ MOVIES",
+   "censored": 0
+  },
+  {
+   "id": "1415",
+   "title": "UFC ARABIA",
+   "alias": "UFC ARABIA",
+   "censored": 0
+  },
+  {
+   "id": "100",
+   "title": "اغاني عربية",
+   "alias": "اغاني عربية",
+   "censored": 0
+  },
+  {
+   "id": "331",
+   "title": "أغاني طرب كلاسيك",
+   "alias": "أغاني طرب كلاسيك",
+   "censored": 0
+  },
+  {
+   "id": "2444",
+   "title": "سهرات طربية",
+   "alias": "سهرات طربية",
+   "censored": 0
+  }
+ ]
+}

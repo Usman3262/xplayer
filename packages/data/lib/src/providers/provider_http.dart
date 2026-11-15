@@ -102,7 +102,9 @@ class ProviderHttp {
       throw ProviderFailure(ProviderFailureKind.network, '${uri.host}: ${e.runtimeType}');
     }
     final code = res.statusCode;
-    if (code >= 200 && code < 300) return res.body;
+    // Panels rarely send a charset; `res.body` would then fall back to
+    // Latin-1 and garble Arabic/other names. Panels speak UTF-8.
+    if (code >= 200 && code < 300) return utf8.decode(res.bodyBytes, allowMalformed: true);
     throw ProviderFailure(failureKindForStatus(code), 'HTTP $code');
   }
 
@@ -124,12 +126,14 @@ class ProviderHttp {
     _client.close();
   }
 
-  /// Panel HTTP status → failure kind. Some panels answer 884 / 512 for banned
-  /// or blocked accounts.
+  /// Panel HTTP status → failure kind. 884 is the Xtream panel's "this is not
+  /// allowed for this line" (Neo answers it to every `get.php` M3U export,
+  /// whatever the User-Agent; measured 2026-11-15) → `unsupported`, so the app
+  /// suggests the Xtream login instead of calling the account banned.
   static ProviderFailureKind failureKindForStatus(int code) {
     if (code == 401 || code == 403) return ProviderFailureKind.unauthorized;
     if (code == 429) return ProviderFailureKind.rateLimited;
-    if (code == 884 || code == 512) return ProviderFailureKind.banned;
+    if (code == 884) return ProviderFailureKind.unsupported;
     if (code >= 500) return ProviderFailureKind.server;
     return ProviderFailureKind.badResponse;
   }

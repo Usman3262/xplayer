@@ -10,10 +10,10 @@ Spec: `new-platform.md` · Rules: `CLAUDE.md` · App "where to change": `XPLAYER
 ---
 
 ## ▶ NEXT
-**Phase 5 · Step 5.2 — Xtream adapter (Neo):** `XtreamAdapter implements ProviderAdapter` in
-`packages/data/lib/src/providers/xtream/` — login/account → `ProviderAccount`, categories, live/vod/series
-lists, vod/series info, short EPG (base64), stream URL builder (output format from `player.live_format` +
-`allowed_output_formats`), registered in `ProviderAdapterFactory`. Tests with recorded JSON fixtures.
+**Phase 5 · Step 5.5 — Connection manager:** saved panels (several per device) in secure storage,
+per-device generated MAC for Stalker (`00:1A:79:xx:xx:xx`, created once, shown with copy, user can type
+their own), test connection → status (§3.5), expiry, primary panel, enable/disable/remove, last sync;
+registers the adapters with limits from the admin config. Unit tests.
 
 ## Waiting on you
 - [ ] **Android build setup on this PC** (to run on your phone/TV): free ~10 GB, install Android Studio
@@ -23,6 +23,8 @@ lists, vod/series info, short EPG (base64), stream URL builder (output format fr
   --dart-define-from-file=../../env/app.json`, then F12 → Ctrl+Shift+M (phone size). Screens only; IPTV
   video won't play in a browser (http streams). `apps/mobile/web/` exists only for this preview.
 - [x] `TMDB_API_KEY` set as a Supabase secret (done by you; metadata-tmdb verified live).
+- [ ] **Neo blocked this PC's IP (403 on everything) on 2026-11-15** after my repeated get.php + full pulls — check Neo on mobile data; usually lifts by itself. **Trial line** (`env/test_panels.json`) expires 2026-11-15 17:37 UTC.
+- [ ] **Neo test account expires 2026-11-21** (seen in the live test) — renew or give a new one for later live tests.
 - [ ] **Sports API**: which provider? (e.g. API-Football / football-data.org / TheSportsDB)
   — needed at step 3.9; key goes in Supabase secrets.
 - [x] Super admin created by you (2026-11-15). Secret key added to `.env.local`. Root `supabase/` folder deleted.
@@ -424,11 +426,49 @@ role has sports.read without sports.write).
     timeout + panel limit were already under Access.
   *Tested:* `flutter test test/providers` 21/21 + mpv tests (split check) 7/7; `flutter analyze` on touched
   files: no errors. Admin `tsc` **not run** (`apps/admin/node_modules` missing — run `npm install` later).
-- [ ] 5.2 Xtream adapter (auth/account info, categories, live/vod/series, series info,
+- [x] 5.2 Xtream adapter (auth/account info, categories, live/vod/series, series info,
   vod info, short EPG / xmltv, URL builder, output format choice). Tests with recorded JSON.
-- [ ] 5.3 M3U adapter (URL/file, EXTINF attrs, groups, tvg-id, isolate parser, dedupe).
-- [ ] 5.4 Stalker/MAC adapter (handshake/token, profile, genres, channels, VOD, create_link,
+  *Implemented:* `packages/data/lib/src/providers/xtream/xtream_adapter.dart` — login → `ProviderAccount`
+  (wrong password shapes `[]`/`{}`/auth 0 → unauthorized; Expired status or past `exp_date` → expired;
+  Banned/Disabled → banned), categories, live/movie/series lists (header channels skipped, catch-up days,
+  tmdb ids, year from date/name, genres split), vod/series info (seasons from episode groups or flat list),
+  short EPG (base64, unix strings, bad rows skipped), stream URLs built on device
+  (`/live|movie|series/u/p/id.ext`, credentials path-encoded, panel sub-path kept), live format = admin
+  `player.live_format` if the account allows it. `XtreamAdapter.register(limits, liveFormat)` adds it to
+  the factory (called from the connection manager in 5.5). XMLTV full guide → Phase 6 (EPG sync).
+  Fixtures: `test/fixtures/xtream/*.json` = real Neo replies, trimmed, user/pass/host replaced.
+  *Tested:* `flutter test test/providers` 40/40 (19 Xtream unit + **LIVE against Neo test account**:
+  login 0.5 s, 113/90/95 categories, 68 channels, 114 movies, movie + series details, 4 EPG entries,
+  whole run ≈5–6 s); `flutter analyze` providers: no issues. Findings in docs/PROVIDER_PROTOCOLS.md.
+- [x] 5.3 M3U adapter (URL/file, EXTINF attrs, groups, tvg-id, isolate parser, dedupe).
+  *Implemented:* `providers/m3u/m3u_parser.dart` (BOM/CRLF, header `url-tvg`/`x-tvg-url`, attributes with
+  commas inside values, `#EXTGRP`, `#EXTVLCOPT` / `#KODIPROP` headers, duplicate URLs dropped, kind from
+  URL shape/extension + "S01E02", stable ids: panel number or sha1 of URL) and `m3u_adapter.dart`
+  (one download, catalog built in an isolate when big, concurrent calls share it, series grouped from
+  episodes, entry headers applied at play time, `[]`/HTML/empty → badResponse). Full XMLTV → Phase 6.
+  Also fixed in `ProviderHttp`: bodies always decoded as **UTF-8** (Latin-1 fallback would garble Arabic);
+  HTTP 884 → `unsupported` (was "banned").
+  *Tested:* 53/53 offline provider tests (incl. 78k-entry playlist 7.3 MB → 3.6 s); live (opt-in): trial
+  line Xtream adapter OK (login 0.53 s, 921/447/388 categories, EPG with "on now"), panel M3U export
+  refused → `unsupported` as designed. No real M3U playlist tested live yet (both panels block get.php).
+  Live tests are now **opt-in**: `XPLAYER_LIVE_TESTS=1 XPLAYER_LIVE_PANEL=trial|neo` (creds in git-ignored
+  `env/test_panels.json` / `neo-channel-tester.html`).
+- [x] 5.4 Stalker/MAC adapter (handshake/token, profile, genres, channels, VOD, create_link,
   token renew). Tests.
+  *Implemented:* `providers/stalker/stalker_adapter.dart` — endpoint discovery (`/portal.php`,
+  `/server/load.php`, `/stalker_portal/server/load.php`), MAG headers + MAC cookie (MAC normalised),
+  handshake → profile (blocked → banned, status≠0 → unauthorized) → account info (expiry from `phone` /
+  `end_date` / billing dates, many date formats), token renewed once on "Authorization failed",
+  genres/categories ("All" dropped), paged lists fetched in parallel (cap for "all" lists), series →
+  seasons → episode numbers, short EPG, `create_link` right before play (live fallback to
+  `localhost/ch/{id}_` when the portal returns an empty `stream=`). Episode titles left empty for the
+  app's locale layer (also changed in Xtream; no English text in the data package).
+  Fixtures: `test/fixtures/stalker/*.json` (real portal, MAC/host/token replaced).
+  *Tested:* 71/71 offline provider tests (18 Stalker: real samples + fake-portal flow: token renewal,
+  paging, live-link fallback, endpoint fall-through); **LIVE once against the user's MAG line**: login
+  1.2 s, 921/447/388 categories, 657 movies over 47 pages, **live channel, movie and episode links all
+  HTTP 200 (live = real MPEG-TS)**. Generated MAC `00:1A:79:F0:06:3B` registered by the user; line
+  expires 2026-11-16 09:29.
 - [ ] 5.5 Connection manager: multiple panels, secure storage, test connection, status,
   expiry, primary, enable/disable, last sync.
 - [ ] 5.6 Onboarding UI (phone + TV): choose panel → form → test → connect in seconds
@@ -517,6 +557,9 @@ role has sports.read without sports.write).
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-15 — Step 5.4 done: Stalker adapter; live MAG line verified incl. playable live/movie/episode links. 71/71 offline tests.
+- 2026-11-15 — Step 5.3 done: M3U parser/adapter, UTF-8 + 884 fixes, live tests opt-in; trial line measured (57k live / 187k movies / 50k series ⇒ per-category sync in Phase 6). Neo IP-blocked this PC after heavy probing.
+- 2026-11-15 — Step 5.2 done: Xtream adapter + real Neo fixtures; 40/40 tests incl. live Neo run. Neo test account expires 2026-11-21.
 - 2026-11-15 — Step 5.1 done: provider engine interface/models/HTTP/mappers + 21 tests; admin Panel connections card (tsc not run).
 - 2026-11-15 — Browser preview of the mobile app: added `apps/mobile/web/`; split mpv FFI code into `mpv_native_ffi.dart` + web stub (conditional import); browser HTTP client in `api_client.dart`; web guard in `network_diag.dart`. Tested: app starts in Chrome (user ran it). Not a device result.
 - 2026-11-14 — Phase 0 done (planning files only, no code). Untested (nothing to run).

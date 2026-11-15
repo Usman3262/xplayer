@@ -58,6 +58,30 @@ M3U export `get.php?username&password&type=m3u_plus&output=ts|m3u8`.
 - `added` / `last_modified` (unix) are the cheap way to detect new items (incremental sync).
 - `tmdb` / `tmdb_id` present on some panels → direct match to the global catalog.
 
+### Trial line (`*.wd.business-cloud-8.ru`, any subdomain), measured 2026-11-15
+- Login 0.53 s; max 1 connection; ts/m3u8; `https_port` 443 but protocol http.
+- **Full lists: live 57,136 (21 MB, 7.6 s), movies 187,449 (77 MB, 20 s), series 50,285
+  (74 MB, 17 s)** — 921 / 447 / 388 categories; tmdb 92 % movies / 89 % series.
+- ⇒ **Phase 6 must not pull whole lists in one go on TV boxes**: browse per category (small, fast),
+  background sync category by category straight into the local DB, keep memory flat.
+- EPG: short EPG includes the programme on air now (unlike Neo).
+
+### Neo, as measured live (2026-11-15, test account, `XtreamAdapter` LIVE test)
+- Login ≈0.5–0.75 s; `max_connections` 1; formats `m3u8, ts, rtmp`; `server_info.https_port` empty → http only.
+- **Full lists, no category filter (test line):** live 3,070 (67 `#####` headers) 1.1 MB 1.4 s;
+  movies 14,703 6.0 MB 2.1 s (tmdb 96 %, mkv 73 % / mp4 27 %); series 10,063 19.9 MB 3.1 s
+  (tmdb 82 %). Added last 7 d: 120 movies / 278 series. Whole catalog ≈27 MB ≈7 s → Phase 6 can
+  pull full lists once in the background, then sync incrementally by `added` / `last_modified`.
+- Streams: live `.ts` first bytes 0.99 s (MPEG-TS); movie `.mkv` 0.76 s. Plain http.
+- 113 live / 90 movie / 95 series categories. First live category: 68 channels, all with logos,
+  38 with `epg_channel_id`, none with catch-up. Movies: `tmdb` on ~95 %, `rating` as string.
+- `get_series_info`: `seasons: []` — seasons exist only as `episodes` keys ("1": […]).
+- Dates like `"2026-01-11 (مصر)"`; genres `"Drama / Comedy"` or `"Adventure, Family"`.
+- EPG: many channels have an `epg_channel_id` but no listings. Where present, `get_short_epg`
+  returns **upcoming** programmes (the one on air now may be missing) → show channel name as
+  "now" in that case; `get_simple_data_table` has ≈5 days back + ≈5 days ahead. Timestamps are
+  unix strings (UTC); titles base64.
+
 ---
 
 ## 2. M3U / M3U8 playlists
@@ -75,6 +99,11 @@ http://host/live/u/p/123.ts
 - Kind detection: Xtream-style paths `/movie/` `/series/` or file extensions
   (`.mp4 .mkv .avi`) = VOD; else live.
 - Parse in an isolate; dedupe by (url) then (tvg-id + name); keep source order.
+- **Panel M3U exports are often disabled:** Neo and the trial line answer `get.php` with **HTTP 884**
+  (403 with a browser User-Agent) → adapter reports `unsupported` ("use the Xtream login").
+  **Never retry get.php in a loop** — Neo IP-blocked this PC (403 on everything, incl. login) right
+  after 8 export attempts + 2 full catalog pulls (2026-11-15).
+- Measured: 7.3 MB / 78k-entry playlist → grouped catalog in 3.6 s in an isolate (debug test VM).
 - Sizes up to 100k+ lines → stream the download, don't hold multiple copies.
 
 ---
@@ -109,6 +138,23 @@ Flow (responses are wrapped in `{"js": …}`):
   parallel with a small concurrency limit.
 - Token expires → on 401/`Authorization failed` re-handshake once, then retry.
 - Only use MACs the user is authorised for (their own device / provider-issued).
+
+### Measured on a real portal (user's MAG trial, `*.wd.business-cloud-8.ru/c/`, 2026-11-15)
+- Endpoint `/portal.php` (first candidate). Handshake 0.7 s → token; `get_profile` `status: 0`, `blocked: "0"`.
+- **Expiry is in `account_info.get_main_info` → `phone`**: `"November 16, 2026, 9:29 am"`.
+- `get_genres` 922 entries incl. `{"id":"*","title":"All"}` (drop it). Pages of **14**.
+- Live: list `cmd` = `ffmpeg http://…/play/live.php?mac=…&stream={id}&extension=ts&play_token=…`.
+  **`create_link` with that cmd returns `stream=` EMPTY (connection reset)**; with
+  `cmd=ffmpeg http://localhost/ch/{id}_` it returns a full fresh link → MPEG-TS in 0.8 s. Adapter tries
+  the list cmd, falls back to the localhost form.
+- VOD: `cmd` is base64 JSON `{"type":"movie","stream_id":…}`; list items already carry description,
+  actors, director, `genres_str`, `time` (minutes), `rating_imdb`, `tmdb_id`, `added` "YYYY-MM-DD hh:mm:ss".
+  `create_link type=vod` → `/play/movie.php` (MKV plays).
+- Series: list item id `"49938:49938"`, `is_series: 1`, no cmd. Seasons = `type=series&action=get_ordered_list
+  &movie_id={id}&season_id=0&episode_id=0` → items id `"49938:1"`, `cmd`, `series: [1,2,…]` (episode numbers).
+  Play = `create_link type=vod cmd={season cmd} series={n}`. No per-episode titles.
+- Same provider as the trial Xtream line (same 921/447/388 categories) — Stalker is a front-end to it.
+- MAC is only a cookie value → works on any network; never the device's real (randomised) Wi-Fi MAC.
 
 ---
 
