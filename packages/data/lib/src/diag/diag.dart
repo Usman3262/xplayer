@@ -11,6 +11,10 @@ abstract final class DiagConfig {
   /// Default off: only status *changes* and non-pending responses print.
   static bool verboseApi = false;
 
+  /// Logs from the old app backend (removed): `[API]`, `[TokenStore]`,
+  /// `[ApiEndpoints]`, `SPORTS_DATA`. Off so `[PANEL]` lines stay readable.
+  static bool legacyBackend = false;
+
   static bool get isOn =>
       forceEnable || kDebugMode || kProfileMode;
 
@@ -39,7 +43,40 @@ abstract final class Diag {
   static void net(String message) => _emit('NET', message);
   static void pb(String message) => _emit('PB', message);
   static void perf(String message) => _emit('PERF', message);
-  static void dev(String message) => _emit('DEV', message);
+  static void dev(String message) {
+    if (!DiagConfig.legacyBackend && message.startsWith('SPORTS_DATA')) return;
+    _emit('DEV', message);
+  }
+
+  /// IPTV panel traffic (Xtream / M3U / Stalker): host + path + status +
+  /// timing + the real error. Callers pass text already made safe with
+  /// [panelUrl] / [panelText]; this never prints credentials.
+  static void panel(String message) {
+    DiagTrail.add('PANEL', message);
+    if (!DiagConfig.isOn) return;
+    debugPrint('[PANEL] ${panelText(message)}');
+  }
+
+  static final _credPath = RegExp(r'/(live|movie|series|timeshift)/[^/\s]+/[^/\s]+/');
+  static final _credParam = RegExp(r'(username|password|mac|token|play_token|sn2?)=[^&\s]*', caseSensitive: false);
+
+  /// `scheme://host:port/path` (+ `?action=` / `type=`), credentials masked.
+  static String panelUrl(Uri u) {
+    final path = u.path.replaceAllMapped(_credPath, (m) => '/${m[1]}/***/***/');
+    final keep = [
+      for (final k in const ['action', 'type'])
+        if (u.queryParameters[k] case final v? when v.isNotEmpty) '$k=$v',
+    ];
+    return '${u.scheme}://${u.host}${u.hasPort ? ':${u.port}' : ''}$path${keep.isEmpty ? '' : '?${keep.join('&')}'}';
+  }
+
+  /// Any URL inside [text] → [panelUrl]; leftover credential params masked.
+  static String panelText(String text) => text
+      .replaceAllMapped(_url, (m) {
+        final u = Uri.tryParse(m[0]!);
+        return u == null || u.host.isEmpty ? '<url>' : panelUrl(u);
+      })
+      .replaceAllMapped(_credParam, (m) => '${m[1]}=***');
 
   static void err(
     String message, [
@@ -59,6 +96,7 @@ abstract final class Diag {
   }
 
   static void _emit(String tag, String message) {
+    if (tag == 'API' && !DiagConfig.legacyBackend) return;
     // [API] lines carry payloads; the trail keeps playback/device lines only.
     if (tag != 'API') DiagTrail.add(tag, message);
     if (!DiagConfig.isOn) return;

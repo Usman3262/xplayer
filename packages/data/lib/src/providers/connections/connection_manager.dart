@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../backend/remote_config.dart';
+import '../../diag/diag.dart';
 import '../m3u/m3u_adapter.dart';
 import '../provider_adapter.dart';
 import '../provider_http.dart';
@@ -94,14 +95,24 @@ class ConnectionManager {
     if (existing == null && connections.value.length >= maxPanels) {
       throw ProviderFailure(ProviderFailureKind.invalidInput, 'max panels $maxPanels');
     }
+    Diag.panel('connect ${credentials.kind.name} → ${describeInput(credentials)}');
+    final sw = Stopwatch()..start();
     final adapter = _create(credentials);
     final ProviderAccount account;
     try {
       account = await adapter.authenticate();
+    } on ProviderFailure catch (f) {
+      Diag.panel('connect ${credentials.kind.name} FAILED in ${sw.elapsedMilliseconds}ms: ${f.kind.name} (${f.detail})');
+      adapter.dispose();
+      rethrow;
     } catch (e) {
+      Diag.panel('connect ${credentials.kind.name} CRASHED in ${sw.elapsedMilliseconds}ms: ${e.runtimeType}: $e');
       adapter.dispose();
       rethrow;
     }
+    Diag.panel('connect ${credentials.kind.name} OK in ${sw.elapsedMilliseconds}ms: ${account.status.name}, '
+        'expires ${account.expiresAt?.toIso8601String() ?? 'never/unknown'}, max streams ${account.maxConnections ?? '?'}, '
+        'formats ${account.allowedOutputFormats}');
     final now = _clock();
     final id = existing?.id ?? _store.newId();
     await _store.saveCredentials(id, credentials);
@@ -153,6 +164,7 @@ class ConnectionManager {
         maxConnections: account.maxConnections,
       );
     } on ProviderFailure catch (f) {
+      Diag.panel('recheck ${c.kind.name} "${c.name}" → ${f.status.name} (${f.kind.name}: ${f.detail})');
       next = c.copyWith(status: f.status, lastCheckedAt: now, lastFailure: f.kind.name);
     } catch (_) {
       next = c.copyWith(
@@ -235,6 +247,20 @@ class ConnectionManager {
   Future<void> markSynced(String id) async {
     await load();
     await _persist([for (final x in connections.value) x.id == id ? x.copyWith(lastSyncAt: _clock()) : x]);
+  }
+
+  /// What the app understood from the form (scheme/host/port/path), no secrets.
+  static String describeInput(ProviderCredentials c) {
+    String u(Uri? x, String raw) => x == null
+        ? 'INVALID URL (${raw.trim().length} chars, starts "${raw.trim().length > 12 ? raw.trim().substring(0, 12) : raw.trim()}")'
+        : Diag.panelUrl(x);
+    return switch (c) {
+      XtreamCredentials x => 'server ${u(x.baseUri, x.server)}, username ${x.username.trim().length} chars, '
+          'password ${x.password.length} chars${x.username != x.username.trim() ? ' (username had spaces, trimmed)' : ''}'
+          '${x.password != x.password.trim() ? ' (password has leading/trailing spaces!)' : ''}',
+      M3uCredentials m => 'playlist ${u(m.playlistUri, m.url)}${(m.epgUrl ?? '').isEmpty ? '' : ', epg set'}',
+      StalkerCredentials s => 'portal ${u(s.portalUri, s.portal)}, mac ${s.normalizedMac == null ? 'INVALID' : 'ok'}',
+    };
   }
 
   void dispose() {

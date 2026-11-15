@@ -1757,6 +1757,26 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_list_users: {
+        Args: {
+          p_before_created?: string
+          p_before_id?: string
+          p_limit?: number
+          p_search?: string
+          p_status?: string
+        }
+        Returns: {
+          created_at: string
+          display_name: string
+          email: string
+          email_confirmed: boolean
+          id: string
+          is_admin: boolean
+          last_seen_at: string
+          last_sign_in_at: string
+          status: string
+        }[]
+      }
       admin_remove: { Args: { p_user: string }; Returns: undefined }
       admin_republish_version: {
         Args: { p_notes?: string; p_version: number }
@@ -1771,6 +1791,20 @@ export type Database = {
       admin_set_role: {
         Args: { p_role_key: string; p_user: string }
         Returns: undefined
+      }
+      admin_set_user_status: {
+        Args: { p_reason?: string; p_status: string; p_user: string }
+        Returns: undefined
+      }
+      admin_user_counts: {
+        Args: never
+        Returns: {
+          active: number
+          banned: number
+          last_7_days: number
+          suspended: number
+          total: number
+        }[]
       }
       admin_user_id_by_email: { Args: { p_email: string }; Returns: string }
       bootstrap_super_admin: { Args: { p_email: string }; Returns: string }

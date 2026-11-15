@@ -30,7 +30,8 @@ export function TableToolbar({ filters = [], searchPlaceholder = "Search" }: { f
       if (v) next.set(k, v);
       else next.delete(k);
     }
-    next.delete("page");
+    // A new search/filter starts from the first page (offset or cursor paging).
+    for (const k of ["page", "before", "bid"]) next.delete(k);
     const s = next.toString();
     startTransition(() => router.replace(s ? `${pathname}?${s}` : pathname, { scroll: false }));
   };

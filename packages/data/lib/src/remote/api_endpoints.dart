@@ -127,7 +127,7 @@ Future<void> syncSignedAppConfig(
       }
     }
   } catch (e) {
-    debugPrint('[ApiEndpoints] config from API failed: $e');
+    if (DiagConfig.legacyBackend) debugPrint('[ApiEndpoints] config from API failed: $e');
   }
   await syncFromConfigMirrors(store: s, mirrors: mirrors, client: client);
 }

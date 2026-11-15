@@ -2871,6 +2871,35 @@ class AppCopy {
   String get panelNoExpiry => _t('No expiry date', 'بدون تاريخ انتهاء', 'No expiry date');
   String get panelsEmpty => _t('No panels yet. Add the IPTV service you use.', 'لا توجد لوحات بعد. أضف خدمة IPTV التي تستخدمها.', 'No panels yet. Add the IPTV service you use.');
 
+  // ── Optional app account (Supabase Auth, Phase 5.7) ──
+  String get accountOfferTitle => _t('Save your stuff across devices', 'احفظ بياناتك على كل أجهزتك', 'Save your stuff across devices');
+  String get accountOfferBody => _t('Create a free ${AppBrand.name} account to keep favorites, watch history and settings when you change phone. Optional: your panel works without it.', 'أنشئ حساب ${AppBrand.name} مجانيًا لتحتفظ بالمفضلة وسجل المشاهدة والإعدادات عند تغيير هاتفك. اختياري: لوحتك تعمل بدونه.', 'Create a free ${AppBrand.name} account to keep favorites, watch history and settings when you change phone. Optional: your panel works without it.');
+  String get accountCreate => _t('Create account', 'إنشاء حساب', 'Create account');
+  String get accountNotNow => _t('Not now', 'ليس الآن', 'Not now');
+  String get accountSignInLink => _t('Already have an account? Sign in', 'لديك حساب؟ سجّل الدخول', 'Already have an account? Sign in');
+  String get accountCreateLink => _t('No account yet? Create one', 'ليس لديك حساب؟ أنشئ حسابًا', 'No account yet? Create one');
+  String get forgotPasswordLink => _t('Forgot password?', 'نسيت كلمة المرور؟', 'Forgot password?');
+  String get registerTitle => _t('Join ${AppBrand.name}', 'انضم إلى ${AppBrand.name}', 'Join ${AppBrand.name}');
+  String get registerSubtitle => _t('Your panel stays on this device. The account keeps your favorites and history.', 'لوحتك تبقى على هذا الجهاز. الحساب يحفظ المفضلة وسجل المشاهدة.', 'Your panel stays on this device. The account keeps your favorites and history.');
+  String get newMemberBadge => _t('NEW MEMBER', 'عضو جديد', 'NEW MEMBER');
+  String get fieldFullName => _t('Full name', 'الاسم الكامل', 'Full name');
+  String get fieldEmail => _t('Email', 'البريد الإلكتروني', 'Email');
+  String get accountCheckEmail => _t('Check your email to confirm your account, then sign in.', 'تحقق من بريدك لتأكيد الحساب، ثم سجّل الدخول.', 'Check your email to confirm your account, then sign in.');
+  String get resetEmailSent => _t('If this email has an account, a reset link is on its way.', 'إذا كان لهذا البريد حساب، فرابط إعادة التعيين في الطريق.', 'If this email has an account, a reset link is on its way.');
+  String get authErrInvalid => _t('Wrong email or password.', 'البريد أو كلمة المرور غير صحيحة.', 'Wrong email or password.');
+  String get authErrNotConfirmed => _t('Confirm your email first: check your inbox.', 'أكّد بريدك أولًا: تحقق من صندوق الوارد.', 'Confirm your email first: check your inbox.');
+  String get authErrExists => _t('This email already has an account. Sign in instead.', 'هذا البريد لديه حساب بالفعل. سجّل الدخول بدلًا من ذلك.', 'This email already has an account. Sign in instead.');
+  String get authErrWeakPassword => _t('Use a stronger password (at least 8 characters).', 'استخدم كلمة مرور أقوى (8 أحرف على الأقل).', 'Use a stronger password (at least 8 characters).');
+  String get authErrBadEmail => _t('Enter a valid email address.', 'أدخل بريدًا إلكترونيًا صحيحًا.', 'Enter a valid email address.');
+  String get authErrRateLimit => _t('Too many attempts. Wait a few minutes and try again.', 'محاولات كثيرة. انتظر بضع دقائق وحاول مجددًا.', 'Too many attempts. Wait a few minutes and try again.');
+  String get authErrSignupOff => _t('New accounts are closed right now.', 'إنشاء الحسابات الجديدة متوقف حاليًا.', 'New accounts are closed right now.');
+  String get authErrNetwork => _t("Can't reach ${AppBrand.name} right now. Check your internet.", 'تعذّر الوصول إلى ${AppBrand.name} الآن. تحقق من الإنترنت.', "Can't reach ${AppBrand.name} right now. Check your internet.");
+  String get authErrGeneric => _t('Something went wrong. Try again.', 'حدث خطأ. حاول مجددًا.', 'Something went wrong. Try again.');
+  String get accountRowTitle => _t('${AppBrand.name} account', 'حساب ${AppBrand.name}', '${AppBrand.name} account');
+  String get accountNotSignedIn => _t('Not signed in', 'غير مسجّل الدخول', 'Not signed in');
+  String get signOutConfirm => _t('Sign out of your account? Your panels stay on this device.', 'تسجيل الخروج من حسابك؟ لوحاتك تبقى على هذا الجهاز.', 'Sign out of your account? Your panels stay on this device.');
+  String get accountRequiredBody => _t('Sign in to your ${AppBrand.name} account to continue.', 'سجّل الدخول إلى حساب ${AppBrand.name} للمتابعة.', 'Sign in to your ${AppBrand.name} account to continue.');
+
   List<(String, String)> get appearanceThemesList => [
     (themeCinematic, themeCinematicDesc),
     (themeMidnight, themeMidnightDesc),

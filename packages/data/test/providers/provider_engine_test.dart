@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:data/data.dart';
 import 'package:domain/domain.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -291,6 +292,66 @@ void main() {
       expect(ch.code, 'LIVE');
       expect(ch.nowTitle, ch.name);
       expect(ch.nextTitle, '');
+    });
+  });
+
+  group('[PANEL] logs', () {
+    late List<String> lines;
+    late DebugPrintCallback saved;
+    setUp(() {
+      lines = [];
+      saved = debugPrint;
+      debugPrint = (String? m, {int? wrapWidth}) => lines.add(m ?? '');
+    });
+    tearDown(() => debugPrint = saved);
+
+    const creds = XtreamCredentials(server: 'http://panel.example:8080', username: 'alice99', password: 'S3cr3tPw');
+
+    test('success: host, path, action, status, size — never the credentials', () async {
+      final a = XtreamAdapter(creds, http: ProviderHttp(client: MockClient((_) async => http.Response(
+            '{"user_info":{"username":"alice99","password":"S3cr3tPw","auth":1,"status":"Active"}}', 200))));
+      await a.authenticate();
+      final log = lines.where((l) => l.startsWith('[PANEL]')).join(' | ');
+      expect(log, contains('GET http://panel.example:8080/player_api.php → HTTP 200'));
+      expect(log, isNot(contains('alice99')));
+      expect(log, isNot(contains('S3cr3tPw')));
+    });
+
+    test('network error: the real reason is logged, URL query/credentials masked', () async {
+      final a = XtreamAdapter(creds, http: ProviderHttp(
+        client: MockClient((r) async => throw http.ClientException(
+            "Failed host lookup: 'panel.example' (OS Error: No address associated with hostname)", r.url)),
+      ));
+      await expectLater(a.authenticate(), throwsA(isA<ProviderFailure>()));
+      final log = lines.where((l) => l.startsWith('[PANEL]')).join(' | ');
+      expect(log, contains('NETWORK ERROR'));
+      expect(log, contains('Failed host lookup'));
+      expect(log, isNot(contains('S3cr3tPw')));
+    });
+
+    test('refused login says why (fields, not values)', () async {
+      final a = XtreamAdapter(creds, http: ProviderHttp(client: MockClient((_) async => http.Response(
+            '{"user_info":{"username":"alice99","password":"S3cr3tPw","auth":0}}', 200))));
+      await expectLater(a.authenticate(), throwsA(isA<ProviderFailure>()));
+      final log = lines.where((l) => l.startsWith('[PANEL]')).join(' | ');
+      expect(log, contains('xtream login refused (unauthorized)'));
+      expect(log, contains('auth=0'));
+      expect(log, isNot(contains('S3cr3tPw')));
+      expect(log, isNot(contains('alice99')));
+    });
+
+    test('panelUrl masks Xtream stream paths and keeps only action/type', () {
+      expect(Diag.panelUrl(Uri.parse('http://h:8080/live/alice99/S3cr3tPw/1.ts')), 'http://h:8080/live/***/***/1.ts');
+      expect(Diag.panelUrl(Uri.parse('http://h/player_api.php?username=a&password=b&action=get_live_streams')),
+          'http://h/player_api.php?action=get_live_streams');
+      expect(Diag.panelText('see http://h/play/live.php?mac=00:1A:79:AA:BB:CC&stream=5 and password=xyz'),
+          'see http://h/play/live.php and password=***');
+    });
+
+    test('old backend noise is off by default', () {
+      Diag.api('GET /catalog/top10 → LOCAL miss');
+      Diag.dev('SPORTS_DATA getSportsMatches FAILED');
+      expect(lines.where((l) => l.contains('LOCAL miss') || l.contains('SPORTS_DATA')), isEmpty);
     });
   });
 }

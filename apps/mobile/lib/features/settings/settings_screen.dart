@@ -10,6 +10,7 @@ import '../auth/login_screen.dart' show showSupportHelpSheet;
 import '../../core/demo_mode.dart';
 import '../../core/remote_config.dart';
 import '../../core/providers.dart';
+import '../../core/account.dart';
 import '../../core/panels.dart';
 import '../../core/session_controller.dart';
 import '../../core/app_log.dart';
@@ -150,6 +151,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             const SizedBox(height: 18),
             _section(copy.sectionAccount, [
+              if (ref.watch(accountPolicyProvider).accountsOn)
+                _accountRow(context, ref, copy),
               _nav(
                 context,
                 ref,
@@ -500,6 +503,45 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         const SizedBox(height: 10),
       ],
+    );
+  }
+
+  /// App account (Supabase): email + sign out, or a way to sign in.
+  /// Signing out never touches the panels saved on this device.
+  Widget _accountRow(BuildContext context, WidgetRef ref, AppCopy copy) {
+    final user = ref.watch(accountUserProvider);
+    if (user == null) {
+      return _nav(
+        context,
+        ref,
+        Icons.account_circle_outlined,
+        copy.accountRowTitle,
+        value: copy.accountNotSignedIn,
+        route: '/auth/login',
+      );
+    }
+    return _SettingsRow(
+      icon: Icons.account_circle_rounded,
+      title: copy.accountRowTitle,
+      value: user.email,
+      onTap: () async {
+        playUiTap(ref);
+        final ok = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text(user.email),
+            content: Text(copy.signOutConfirm),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(copy.cancel)),
+              FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(copy.signOut)),
+            ],
+          ),
+        );
+        if (ok == true) {
+          AppLog.tap('settings.account_sign_out');
+          await AccountService.signOut();
+        }
+      },
     );
   }
 

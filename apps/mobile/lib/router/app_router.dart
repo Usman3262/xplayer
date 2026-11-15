@@ -60,7 +60,9 @@ import '../features/settings/splash_preview_screen.dart';
 import '../features/settings/subscription_screen.dart';
 import '../features/settings/tv_pair_screen.dart';
 import '../features/splash/splash_screen.dart';
+import '../features/connect/account_offer_screen.dart';
 import '../features/connect/choose_panel_screen.dart';
+import '../core/account.dart';
 import '../features/connect/panel_form_screen.dart';
 import '../features/settings/panels_screen.dart';
 import '../core/panels.dart';
@@ -126,8 +128,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/connect';
       }
 
+      // App account policy from the admin (Access): disabled → no account
+      // pages; required → sign in before Home; optional → guest allowed.
+      final policy = ref.read(accountPolicyProvider);
+      if (!policy.accountsOn && (isAuth || loc == '/account-offer')) return '/home';
+      if (policy.required && !AccountService.signedIn) {
+        return isAuth || isConnect || isPublicLegal ? null : '/auth/login';
+      }
+      if (AccountService.signedIn && (loc == '/auth/login' || loc == '/auth/register')) return '/home';
+
       if (!session.isLoggedIn) {
-        // Guest: everything except the profile picker (account feature).
+        // Guest: everything except the profile picker (old account feature).
         if (isProfiles || isOnboarding) return '/home';
         return null;
       }
@@ -151,6 +162,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) =>
             PanelFormScreen(kind: ProviderKind.fromKey(state.pathParameters['kind'])!),
       ),
+      GoRoute(path: '/account-offer', builder: (_, _) => const AccountOfferScreen()),
       GoRoute(path: '/auth/welcome', builder: (_, _) => const WelcomeScreen()),
       GoRoute(
         path: demoSignInRoute,
@@ -423,6 +435,8 @@ class _RouterRefresh extends ChangeNotifier {
       notifyListeners();
     });
     PanelsService.manager.connections.addListener(notifyListeners);
+    AccountService.user.addListener(notifyListeners);
+    RemoteConfigService.listenable.addListener(notifyListeners);
   }
 
   final Ref ref;
@@ -432,6 +446,8 @@ class _RouterRefresh extends ChangeNotifier {
   @override
   void dispose() {
     PanelsService.manager.connections.removeListener(notifyListeners);
+    AccountService.user.removeListener(notifyListeners);
+    RemoteConfigService.listenable.removeListener(notifyListeners);
     _sub.close();
     _demoSub.close();
     super.dispose();

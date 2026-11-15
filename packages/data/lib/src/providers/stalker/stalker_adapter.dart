@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:domain/domain.dart';
 
 import '../../backend/json_util.dart';
+import '../../diag/diag.dart';
 import '../../remote/json_read.dart';
 import '../provider_adapter.dart';
 import '../provider_http.dart';
@@ -125,11 +126,14 @@ class StalkerAdapter implements ProviderAdapter {
         final js = jsonMap(await _get(api, {'type': 'stb', 'action': 'handshake', 'token': ''}, auth: true));
         final token = jsonStr(js['token'])?.trim();
         if (token != null && token.isNotEmpty) {
+          Diag.panel('stalker endpoint ${Diag.panelUrl(api)} → handshake OK');
           _api = api;
           _token = token;
           return;
         }
+        Diag.panel('stalker endpoint ${Diag.panelUrl(api)} → no token in reply');
       } on ProviderFailure catch (f) {
+        Diag.panel('stalker endpoint ${Diag.panelUrl(api)} → ${f.kind.name}, trying next');
         last = f;
         // Wrong path answers 404/HTML: try the next one. Network errors and
         // timeouts mean the portal itself is unreachable.
@@ -162,6 +166,7 @@ class StalkerAdapter implements ProviderAdapter {
   Future<Map<String, dynamic>> _login() async {
     await _handshake();
     final p = await _profile();
+    Diag.panel('stalker profile: status=${p['status']}, blocked=${p['blocked']}, has id ${p['id'] != null}');
     checkProfile(p);
     return p;
   }

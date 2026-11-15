@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../diag/diag.dart';
 import '../security/token_vault.dart';
 
 class AuthTokens {
@@ -112,7 +113,7 @@ class TokenStore {
         refresh == null ||
         refresh.isEmpty ||
         expiresRaw == null) {
-      debugPrint(
+      if (DiagConfig.legacyBackend) debugPrint(
         '[TokenStore] read miss access=${access != null} refresh=${refresh != null} expires=${expiresRaw != null}',
       );
       return null;

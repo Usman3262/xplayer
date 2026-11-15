@@ -10,11 +10,19 @@ Spec: `new-platform.md` · Rules: `CLAUDE.md` · App "where to change": `XPLAYER
 ---
 
 ## ▶ NEXT
-**Phase 5 · Step 5.6b — "Choose your panel" on Android TV** (TV's own D-pad UI, same flow and rules as
-the phone: choose → form with on-screen keyboard → Connect → home; My panels in TV settings; the device
-MAC shown large for Stalker). Reuse `PanelsService`/`panel_copy` logic; widget tests with D-pad focus.
+**Phase 6 · Step 6.1 — Local catalog database (phone; data package):** Drift DB for categories, channels,
+movies, series, episodes, EPG window and per-panel sync cursors; built for big panels (trial line: 57k live
+/ 187k movies / 50k series) → per-category storage, indexed queries, no whole-catalog loads in memory.
+**TV work is paused by the user (5.6b and all TV screens) — phone + admin + data only until told.**
 
 ## Waiting on you
+- [ ] **Disk space: C: has ~1.1 GB free.** Needed: `npm install` in `apps/admin` (typecheck/lint the
+  new Users page), Android SDK later. Flutter build caches (`apps/*/build`, `packages/*/build`) ≈550 MB
+  can be deleted safely if you want (they are rebuilt).
+- [ ] **Supabase emails:** confirmation is ON and the built-in sender allows only a few emails per hour.
+  For real users: set custom SMTP (Dashboard → Auth → SMTP) — or turn "Confirm email" off while testing.
+  Also set **Site URL** (Auth → URL configuration) to the admin site, so the confirm link doesn't land on
+  localhost.
 - [ ] **Android build setup on this PC** (to run on your phone/TV): free ~10 GB, install Android Studio
   (SDK + adb), then I enable Android in Flutter, set the SDK path, fix `JAVA_HOME`, accept licences,
   build + install. Allow "USB debugging" on the phone when asked.
@@ -501,10 +509,33 @@ role has sports.read without sports.write).
   saved, Stalker MAC prefilled); full mobile suite 35/35; analyze: no errors in touched files.
   *Not tested on a device* (no Android SDK). In Chrome, panels will fail to connect (browser CORS) —
   screens only. Home rails stay empty until Phase 6/7 feed them from the panel.
-- [ ] 5.6b TV: choose panel → form → test → connect in seconds
+- [⏸] 5.6b TV: choose panel → form → test → connect in seconds — **paused by the user (2026-11-15):
+  "don't touch TV side yet"**. Resume after the phone flow is complete.
   (account check first, catalog in background, cache-first) — using the app's existing look.
-- [ ] 5.7 Optional XPlayer account after connecting (Supabase Auth: sign up / sign in, policy from
+- [x] 5.7 Optional XPlayer account after connecting (Supabase Auth: sign up / sign in, policy from
   `auth.mode`, guest data kept on device and synced after sign-up).
+  *Implemented — phone:* `core/account.dart` (`AccountService` over Supabase Auth behind an
+  `AccountAuth` interface; error codes → EN/AR messages; local email/password checks; `AccountPolicy`
+  from admin `auth.mode` + `auth.guest_enabled` (off ⇒ required) + `auth.allow_registration`; one-time
+  offer flag). Existing sign-in / register screens kept their design, now call Supabase (email field,
+  "Create account" link; register texts moved to AppCopy). New `/account-offer` screen after the first
+  panel ("Save your stuff across devices": Create account / Sign in / Not now). Router: disabled ⇒ no
+  account pages; required ⇒ sign-in before Home; optional ⇒ guest. Settings → Account: "XPlayer account"
+  row (email + sign out, or Sign in) — signing out never touches panels. Email confirmation is ON in the
+  project ⇒ after sign-up the app says "check your email, then sign in".
+  *Implemented — admin + DB:* migration `021_admin_users` (`admin_list_users` keyset + search + status,
+  `admin_user_counts`, `admin_set_user_status` = users.write, not yourself, not admin accounts, sets
+  `auth.users.banned_until` so Supabase Auth blocks sign-in, audit row with reason). Admin **Users** page
+  (`/users`, nav enabled): stats, search, status filter, cursor paging, Suspend / Ban / Re-activate dialogs
+  with reason (server action: guard + zod). Types regenerated. Toolbar now also resets cursor params.
+  *Tested:* mobile `account_test.dart` 10 + updated `panels_flow_test.dart` 10 → mobile suite **45/45**;
+  analyze: no errors. **Live DB:** `live_users_check.py` **22/22** (sign-up trigger + display name;
+  anon / app user / content manager denied; support agent reads but can't ban; search incl. literal `%`;
+  keyset paging; ban ⇒ Supabase sign-in refused; re-activate ⇒ sign-in works; audit with reason;
+  self / admin protected; user can't set own status). **Admin `tsc`/lint NOT run** (node_modules missing,
+  1.1 GB free disk). Not on a device.
+  *Later:* password reset (needs a reset page / deep link; link hidden for now), guest → account data
+  sync (Phase 8), Google/Apple sign-in (not enabled in the project).
 
 ## Phase 6 — Catalog, cache, sync
 - [ ] 6.1 Drift local DB: categories, channels, movies, series, episodes, EPG window, sync cursors.
@@ -587,6 +618,15 @@ role has sports.read without sports.write).
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-15 — **First real-device run (OnePlus LE2115, Android 14, user):** Stalker connects; Xtream and
+  M3U fail with "network" (no detail). PC → same servers OK (Neo HTTP 200, trial HTTP 200), cleartext is
+  allowed in the Android config ⇒ cause unknown yet. Added `[PANEL]` logs (`Diag.panel`): every panel
+  request (host/path/action, status, ms, size, first chars of reply) + the real network error
+  (host lookup / refused / reset / TLS / timeout), the form input as understood (no secrets), Xtream
+  refusal reasons (fields only), M3U parse summary, Stalker endpoint/profile; credentials masked
+  (tested). Old backend logs (`[API]`, `[TokenStore]`, `[ApiEndpoints]`, `SPORTS_DATA`) off by default
+  (`DiagConfig.legacyBackend`). Provider tests 90/90. Waiting for the user's `[PANEL]` lines.
+- 2026-11-15 — Step 5.7 done: optional account (phone) + admin Users page + migration 021 (live 22/22); mobile 45/45; admin tsc not run (disk). TV paused by user.
 - 2026-11-15 — Step 5.6a done (phone): Choose your panel → form → Connect → Home, My panels; 9 new tests, mobile 35/35.
 - 2026-11-15 — Step 5.5 done: connection manager + sealed credential store + device MAC; 85/85 provider tests.
 - 2026-11-15 — Step 5.4 done: Stalker adapter; live MAG line verified incl. playable live/movie/episode links. 71/71 offline tests.

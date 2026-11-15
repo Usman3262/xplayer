@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show compute;
 import 'package:http/http.dart' as http;
 
 import '../backend/remote_config.dart';
+import '../diag/diag.dart';
 import 'provider_models.dart';
 
 /// Timeouts and limits for panel calls. Defaults are built in; the admin panel
@@ -83,30 +84,57 @@ class ProviderHttp {
         // Login answers fast or fails fast: no retries on the auth call.
         if (auth || !f.isRetryable || attempt >= limits.retries || _closed) rethrow;
         attempt++;
-        await Future<void>.delayed(_backoffBase * math.pow(2, attempt - 1).toInt());
+        final wait = _backoffBase * math.pow(2, attempt - 1).toInt();
+        Diag.panel('retry $attempt/${limits.retries} in ${wait.inMilliseconds}ms → ${Diag.panelUrl(uri)}');
+        await Future<void>.delayed(wait);
       }
     }
   }
 
   Future<String> _once(Uri uri, Map<String, String> headers, Duration timeout) async {
     if (_closed) throw const ProviderFailure(ProviderFailureKind.network, 'closed');
+    final where = 'GET ${Diag.panelUrl(uri)}';
+    final sw = Stopwatch()..start();
     final http.Response res;
     try {
       res = await _client.get(uri, headers: headers).timeout(timeout);
     } on TimeoutException {
+      Diag.panel('$where → TIMEOUT: no answer within ${timeout.inMilliseconds}ms');
       throw ProviderFailure(ProviderFailureKind.timeout, '${timeout.inMilliseconds}ms ${uri.host}');
-    } on http.ClientException catch (e) {
-      throw ProviderFailure(ProviderFailureKind.network, '${uri.host}: ${_safe(e.message)}');
     } catch (e) {
-      // SocketException / HandshakeException / browser fetch errors.
-      throw ProviderFailure(ProviderFailureKind.network, '${uri.host}: ${e.runtimeType}');
+      // ClientException wraps the real cause (SocketException: Failed host
+      // lookup / Connection refused / reset, HandshakeException, …).
+      final why = Diag.panelText(e is http.ClientException ? e.message : '$e');
+      Diag.panel('$where → NETWORK ERROR after ${sw.elapsedMilliseconds}ms: ${e.runtimeType}: $why');
+      throw ProviderFailure(ProviderFailureKind.network, '${uri.host}: $why');
     }
     final code = res.statusCode;
+    final ms = sw.elapsedMilliseconds;
     // Panels rarely send a charset; `res.body` would then fall back to
     // Latin-1 and garble Arabic/other names. Panels speak UTF-8.
-    if (code >= 200 && code < 300) return utf8.decode(res.bodyBytes, allowMalformed: true);
+    final text = utf8.decode(res.bodyBytes, allowMalformed: true);
+    if (code >= 200 && code < 300) {
+      Diag.panel('$where → HTTP $code in ${ms}ms, ${_size(res.bodyBytes.length)}, '
+          'type ${res.headers['content-type'] ?? '?'}, starts "${_peek(text)}"');
+      return text;
+    }
+    Diag.panel('$where → HTTP $code in ${ms}ms, server: ${res.headers['server'] ?? '?'}, body "${_peek(text)}"');
     throw ProviderFailure(failureKindForStatus(code), 'HTTP $code');
   }
+
+  /// First characters of a reply, one line, credentials masked (Xtream login
+  /// replies echo username/password, so those values are masked too).
+  static String _peek(String text) {
+    var t = text.replaceAll(RegExp(r'\s+'), ' ').trim();
+    t = t.replaceAllMapped(RegExp(r'"(username|password|mac)"\s*:\s*"[^"]*"'), (m) => '"${m[1]}":"***"');
+    return Diag.panelText(t.length > 90 ? '${t.substring(0, 90)}…' : t);
+  }
+
+  static String _size(int n) => n >= 1048576
+      ? '${(n / 1048576).toStringAsFixed(1)} MB'
+      : n >= 1024
+          ? '${(n / 1024).toStringAsFixed(1)} KB'
+          : '$n B';
 
   /// Big bodies are decoded in an isolate; bad JSON → `badResponse`.
   Future<Object?> decodeJson(String body) async {
@@ -117,6 +145,7 @@ class ProviderHttp {
       return jsonDecode(text);
     } on FormatException {
       // Often an HTML error / captive portal page instead of JSON.
+      Diag.panel('reply is not JSON: "${_peek(text)}"');
       throw const ProviderFailure(ProviderFailureKind.badResponse, 'not JSON');
     }
   }
@@ -138,8 +167,6 @@ class ProviderHttp {
     return ProviderFailureKind.badResponse;
   }
 
-  /// Strips anything URL-like from an error message (URLs carry credentials).
-  static String _safe(String m) => m.replaceAll(RegExp(r'https?://\S+'), '<url>');
 }
 
 Object? _decode(String s) => jsonDecode(s);

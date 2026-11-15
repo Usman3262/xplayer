@@ -57,6 +57,7 @@ void main() {
       routes: [
         GoRoute(path: '/form', builder: (_, _) => screen),
         GoRoute(path: '/home', builder: (_, _) => const Text('HOME')),
+        GoRoute(path: '/account-offer', builder: (_, _) => const Text('OFFER')),
         GoRoute(path: '/settings/panels', builder: (_, _) => const Text('PANELS')),
         GoRoute(path: '/connect', builder: (_, _) => const Text('CONNECT')),
         GoRoute(path: '/connect/:kind', builder: (_, s) => Text('FORM ${s.pathParameters['kind']}')),
@@ -151,7 +152,7 @@ void main() {
     expect(logins, isEmpty);
   });
 
-  testWidgets('connect works → saved and first panel goes Home', (t) async {
+  testWidgets('connect works → saved; first panel shows the one-time account offer', (t) async {
     await t.pumpWidget(app(const PanelFormScreen(kind: ProviderKind.xtream)));
     await t.pumpAndSettle();
     await enter(t, 0, 'panel.example:8080');
@@ -160,11 +161,23 @@ void main() {
     await enter(t, 3, 'Living room');
     await t.tap(find.byKey(const Key('panel-connect')));
     await t.pumpAndSettle();
-    expect(find.text('HOME'), findsOneWidget);
+    expect(find.text('OFFER'), findsOneWidget);
     final saved = PanelsService.manager.connections.value.single;
     expect(saved.name, 'Living room');
     expect(saved.isPrimary, isTrue);
     expect((logins.single as XtreamCredentials).username, 'alice');
+  });
+
+  testWidgets('offer already seen → straight Home', (t) async {
+    SharedPreferences.setMockInitialValues({'xp.account_offer_shown': true});
+    await t.pumpWidget(app(const PanelFormScreen(kind: ProviderKind.xtream)));
+    await t.pumpAndSettle();
+    await enter(t, 0, 'panel.example');
+    await enter(t, 1, 'bob');
+    await enter(t, 2, 'pw');
+    await t.tap(find.byKey(const Key('panel-connect')));
+    await t.pumpAndSettle();
+    expect(find.text('HOME'), findsOneWidget);
   });
 
   testWidgets('login refused → clear message, nothing saved, stays on the form', (t) async {

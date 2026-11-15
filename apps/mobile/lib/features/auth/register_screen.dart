@@ -1,9 +1,9 @@
 import 'package:design_system/design_system.dart';
-import 'package:domain/domain.dart' show AppBrand;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/account.dart';
 import '../../core/session_controller.dart';
 import '../../widgets/auth_scaffold.dart';
 
@@ -29,21 +29,29 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.dispose();
   }
 
-  Future<void> _submit() async {
+  Future<void> _submit(AppCopy copy) async {
+    if (_loading) return;
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
-      await ref.read(sessionProvider.notifier).register(
-            name: _name.text,
-            email: _email.text,
-            password: _password.text,
-          );
+      final needsConfirm = await AccountService.signUp(
+        _email.text,
+        _password.text,
+        displayName: _name.text,
+      );
       if (!mounted) return;
-      context.go('/profiles');
-    } catch (e) {
-      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+      if (needsConfirm) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(copy.accountCheckEmail), duration: const Duration(seconds: 6)),
+        );
+        context.go('/auth/login');
+      } else {
+        context.go('/home');
+      }
+    } on AccountException catch (e) {
+      if (mounted) setState(() => _error = e.error.text(copy));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -51,29 +59,30 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final copy = AppCopy.ofLanguage(ref.watch(sessionProvider.select((s) => s.language)));
     return AuthScaffold(
-      title: 'Join ${AppBrand.name}',
-      subtitle: 'Create your profile. Fields are local until backend is live.',
-      badge: 'NEW MEMBER',
+      title: copy.registerTitle,
+      subtitle: copy.registerSubtitle,
+      badge: copy.newMemberBadge,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           AuthField(
             controller: _name,
-            label: 'Full name',
+            label: copy.fieldFullName,
             prefix: Icons.person_outline_rounded,
           ),
           const SizedBox(height: 14),
           AuthField(
             controller: _email,
-            label: 'Email',
+            label: copy.fieldEmail,
             keyboardType: TextInputType.emailAddress,
             prefix: Icons.mail_outline_rounded,
           ),
           const SizedBox(height: 14),
           AuthField(
             controller: _password,
-            label: 'Password',
+            label: copy.fieldPassword,
             obscure: true,
             prefix: Icons.lock_outline_rounded,
           ),
@@ -86,18 +95,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             color: AppColors.magenta,
             enabled: !_loading,
             child: PrimaryButton(
-              label: 'Create Account',
+              key: const Key('register-submit'),
+              label: copy.accountCreate,
               color: AppColors.magenta,
               icon: Icons.rocket_launch_rounded,
               loading: _loading,
-              onPressed: _loading ? null : _submit,
+              onPressed: _loading ? null : () => _submit(copy),
             ),
           ),
           const SizedBox(height: 12),
           TextButton(
             onPressed: () => context.go('/auth/login'),
             child: Text(
-              'Already have an account? Sign in',
+              copy.accountSignInLink,
               style: TextStyle(
                 color: AppColors.cyan,
                 fontWeight: FontWeight.w700,

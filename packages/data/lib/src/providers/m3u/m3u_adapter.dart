@@ -1,6 +1,7 @@
 import 'package:domain/domain.dart';
 import 'package:flutter/foundation.dart' show compute;
 
+import '../../diag/diag.dart';
 import '../provider_adapter.dart';
 import '../provider_http.dart';
 import '../provider_models.dart';
@@ -71,9 +72,13 @@ class M3uAdapter implements ProviderAdapter {
     return _loading ??= () async {
       try {
         final text = await _http.getText(_uri);
+        final sw = Stopwatch()..start();
         final c = text.length >= _http.limits.isolateDecodeBytes
             ? await compute(buildM3uCatalog, text)
             : buildM3uCatalog(text);
+        Diag.panel('m3u parsed in ${sw.elapsedMilliseconds}ms: header #EXTM3U ${c.hadHeader ? 'yes' : 'NO'}, '
+            'live ${c.channels.length}, movies ${c.movies.length}, series ${c.series.length}, '
+            'groups ${c.liveCategories.length}/${c.movieCategories.length}/${c.seriesCategories.length}, epg urls ${c.epgUrls.length}');
         _catalog = c;
         return c;
       } finally {

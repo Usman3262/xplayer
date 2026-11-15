@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:domain/domain.dart';
 
 import '../../backend/json_util.dart';
+import '../../diag/diag.dart';
 import '../../remote/json_read.dart';
 import '../provider_adapter.dart';
 import '../provider_http.dart';
@@ -79,7 +80,15 @@ class XtreamAdapter implements ProviderAdapter {
   @override
   Future<ProviderAccount> authenticate() async {
     final raw = await _http.getJson(_api(), auth: true);
-    final account = parseAccount(raw, now: _clock());
+    final ProviderAccount account;
+    try {
+      account = parseAccount(raw, now: _clock());
+    } on ProviderFailure catch (f) {
+      final ui = jsonMap(jsonMap(raw)['user_info']);
+      Diag.panel('xtream login refused (${f.kind.name}): reply ${raw.runtimeType}, '
+          'keys ${jsonMap(raw).keys.toList()}, auth=${ui['auth']}, status=${ui['status']}, exp_date=${ui['exp_date']}');
+      rethrow;
+    }
     _allowedFormats = account.allowedOutputFormats;
     return account;
   }

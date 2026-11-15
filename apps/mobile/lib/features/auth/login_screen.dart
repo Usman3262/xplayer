@@ -1,7 +1,6 @@
 import 'dart:io' show Platform;
 import 'dart:ui';
 
-import 'package:data/data.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/account.dart';
 import '../../core/session_controller.dart';
 
 /// Figma: the app Mobile Login (14:4569)
@@ -37,35 +37,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void _showLoginHelp(BuildContext context, AppCopy copy) =>
       showSupportHelpSheet(context, copy);
 
-  Future<void> _submit() async {
+  Future<void> _submit(AppCopy copy) async {
+    if (_loading) return;
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
-      await ref.read(sessionProvider.notifier).login(
-            email: _email.text.trim(),
-            password: _password.text,
-            rememberMe: _remember,
-          );
+      await AccountService.signIn(_email.text, _password.text);
       if (!mounted) return;
-      context.go('/profiles');
-    } on MfaRequiredException catch (e) {
-      if (!mounted) return;
-      context.push(
-        '/auth/mfa?challenge=${Uri.encodeComponent(e.mfaChallengeId)}',
-      );
-    } on LoginApprovalRequiredException catch (e) {
-      if (!mounted) return;
-      final q = StringBuffer(
-        'challenge=${Uri.encodeComponent(e.challengeId)}',
-      );
-      if (e.expiresAt != null && e.expiresAt!.isNotEmpty) {
-        q.write('&expires=${Uri.encodeComponent(e.expiresAt!)}');
-      }
-      context.push('/auth/login-approval?$q');
-    } catch (e) {
-      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+      context.go('/home');
+    } on AccountException catch (e) {
+      if (mounted) setState(() => _error = e.error.text(copy));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -98,8 +81,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           if (context.canPop()) {
                             context.pop();
                           } else {
-                            // There is no '/' route; the sign-in start page.
-                            context.go('/auth/welcome');
+                            context.go('/home');
                           }
                         },
                       ),
@@ -223,13 +205,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 20),
-                                LoginFieldLabel(copy.emailOrUsername),
+                                LoginFieldLabel(copy.fieldEmail),
                                 const SizedBox(height: 6),
                                 LoginField(
                                   controller: _email,
                                   hint: copy.emailHint,
-                                  prefix: Icons.person_outline_rounded,
-                                  keyboardType: TextInputType.text,
+                                  prefix: Icons.mail_outline_rounded,
+                                  keyboardType: TextInputType.emailAddress,
+                                  textInputAction: TextInputAction.next,
                                 ),
                                 const SizedBox(height: 14),
                                 LoginFieldLabel(copy.passwordLabel),
@@ -306,7 +289,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   child: SizedBox(
                                     height: 52,
                                     child: FilledButton(
-                                      onPressed: _loading ? null : _submit,
+                                      onPressed: _loading ? null : () => _submit(copy),
                                       style: FilledButton.styleFrom(
                                         backgroundColor: AppColors.cyan,
                                         foregroundColor: Colors.black,
@@ -329,7 +312,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 18),
+                                const SizedBox(height: 10),
+                                // Password reset needs a reset page / deep link first (roadmap 8.x).
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    if (ref.watch(accountPolicyProvider).allowRegistration)
+                                      TextButton(
+                                        onPressed: () => context.pushReplacement('/auth/register'),
+                                        child: Text(copy.accountCreate,
+                                            style: TextStyle(
+                                                color: AppColors.cyan, fontSize: 12, fontWeight: FontWeight.w800)),
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
                                 // Task #143 #5: thank-you under form (subtle glow).
                                 _ThankYouGlow(copy: copy),
                                 const SizedBox(height: 10),

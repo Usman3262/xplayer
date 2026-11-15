@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/account.dart';
 import '../../core/app_log.dart';
 import '../../core/panels.dart';
 import '../../core/remote_config.dart';
@@ -81,8 +82,12 @@ class _PanelFormScreenState extends ConsumerState<PanelFormScreen> {
     try {
       await manager.connect(creds, name: _name.text);
       if (!mounted) return;
+      final offer = wasFirst && await AccountService.shouldOffer(ref.read(accountPolicyProvider));
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(copy.panelConnected)));
-      context.go(wasFirst ? '/home' : '/settings/panels');
+      // First panel → (one-time account offer) → Home. Router sends "account
+      // required" users to sign-in by itself.
+      context.go(!wasFirst ? '/settings/panels' : (offer ? '/account-offer' : '/home'));
     } on ProviderFailure catch (f) {
       AppLog.info('Connect', 'failed: ${f.kind.name}'); // no URL / credentials
       if (mounted) setState(() => _error = panelFailureText(f, copy, maxPanels: manager.maxPanels));

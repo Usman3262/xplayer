@@ -74,7 +74,7 @@ export const NAV: NavGroup[] = [
   {
     label: "People",
     items: [
-      { title: "Users", href: "/users", icon: Users, permission: "users.read", ready: false },
+      { title: "Users", href: "/users", icon: Users, permission: "users.read", ready: true },
       { title: "Devices", href: "/devices", icon: Monitor, permission: "devices.read", ready: false },
       { title: "Support", href: "/support", icon: LifeBuoy, permission: "support.read", ready: false },
     ],
