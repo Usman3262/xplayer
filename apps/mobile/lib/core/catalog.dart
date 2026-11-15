@@ -37,7 +37,7 @@ class CatalogService {
 
   /// A removed panel's catalog goes with it (any running sync stops first).
   static Future<void> clearPanel(String panelId) async {
-    _syncer?.cancel(panelId);
+    _syncer?.cancel(panelId, reason: 'panel removed');
     await store.clearPanel(panelId);
   }
 
@@ -85,7 +85,7 @@ class CatalogService {
   /// App to background: stop downloading; resumes later where it stopped.
   static void pause() {
     _paused = true;
-    _syncer?.cancelAll();
+    _syncer?.cancelAll(reason: 'app in background');
   }
 
   static void resume() {

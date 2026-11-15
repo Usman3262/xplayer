@@ -647,6 +647,15 @@ role has sports.read without sports.write).
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-15 — **First check via remote logs (OnePlus LE2115):** `[BACKEND] ready (from bundled env/app.json)`
+  ⇒ automatic Supabase config works on the user's Mac. Sync on the trial line: 921/447/388 categories,
+  run 1 = 9,375 items in 47 s, 0 failed, stopped; run 2 skipped 200 fresh categories and continued
+  (resume verified on device). No ERR/CRASH. Fixes: routine sync request successes no longer uploaded
+  (`Diag.panelQuiet`; only errors, logins, >3 s or >5 MB replies), `[SYNC]` progress every 100
+  categories, "stopped" now says why (app in background / panel removed). Data tests 117 pass.
+- 2026-11-15 — Admin checks finally run (node_modules installed): `next typegen` + `tsc --noEmit` **0 errors**
+  (covers Users page 5.7, Panel connections / Diagnostics / Cache cards, toolbar), `eslint` on changed
+  admin files clean. Note: run `npx next typegen` before `tsc` on a fresh checkout (PageProps/LayoutProps).
 - 2026-11-15 — **Remote app logs** (user request: "test by reading the logs the app shares"):
   migration 023 `app_logs` + `log_app_events` (anon/auth RPC: on/off switch, ≤100 lines/batch, field
   checks, flood guard 600/10 min/device, auto-prune by `diagnostics.log_retention_days`); read only

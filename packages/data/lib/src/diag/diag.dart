@@ -53,6 +53,13 @@ abstract final class Diag {
   /// [panelUrl] / [panelText]; this never prints credentials.
   static void panel(String message) => event('PANEL', message);
 
+  /// Routine success lines (e.g. each request during a catalog sync):
+  /// printed in debug only, never uploaded — keeps the server log readable.
+  static void panelQuiet(String message) {
+    if (!DiagConfig.isOn) return;
+    debugPrint('[PANEL] ${panelText(message)}');
+  }
+
   /// Where important lines also go (the app uploads them for support /
   /// remote testing). Gets text that is already scrubbed.
   static void Function(String tag, String message)? remoteSink;

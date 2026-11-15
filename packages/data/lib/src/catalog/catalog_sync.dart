@@ -114,17 +114,21 @@ class CatalogSyncer {
   /// Latest progress per panel (screens listen).
   final ValueNotifier<Map<String, SyncProgress>> progress = ValueNotifier(const {});
 
-  final _cancelled = <String>{};
+  final _cancelled = <String, String>{};
   final _running = <String, Future<SyncProgress>>{};
 
   bool isRunning(String panelId) => _running.containsKey(panelId);
 
   /// Stops a running sync after the categories in flight.
-  void cancel(String panelId) {
-    if (_running.containsKey(panelId)) _cancelled.add(panelId);
+  void cancel(String panelId, {String reason = 'cancelled'}) {
+    if (_running.containsKey(panelId)) _cancelled[panelId] = reason;
   }
 
-  void cancelAll() => _cancelled.addAll(_running.keys);
+  void cancelAll({String reason = 'cancelled'}) {
+    for (final id in _running.keys) {
+      _cancelled[id] = reason;
+    }
+  }
 
   /// Syncs one panel. A second call while it runs returns the same run.
   /// [force] ignores freshness (pull-to-refresh). [maxCategoriesPerKind]
@@ -196,6 +200,10 @@ class CatalogSyncer {
               final n = await _syncCategory(panelId, adapter, kind, cat.id, scope);
               consecutiveFailures = 0;
               emit(p.copyWith(done: p.done + 1, items: p.items + n));
+              if (p.done % 100 == 0) {
+                Diag.event('SYNC', 'sync $panelId ${kind.name}: ${p.done}/${p.total} categories, '
+                    '${p.items} items so far (${(sw.elapsedMilliseconds / 1000).toStringAsFixed(0)}s)');
+              }
             } on ProviderFailure catch (f) {
               if (_isFatal(f)) {
                 fatal = f;
@@ -233,12 +241,13 @@ class CatalogSyncer {
   SyncProgress _finish(void Function(SyncProgress) emit, SyncProgress p, SyncPhase phase, Stopwatch sw) {
     final out = p.copyWith(phase: phase);
     emit(out);
-    Diag.event('SYNC', 'sync ${p.panelId} ${phase.name} in ${(sw.elapsedMilliseconds / 1000).toStringAsFixed(1)}s: '
+    final why = phase == SyncPhase.stopped ? ' (${_cancelled[p.panelId] ?? 'cancelled'})' : '';
+    Diag.event('SYNC', 'sync ${p.panelId} ${phase.name}$why in ${(sw.elapsedMilliseconds / 1000).toStringAsFixed(1)}s: '
         '${out.items} items, ${out.skipped} fresh categories skipped, ${out.failedCategories} failed');
     return out;
   }
 
-  bool _stop(String panelId) => _cancelled.contains(panelId);
+  bool _stop(String panelId) => _cancelled.containsKey(panelId);
 
   /// Login / subscription problems end the run; anything else is per category.
   static bool _isFatal(ProviderFailure f) =>

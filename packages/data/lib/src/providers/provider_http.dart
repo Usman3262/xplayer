@@ -148,8 +148,12 @@ class ProviderHttp {
     // Latin-1 and garble Arabic/other names. Panels speak UTF-8.
     final text = utf8.decode(res.bodyBytes, allowMalformed: true);
     if (code >= 200 && code < 300) {
-      Diag.panel('$where → HTTP $code in ${ms}ms, ${_size(res.bodyBytes.length)}, '
-          'type ${res.headers['content-type'] ?? '?'}, starts "${_peek(text)}"');
+      final line = '$where → HTTP $code in ${ms}ms, ${_size(res.bodyBytes.length)}, '
+          'type ${res.headers['content-type'] ?? '?'}, starts "${_peek(text)}"';
+      // Upload only what matters: logins, slow or very big replies. Routine
+      // catalog requests (thousands per sync) stay local.
+      final important = timeout == limits.authTimeout || ms > 3000 || res.bodyBytes.length > 5 * 1048576;
+      important ? Diag.panel(line) : Diag.panelQuiet(line);
       return text;
     }
     Diag.panel('$where → HTTP $code in ${ms}ms, server: ${res.headers['server'] ?? '?'}, body "${_peek(text)}"');
