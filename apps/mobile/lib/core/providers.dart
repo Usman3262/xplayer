@@ -3,7 +3,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:data/data.dart';
 import 'package:domain/domain.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'adult.dart';
 import 'backend.dart';
 import 'catalog.dart';
 import 'panels.dart';
@@ -34,7 +33,9 @@ final catalogRepositoryProvider = Provider<CatalogRepository>((ref) {
   final panel = panelId == null ? null : (id: panelId);
   if (panel != null) {
     final config = ref.watch(remoteConfigProvider);
-    final showAdult = ref.watch(adultUnlockedProvider);
+    // Not rebuilt on 18+ unlock / hide: Movies/Series switch to
+    // adultView() themselves; a rebuild reloaded Home and fetched ~15
+    // series again on every toggle (device log 15 Nov).
     return PanelCatalogRepository(
       store: CatalogService.store,
       panelId: panel.id,
@@ -42,8 +43,7 @@ final catalogRepositoryProvider = Provider<CatalogRepository>((ref) {
       layout: () => config.home,
       metadata: CatalogService.metadata,
       artwork: ArtworkUrls.fromConfig(config),
-      onMetadataArrived: CatalogService.bumpSoon,
-      includeAdult: showAdult,
+      onMetadataArrived: CatalogService.metadataArrived,
     );
   }
   // Only what the catalog depends on. Watching the whole session rebuilt

@@ -454,13 +454,17 @@ class _CategoryChannelTrailsScreenState
         if (mounted) unawaited(_boot());
       });
     }
-    ref.listen<int>(catalogRevisionProvider, (_, _) => _refreshQuiet());
-    // 18+ shown / hidden or another main panel: the package list changes.
-    ref.listen(catalogRepositoryProvider, (_, _) {
-      _itemsByCat.clear();
-      _totalByCat.clear();
-      unawaited(_boot());
-    });
+    // Provider changes can arrive while widgets build: act after the frame.
+    void later(VoidCallback f) => WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) f();
+        });
+    ref.listen<int>(catalogRevisionProvider, (_, _) => later(_refreshQuiet));
+    // Another main panel: the package list changes.
+    ref.listen(catalogRepositoryProvider, (_, _) => later(() {
+          _itemsByCat.clear();
+          _totalByCat.clear();
+          unawaited(_boot());
+        }));
 
     final filtered = _filteredCategories;
     final paged = _pagedCategories;

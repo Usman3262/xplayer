@@ -4317,9 +4317,10 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
       builder: (ctx) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+          // Scrolls: in landscape the sheet is ~160 px high and the text
+          // overflowed by 61 px (device log 15 Nov).
+          child: ListView(
+            shrinkWrap: true,
             children: [
               Text(
                 isLive

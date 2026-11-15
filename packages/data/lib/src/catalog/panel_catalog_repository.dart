@@ -60,7 +60,9 @@ class PanelCatalogRepository implements CatalogRepository {
       (await store.categories(panelId, _kind(kind), adult: true)).isNotEmpty;
 
   /// The same repository, 18+ only (for the adult screen after the PIN).
-  PanelCatalogRepository adultView() => PanelCatalogRepository(
+  /// One 18+ view per repository (its fetches / caches are kept: the 18+
+  /// movie list was downloaded twice when every screen made a new one).
+  PanelCatalogRepository adultView() => _adultView ??= PanelCatalogRepository(
         store: store,
         panelId: panelId,
         adapter: _adapter,
@@ -71,6 +73,7 @@ class PanelCatalogRepository implements CatalogRepository {
         adultOnly: true,
       );
 
+  PanelCatalogRepository? _adultView;
   final Future<ProviderAdapter?> Function() _adapter;
   final HomeLayout Function() _layout;
   final HomeContentResolver _home;

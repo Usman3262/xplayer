@@ -5,7 +5,8 @@ Run from apps/admin (uses the service key in .env.local, read-only query):
   python scripts/read_app_logs.py --minutes 120 --model LE2115 --tag PANEL,SYNC
   python scripts/read_app_logs.py --device <install id> --limit 500
 """
-import argparse, datetime as dt, json, urllib.parse, urllib.request
+import argparse, datetime as dt, json, sys, urllib.parse, urllib.request
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # Windows console: ⏎ → etc.
 
 env = dict(l.strip().split("=", 1) for l in open(".env.local") if "=" in l and not l.startswith("#"))
 URL, KEY = env["NEXT_PUBLIC_SUPABASE_URL"], env["SUPABASE_SECRET_KEY"]

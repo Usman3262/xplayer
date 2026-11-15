@@ -190,7 +190,13 @@ class _CatalogViewAllScreenState extends ConsumerState<CatalogViewAllScreen> {
                 ),
                 itemCount: count,
                 itemBuilder: (context, i) {
-                  if (i >= count - 4) unawaited(_loadMore());
+                  // Next page after this frame: the grid is being built now
+                  // (setState here crashed: device log 15 Nov).
+                  if (i >= count - 4) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) unawaited(_loadMore());
+                    });
+                  }
                   final item = _items[i];
                   return LayoutBuilder(
                     builder: (context, c) {

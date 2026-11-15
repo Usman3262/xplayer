@@ -706,6 +706,15 @@ Phone done 2026-11-15 (implemented + unit tests; **untested on a device**). TV v
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-15 — **Device logs (Phase 7 build):** **verified on a real device (LE2115, Stalker):** panel
+  playback — 3 movies (one 18+) link 0.3–0.5 s, playing in 4–6 s; Live categories load when opened
+  (Stalker + Xtream); panel PIN + XPlayer PIN. Fixed from the logs: "setState during build" crash in
+  See All (load-more now after the frame; the router GlobalKey / pop crashes followed it); Live screen
+  listeners after the frame; repository no longer rebuilt on 18+ unlock/hide (was: Home reload + ~15
+  series fetched again per toggle) and one cached `adultView()` (18+ movie list of 2,518 was downloaded
+  twice); poster/plot arrivals refresh screens ≤1× per 30 s (Home reloaded every 5–10 s); overflow with
+  the keyboard open on Movies/Series (header rows hidden while typing) and in the player Details sheet
+  in landscape (scrolls). Not yet seen in logs: series episode / live channel playback, EPG.
 - 2026-11-15 — **Adult view (user's fix, merged):** after the PIN, Movies/Series show **only** the 18+
   packages (`adultView()`); "Hide 18+" brings the normal list back (replaces "inline among the others").
   The user replaced `panel_catalog_repository.dart`, `adult.dart`, `catalog_browse_screen.dart`; the

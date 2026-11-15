@@ -469,12 +469,15 @@ class _CatalogBrowseScreenState extends ConsumerState<CatalogBrowseScreen> {
     final hasMoreCats =
         !searching && _shownCatCount < _categories.length;
 
+    // Keyboard open (search): only the search field + results fit (the
+    // header rows overflowed by 15 px on the phone, device log 15 Nov).
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     return Scaffold(
       appBar: const MainAppBar(),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ?widget.topAction,
+          if (!keyboardOpen) ?widget.topAction,
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: TextField(
@@ -500,7 +503,7 @@ class _CatalogBrowseScreenState extends ConsumerState<CatalogBrowseScreen> {
               ),
             ),
           ),
-          Builder(builder: (context) {
+          if (!keyboardOpen) Builder(builder: (context) {
             final counts = ref.watch(catalogCountsProvider).valueOrNull;
             final section =
                 widget.kind == MediaKind.series ? counts?.series : counts?.vod;

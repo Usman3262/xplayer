@@ -44,6 +44,28 @@ class CatalogService {
     _bumpTimer?.cancel();
     _bumpTimer = Timer(const Duration(seconds: 3), () => revision.value++);
   }
+  static DateTime? _lastMetaBump;
+  static Timer? _metaTimer;
+
+  /// Posters / plots arrive in many small batches: screens refresh for them
+  /// at most once every 30 s (each batch reloaded Home: every 5–10 s in the
+  /// device log of 15 Nov).
+  static void metadataArrived() {
+    const gap = Duration(seconds: 30);
+    final now = DateTime.now();
+    final last = _lastMetaBump;
+    if (last == null || now.difference(last) >= gap) {
+      _lastMetaBump = now;
+      bumpSoon();
+      return;
+    }
+    if (_metaTimer?.isActive ?? false) return;
+    _metaTimer = Timer(last.add(gap).difference(now), () {
+      _lastMetaBump = DateTime.now();
+      bumpSoon();
+    });
+  }
+
   static Set<String> _knownPanels = {};
   static bool _paused = false;
 
