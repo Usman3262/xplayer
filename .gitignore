@@ -49,3 +49,4 @@ neo-channel-tester.html
 env/app.json
 
 env/test_panels.json
+apps/*/assets/config/app_env.json

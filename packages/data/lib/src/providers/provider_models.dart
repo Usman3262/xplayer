@@ -144,6 +144,24 @@ Uri? parsePanelUrl(String raw) {
   return Uri(scheme: u.scheme, host: u.host, port: u.hasPort ? u.port : null, path: path);
 }
 
+/// An Xtream panel's playlist link (`…/get.php?username=…&password=…`) holds
+/// a full Xtream login. Many panels refuse the playlist download (HTTP 884)
+/// while the Xtream API works, so the app can connect the same line that way.
+XtreamCredentials? xtreamFromPlaylistUrl(String raw) {
+  final s = raw.trim();
+  final u = Uri.tryParse(s.contains('://') ? s : 'http://$s');
+  if (u == null || u.host.isEmpty || !u.path.toLowerCase().endsWith('/get.php')) return null;
+  final user = u.queryParameters['username'] ?? '';
+  final pass = u.queryParameters['password'] ?? '';
+  if (user.isEmpty || pass.isEmpty) return null;
+  final base = u.path.substring(0, u.path.length - '/get.php'.length);
+  return XtreamCredentials(
+    server: Uri(scheme: u.scheme, host: u.host, port: u.hasPort ? u.port : null, path: base).toString(),
+    username: user,
+    password: pass,
+  );
+}
+
 class XtreamCredentials extends ProviderCredentials {
   const XtreamCredentials({required this.server, required this.username, required this.password});
 

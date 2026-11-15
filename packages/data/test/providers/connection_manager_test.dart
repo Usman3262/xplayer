@@ -4,6 +4,8 @@ import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'live_panel.dart';
+
 /// Test "vault": reversible, and obviously not plain text.
 class FakeBox implements SecretBox {
   bool broken = false;
@@ -250,4 +252,53 @@ void main() {
     await m.remove(a.id);
     expect(removed, [a.id]);
   });
+
+  test('M3U get.php link refused (884) → same line connected via Xtream', () async {
+    logins['pro.example'] = (c) async {
+      if (c is M3uCredentials) throw const ProviderFailure(ProviderFailureKind.unsupported, 'HTTP 884');
+      return ok(c);
+    };
+    final m = manager();
+    final c = await m.connect(const M3uCredentials(
+        url: 'https://pro.example/get.php?username=usman&password=pw1&type=m3u_plus&output=ts'), name: 'My line');
+    expect(c.kind, ProviderKind.xtream);
+    expect(c.name, 'My line');
+    final saved = await ConnectionStore(secrets: box).loadCredentials(c.id) as XtreamCredentials;
+    expect(saved.server, 'https://pro.example');
+    expect(saved.username, 'usman');
+    expect(saved.password, 'pw1');
+  });
+
+  test('a normal M3U link that fails is not turned into Xtream', () async {
+    logins['lists.example'] = (_) async => throw const ProviderFailure(ProviderFailureKind.unsupported);
+    await expectLater(manager().connect(const M3uCredentials(url: 'http://lists.example/my.m3u')),
+        throwsA(isA<ProviderFailure>()));
+  });
+
+  test('xtreamFromPlaylistUrl', () {
+    final x = xtreamFromPlaylistUrl('pro.example:8080/get.php?username=a&password=b&type=m3u_plus')!;
+    expect(x.server, 'http://pro.example:8080');
+    expect(xtreamFromPlaylistUrl('http://h/sub/get.php?username=a&password=b')!.server, 'http://h/sub');
+    expect(xtreamFromPlaylistUrl('http://h/get.php?username=a'), isNull);
+    expect(xtreamFromPlaylistUrl('http://h/list.m3u?username=a&password=b'), isNull);
+  });
+
+  // LIVE (opt-in): the user's real get.php link → real adapters → real server.
+  final liveTrial = livePanel();
+  test('LIVE: user M3U link (884 on the panel) ends up connected via Xtream', () async {
+    registerProviderAdapters(RemoteConfig.empty);
+    final t = liveTrial!;
+    final link = 'https://pro.business-cloud-8.ru/get.php?'
+        'username=${Uri.encodeQueryComponent(t.username)}&password=${Uri.encodeQueryComponent(t.password)}&type=m3u_plus&output=ts';
+    final m = ConnectionManager(store: ConnectionStore(secrets: box));
+    final c = await m.connect(M3uCredentials(url: link));
+    // ignore: avoid_print
+    print('LIVE m3u→xtream: saved as ${c.kind.name}, status ${c.status.name}, expires ${c.expiresAt}');
+    expect(c.kind, ProviderKind.xtream);
+    expect(c.status, ConnectionStatus.active);
+    final a = (await m.adapterFor(c.id))!;
+    final cats = await a.liveCategories();
+    expect(cats, isNotEmpty);
+    m.dispose();
+  }, skip: liveTrial == null ? liveSkip : false, timeout: const Timeout(Duration(minutes: 2)));
 }

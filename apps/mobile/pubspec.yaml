@@ -52,6 +52,9 @@ flutter:
   assets:
     - assets/audio/chime.mp3
     - assets/audio/unlock.mp3
+    # Supabase URL + publishable key, copied from env/app.json at build time
+    # (git-ignored) so a plain `flutter run` is configured.
+    - assets/config/
 
 flutter_launcher_icons:
   android: true

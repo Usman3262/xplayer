@@ -1,0 +1,2 @@
+Bundled app config. app_env.json is copied here from env/app.json by the Android build
+(android/app/build.gradle.kts, task copyAppEnv) and is git-ignored. Edit env/app.json, not this folder.

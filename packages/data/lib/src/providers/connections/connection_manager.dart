@@ -108,6 +108,15 @@ class ConnectionManager {
     } on ProviderFailure catch (f) {
       Diag.panel('connect ${credentials.kind.name} FAILED in ${sw.elapsedMilliseconds}ms: ${f.kind.name} (${f.detail})');
       adapter.dispose();
+      // Playlist download refused, but the link is an Xtream login → use it.
+      final asXtream = credentials is M3uCredentials ? xtreamFromPlaylistUrl(credentials.url) : null;
+      final refused = f.kind == ProviderFailureKind.unsupported ||
+          f.kind == ProviderFailureKind.unauthorized ||
+          f.kind == ProviderFailureKind.badResponse;
+      if (asXtream != null && refused && allowedKinds.contains(ProviderKind.xtream)) {
+        Diag.panel('m3u link is an Xtream login → connecting the same line via the Xtream API');
+        return connect(asXtream, name: name, makePrimary: makePrimary);
+      }
       rethrow;
     } catch (e) {
       Diag.panel('connect ${credentials.kind.name} CRASHED in ${sw.elapsedMilliseconds}ms: ${e.runtimeType}: $e');

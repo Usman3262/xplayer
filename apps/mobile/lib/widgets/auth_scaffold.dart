@@ -41,7 +41,9 @@ class AuthScaffold extends StatelessWidget {
                         Align(
                           alignment: AlignmentDirectional.centerStart,
                           child: IconButton(
-                            onPressed: () => context.pop(),
+                            // Opened with go() (e.g. from the account offer)
+                            // there is nothing to pop: fall back to Home.
+                            onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
                             style: IconButton.styleFrom(
                               backgroundColor:
                                   AppColors.surface.withValues(alpha: 0.7),

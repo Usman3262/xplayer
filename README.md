@@ -25,12 +25,15 @@ backend URL…): **[XPLAYER_CHECKLIST.md](XPLAYER_CHECKLIST.md)**.
 ```bash
 flutter pub get              # once, at the repo root (Dart workspace)
 cp env/app.example.json env/app.json   # once; fill in Supabase URL + publishable key
-cd apps/mobile && flutter run --dart-define-from-file=../../env/app.json
+cd apps/mobile && flutter run -d <device>     # Supabase settings come from env/app.json automatically
 cd apps/tv && flutter run -d <android-tv-device> --dart-define-from-file=../../env/app.json
 ```
 
-Without the `--dart-define-from-file` flag the apps still run, on built-in defaults
-(no admin config). Build release APKs the same way (`flutter build apk --dart-define-from-file=…`).
+**Phone:** the Android build copies `env/app.json` into the app (`assets/config/app_env.json`,
+git-ignored), so a plain `flutter run` / `flutter build apk` has the Supabase settings. `env/app.json`
+is git-ignored: **on every PC that builds the app, create it** (copy `env/app.example.json` and fill in
+the Supabase URL + publishable key). Without it the app runs, but accounts and admin config are off
+(log: `[BACKEND] NOT CONFIGURED`). `--dart-define-from-file=../../env/app.json` still works and wins.
 
 Release builds are signed with the debug key unless you add
 `apps/<app>/android/key.properties` (`storeFile`, `storePassword`, `keyAlias`, `keyPassword`).

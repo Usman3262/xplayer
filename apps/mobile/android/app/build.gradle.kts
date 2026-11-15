@@ -98,6 +98,19 @@ flutter {
     source = "../.."
 }
 
+// Copies env/app.json (Supabase URL + publishable key; git-ignored) into the
+// app's bundled config so a plain `flutter run` / `flutter build apk` is
+// configured. --dart-define values still win when given.
+val copyAppEnv by tasks.registering(Copy::class) {
+    val envFile = rootProject.file("../../../env/app.json")
+    onlyIf { envFile.exists() }
+    from(envFile)
+    into(rootProject.file("../assets/config"))
+    rename { "app_env.json" }
+}
+tasks.matching { it.name.startsWith("compileFlutterBuild") || it.name == "preBuild" }
+    .configureEach { dependsOn(copyAppEnv) }
+
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     implementation("androidx.core:core-ktx:1.13.1")

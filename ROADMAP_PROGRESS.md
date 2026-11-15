@@ -17,6 +17,9 @@ re-sync after admin `cache.catalog_ttl_hours`, "new since last time" by `added`)
 **TV still paused by the user.**
 
 ## Waiting on you
+- [ ] **Build PC: create `env/app.json`** (same content as on this PC, or `env/app.example.json` filled
+  in). It's git-ignored, so it isn't on the PC where you run `flutter run`. Then a plain
+  `flutter run -d le2115` has accounts + admin config. Check the log for `[BACKEND] ready`.
 - [ ] **Disk space: C: has ~1.1 GB free.** Needed: `npm install` in `apps/admin` (typecheck/lint the
   new Users page), Android SDK later. Flutter build caches (`apps/*/build`, `packages/*/build`) ≈550 MB
   can be deleted safely if you want (they are rebuilt).
@@ -632,6 +635,18 @@ role has sports.read without sports.write).
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-15 — Device round 2 (user builds on **another PC**): M3U link `get.php?username&password` →
+  https refused → http **884** (provider blocks playlist download for every client; checked VLC /
+  Smarters / okhttp). Fix: a refused `get.php` M3U link that carries username+password is connected as
+  the same line via **Xtream** automatically (`xtreamFromPlaylistUrl`, ConnectionManager). **Verified
+  live** with the user's exact link: 884 → Xtream over http → active, live categories load. Accounts:
+  "not available" = no Supabase settings in that build — `env/app.json` is git-ignored so it isn't on the
+  other PC. Now: Android build copies `env/app.json` → `apps/mobile/assets/config/app_env.json`
+  (git-ignored, Gradle task `copyAppEnv`), `Backend` uses dart-define first, else that bundled file ⇒
+  plain `flutter run` works **once env/app.json exists on that PC**. **Verified live:** real sign-in /
+  wrong-password / sign-out through `SupabaseAccountAuth` (temp user, deleted). Register back button
+  crash ("nothing to pop") fixed. Tests: data providers 97/97 + live, mobile 47/47 + 3 new.
+  **Not verified here:** the Gradle copy task (this PC has no Android SDK) — first run on the build PC.
 - 2026-11-15 — Device logs (user): **Xtream works**; **M3U failed: `https://pro.business-cloud-8.ru/get.php`
   → Connection refused** (no https on that host). Fix: `ProviderHttp` retries an https panel URL once
   over http when https is refused / TLS fails, remembers the host, stream URLs follow (Xtream / M3U /
