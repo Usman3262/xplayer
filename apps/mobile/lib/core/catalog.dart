@@ -22,7 +22,7 @@ class CatalogService {
   static CatalogSyncer? _syncer;
   static MetadataResolver? _metadata;
   static final _lastPhase = <String, SyncPhase>{};
-  static final _lastShownDone = <String, int>{};
+  static final _halfShown = <String>{};
   static Timer? _bumpTimer;
 
   /// Bumped when new catalog content / artwork is ready: screens reload.
@@ -57,25 +57,23 @@ class CatalogService {
 
   static CatalogSyncer _newSyncer() {
     final s = CatalogSyncer(store: store, policy: SyncPolicy.fromConfig(RemoteConfigService.current));
-    // A finished phase (live / movies / series / done) means new rows the
-    // screens can show → reload them (bundled).
+    // Screens refresh only 3 times per sync: categories saved, half way, end.
     s.progress.addListener(() {
-      for (final e in s.progress.value.entries) {
-        final prev = _lastPhase[e.key];
+      final all = s.progress.value;
+      for (final e in all.entries) {
         final p = e.value;
+        final prev = _lastPhase[e.key];
         if (prev != p.phase) {
           _lastPhase[e.key] = p.phase;
-          if (p.phase == SyncPhase.items || p.phase == SyncPhase.done) bumpSoon(); // categories ready / all done
+          _halfShown.remove(e.key);
+          if (p.phase == SyncPhase.items || p.phase == SyncPhase.done) bumpSoon();
         }
-        // Content shows up while the sync runs (every 25 categories).
-        final shown = _lastShownDone[e.key] ?? 0;
-        if (p.phase == SyncPhase.items && p.done - shown >= 25) {
-          _lastShownDone[e.key] = p.done;
+        if (p.phase == SyncPhase.items && p.total > 0 && p.done * 2 >= p.total && _halfShown.add(e.key)) {
           bumpSoon();
-        } else if (p.phase != SyncPhase.items) {
-          _lastShownDone.remove(e.key);
         }
       }
+      // Posters / plots wait until no catalog sync is running.
+      _metadata?.paused = all.values.any((p) => p.running);
     });
     return s;
   }

@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 
 import '../backend/catalog_models.dart' show CatalogKind;
 import '../backend/remote_config.dart';
+import '../device/device_capabilities.dart' show DeviceTier;
+import '../device/device_capabilities_store.dart';
 import '../diag/diag.dart';
 import '../providers/provider_adapter.dart';
 import 'package:domain/domain.dart' show MediaKind;
@@ -37,6 +39,7 @@ class SyncPolicy {
       epgRetention: Duration(hours: clamp(c.intSetting('cache.epg_retention_hours', 48), 1, 24 * 14)),
       adultKeywords: c.listSetting('content.adult_keywords', AdultClassifier.defaultKeywords),
       cooldown: Duration(minutes: clamp(c.intSetting('cache.sync_cooldown_min', 30), 1, 24 * 60)),
+      bulkMaxCategories: _bulkLimitForDevice(),
     );
   }
 
@@ -67,6 +70,14 @@ class SyncPolicy {
   /// "bulkIfSmall": one request for the whole kind when the panel has at
   /// most this many categories of it (else category by category).
   final int bulkMaxCategories;
+
+  /// A whole huge panel in one reply (e.g. 187k movies ≈ 77 MB of JSON) is
+  /// fine on a phone with memory to spare, not on a low-end TV box.
+  static int _bulkLimitForDevice() => switch (DeviceCapabilitiesStore.instance.current?.tier) {
+        DeviceTier.low => 200,
+        null => 200,
+        _ => 5000,
+      };
 }
 
 enum SyncPhase { idle, categories, items, done, stopped, failed }

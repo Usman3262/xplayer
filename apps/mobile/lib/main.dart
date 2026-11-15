@@ -163,7 +163,7 @@ class _MobileRootAppState extends ConsumerState<MobileRootApp>
     final demo = ref.read(demoModeProvider);
     if (state == AppLifecycleState.paused) {
       CatalogService.pause(); // panel catalog sync continues on return
-      AdultService.lock.lock(); // 18+ needs the PIN again after leaving the app
+      AdultService.hide(); // 18+ needs the PIN again after leaving the app
       unawaited(RemoteLogs.flush());
       _pausedAt ??= DateTime.now();
       if (!demo) ref.read(appDownloadsProvider.notifier).appPaused();

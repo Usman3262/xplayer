@@ -2902,7 +2902,14 @@ class AppCopy {
   String get accountRequiredBody => _t('Sign in to your ${AppBrand.name} account to continue.', 'سجّل الدخول إلى حساب ${AppBrand.name} للمتابعة.', 'Sign in to your ${AppBrand.name} account to continue.');
 
   // ── Adult (18+) section, PIN protected ──
+  // ── Catalog progress bar (bottom) ──
+  String get syncPreparing => _t('Loading your panel catalog…', 'جارٍ تحميل محتوى لوحتك…', 'Loading your panel catalog…');
+  String syncLoading(int pct, int titles) => _t('Loading catalog $pct% · $titles titles', 'تحميل المحتوى $pct% · $titles عنوان', 'Loading catalog $pct% · $titles titles');
+  String syncUpToDate(int titles) => _t('Catalog up to date · $titles titles', 'المحتوى محدّث · $titles عنوان', 'Catalog up to date · $titles titles');
+  String get syncPanelNotAnswering => _t('Panel not answering right now · tap refresh to try again', 'اللوحة لا تستجيب الآن · اضغط تحديث للمحاولة', 'Panel not answering right now · tap refresh to try again');
+  String get syncRefresh => _t('Refresh catalog', 'تحديث المحتوى', 'Refresh catalog');
   String get adultButton => _t('Adult 18+', 'للكبار +18', 'Adult 18+');
+  String get adultHide => _t('Hide 18+', 'إخفاء +18', 'Hide 18+');
   String get adultPinTitle => _t('Enter adult PIN', 'أدخل رمز المحتوى للكبار', 'Enter adult PIN');
   String get adultPinPanelHint => _t('Use the parental PIN of your panel account.', 'استخدم رمز الرقابة الأبوية لحساب لوحتك.', 'Use the parental PIN of your panel account.');
   String get adultPinAppHint => _t('Enter your XPlayer adult PIN.', 'أدخل رمز XPlayer للمحتوى للكبار.', 'Enter your XPlayer adult PIN.');

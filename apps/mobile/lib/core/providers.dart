@@ -3,6 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:data/data.dart';
 import 'package:domain/domain.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'adult.dart';
 import 'catalog.dart';
 import 'panels.dart';
 import 'remote_config.dart';
@@ -32,6 +33,7 @@ final catalogRepositoryProvider = Provider<CatalogRepository>((ref) {
   final panel = panelId == null ? null : (id: panelId);
   if (panel != null) {
     final config = ref.watch(remoteConfigProvider);
+    final showAdult = ref.watch(adultUnlockedProvider);
     return PanelCatalogRepository(
       store: CatalogService.store,
       panelId: panel.id,
@@ -40,6 +42,7 @@ final catalogRepositoryProvider = Provider<CatalogRepository>((ref) {
       metadata: CatalogService.metadata,
       artwork: ArtworkUrls.fromConfig(config),
       onMetadataArrived: CatalogService.bumpSoon,
+      includeAdult: showAdult,
     );
   }
   // Only what the catalog depends on. Watching the whole session rebuilt

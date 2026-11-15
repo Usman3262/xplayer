@@ -82,11 +82,26 @@ class MetadataResolver {
 
   /// Calls running at once (the server fetches each new title from TMDB).
   static const maxInFlight = 2;
+
+  /// While the catalog syncs, nothing is sent: titles wait in the queue and
+  /// go out when the sync ends ([paused] = false), already compared with the
+  /// local cache, so each title is asked once.
+  bool get paused => _paused;
+  bool _paused = false;
+  set paused(bool v) {
+    if (_paused == v) return;
+    _paused = v;
+    if (!v) {
+      if (_queue.isNotEmpty) Diag.event('META', 'sync finished: sending ${_queue.length} waiting titles');
+      _pump();
+    }
+  }
   final _queue = <MetadataQuery>[];
   final _pending = <String, Completer<TitleMetadata?>>{};
   int _running = 0;
 
   void _pump() {
+    if (_paused) return;
     while (_running < maxInFlight && _queue.isNotEmpty) {
       final n = _queue.length < MetadataQuery.maxBatch ? _queue.length : MetadataQuery.maxBatch;
       final part = _queue.sublist(0, n);

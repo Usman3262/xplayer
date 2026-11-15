@@ -27,6 +27,7 @@ class PanelCatalogRepository implements CatalogRepository {
     this.artwork = const ArtworkUrls(),
     this.onMetadataArrived,
     this.adultOnly = false,
+    this.includeAdult = false,
     DateTime Function()? clock,
   })  : _adapter = adapter,
         _layout = layout ?? (() => HomeLayout.empty),
@@ -43,6 +44,13 @@ class PanelCatalogRepository implements CatalogRepository {
   /// The 18+ view (after the PIN): categories / browse / search show only
   /// adult content. The normal view (false) never shows it anywhere.
   final bool adultOnly;
+
+  /// After the PIN: the normal screens also list the 18+ categories, in
+  /// their place among the others (Home rails stay without them).
+  final bool includeAdult;
+
+  /// Store filter: false = hide 18+, true = only 18+, null = everything.
+  bool? get _adult => adultOnly ? true : (includeAdult ? null : false);
 
   /// Does the panel have 18+ categories of [kind]? (shows the Adult button)
   Future<bool> hasAdult(MediaKind kind) async =>
@@ -174,9 +182,16 @@ class PanelCatalogRepository implements CatalogRepository {
     unawaited(() async {
       final sw = Stopwatch()..start();
       var movies = 0, series = 0;
+      var movieDetailsWork = true;
       for (final m in items.take(30)) {
         await Future<void>.delayed(const Duration(milliseconds: 500));
-        if (m.kind == MediaKind.movie && await _movieDetails(m.id) != null) movies++;
+        if (m.kind == MediaKind.movie && movieDetailsWork) {
+          if (await _movieDetails(m.id) != null) {
+            movies++;
+          } else if (movies == 0) {
+            movieDetailsWork = false; // this panel has no per-movie details call
+          }
+        }
         if (m.kind == MediaKind.series && await _seriesDetails(m.id) != null) series++;
       }
       Diag.event('PANEL', 'home details ready in background: $movies movies, $series series '
@@ -226,7 +241,7 @@ class PanelCatalogRepository implements CatalogRepository {
 
   @override
   Future<List<CatalogCategory>> getCategories(MediaKind kind) async =>
-      [for (final c in await store.categories(panelId, _kind(kind), adult: adultOnly)) providerCategoryToDomain(c)];
+      [for (final c in await store.categories(panelId, _kind(kind), adult: _adult)) providerCategoryToDomain(c)];
 
   static CatalogKind _kind(MediaKind k) => switch (k) {
         MediaKind.movie => CatalogKind.movie,
@@ -289,13 +304,13 @@ class PanelCatalogRepository implements CatalogRepository {
     final after = int.tryParse(cursor ?? '');
     final List<(MediaItem, int)> rows = switch (kind) {
       MediaKind.movie => [
-          for (final r in await store.movies(panelId, categoryId: categoryId, limit: limit, afterSort: after, adult: adultOnly)) (_movie(r.$1), r.$2),
+          for (final r in await store.movies(panelId, categoryId: categoryId, limit: limit, afterSort: after, adult: _adult)) (_movie(r.$1), r.$2),
         ],
       MediaKind.series => [
-          for (final r in await store.series(panelId, categoryId: categoryId, limit: limit, afterSort: after, adult: adultOnly)) (_series(r.$1), r.$2),
+          for (final r in await store.series(panelId, categoryId: categoryId, limit: limit, afterSort: after, adult: _adult)) (_series(r.$1), r.$2),
         ],
       MediaKind.live || MediaKind.sports => [
-          for (final r in await store.channels(panelId, categoryId: categoryId, limit: limit, afterSort: after, adult: adultOnly)) (_channelItem(r.$1), r.$2),
+          for (final r in await store.channels(panelId, categoryId: categoryId, limit: limit, afterSort: after, adult: _adult)) (_channelItem(r.$1), r.$2),
         ],
     };
     final items = await _enrich([for (final r in rows) r.$1], fetchFirst: limit);
@@ -314,11 +329,11 @@ class PanelCatalogRepository implements CatalogRepository {
     final per = kind == null ? (limit / 3).ceil() : limit;
     final items = <MediaItem>[
       if (kind == null || kind == MediaKind.movie)
-        ...(await store.searchMovies(panelId, query, limit: per, offset: offset, categoryId: categoryId, adult: adultOnly)).map(_movie),
+        ...(await store.searchMovies(panelId, query, limit: per, offset: offset, categoryId: categoryId, adult: _adult)).map(_movie),
       if (kind == null || kind == MediaKind.series)
-        ...(await store.searchSeries(panelId, query, limit: per, offset: offset, categoryId: categoryId, adult: adultOnly)).map(_series),
+        ...(await store.searchSeries(panelId, query, limit: per, offset: offset, categoryId: categoryId, adult: _adult)).map(_series),
       if (kind == null || kind == MediaKind.live || kind == MediaKind.sports)
-        ...(await store.searchChannels(panelId, query, limit: per, offset: offset, categoryId: categoryId, adult: adultOnly)).map(_channelItem),
+        ...(await store.searchChannels(panelId, query, limit: per, offset: offset, categoryId: categoryId, adult: _adult)).map(_channelItem),
     ];
     return CatalogPage(items: await _enrich(items, fetchFirst: 10), nextCursor: items.length < per ? null : '${offset + per}');
   }

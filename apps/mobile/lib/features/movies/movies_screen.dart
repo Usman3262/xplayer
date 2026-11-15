@@ -3,6 +3,7 @@ import 'package:domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/adult.dart';
 import '../../core/session_controller.dart';
 import '../../widgets/catalog_browse_screen.dart';
 
@@ -17,6 +18,7 @@ class MoviesScreen extends ConsumerWidget {
       kind: MediaKind.movie,
       eyebrow: copy.movies,
       searchHint: copy.searchMovies,
+      topAction: const AdultButton(kind: MediaKind.movie),
     );
   }
 }

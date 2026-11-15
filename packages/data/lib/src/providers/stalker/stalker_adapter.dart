@@ -75,10 +75,11 @@ class StalkerAdapter implements ProviderAdapter {
         epg: true,
         catchup: true,
         linksExpire: true,
-        // Live: get_all_channels = 1 request (vs ~5 pages × every genre).
-        // VOD: 14 items per page → only warm-up + what the user opens.
+        // Pages of 14 items and a slow, huge get_all_channels (timed out on the
+        // user's portal, 2026-11-15) → like the panel's own web player:
+        // category lists at once, a category's items when it is opened.
         lists: {
-          MediaKind.live: ListStrategy.bulk,
+          MediaKind.live: ListStrategy.onDemand,
           MediaKind.movie: ListStrategy.onDemand,
           MediaKind.series: ListStrategy.onDemand,
         },

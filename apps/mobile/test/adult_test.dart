@@ -20,7 +20,7 @@ void main() {
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
-    AdultService.lock.lock();
+    AdultService.hide();
     await AdultService.lock.clear();
     store = CatalogStore(CatalogDb(NativeDatabase.memory()));
     await store.saveCategories('p', CatalogKind.series, const [
@@ -99,6 +99,7 @@ void main() {
     expect(find.text(copy.adultPinTitle), findsOneWidget);
     await typePin(t, '1111');
     expect(find.text(copy.adultPinWrong), findsOneWidget);
+    AdultService.hide(); // stops the 30-min re-lock timer before the test ends
   });
 
   testWidgets('create: PINs that differ are refused', (t) async {
@@ -115,5 +116,22 @@ void main() {
     final repo = PanelCatalogRepository(store: store, panelId: 'p', adapter: () async => null);
     expect((await repo.getCategories(MediaKind.series)).map((c) => c.id), ['s1']);
     expect((await repo.adultView().getCategories(MediaKind.series)).map((c) => c.id), ['s2']);
+  });
+
+  test('after the PIN the normal view also lists 18+ in place (no separate page)', () async {
+    final repo = PanelCatalogRepository(store: store, panelId: 'p', adapter: () async => null, includeAdult: true);
+    expect((await repo.getCategories(MediaKind.series)).map((c) => c.id), ['s1', 's2']);
+  });
+
+  testWidgets('unlocked → the button says "Hide 18+" and hides again', (t) async {
+    await AdultService.lock.setAppPin('1234');
+    AdultService.unlocked.value = true; // as after a correct PIN
+    await t.pumpWidget(app(const AdultButton(kind: MediaKind.series)));
+    await t.pumpAndSettle();
+    expect(find.text(copy.adultHide), findsOneWidget);
+    await t.tap(find.byKey(const Key('adult-button')));
+    await t.pumpAndSettle();
+    expect(AdultService.unlocked.value, isFalse);
+    expect(find.text(copy.adultButton), findsOneWidget);
   });
 }

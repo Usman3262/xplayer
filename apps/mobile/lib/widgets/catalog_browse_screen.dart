@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/media_nav.dart';
+import '../core/catalog.dart';
 import '../core/providers.dart';
 import '../core/row_cache.dart';
 import '../core/session_controller.dart';
@@ -115,11 +116,18 @@ class _CatalogBrowseScreenState extends ConsumerState<CatalogBrowseScreen> {
     }
   }
 
-  Future<void> _boot() async {
-    setState(() {
-      _loadingCats = true;
-      _error = null;
-    });
+  /// [quiet]: new catalog data arrived (sync / adult unlock) — reload the
+  /// category list and rows without a spinner; rows on screen stay until
+  /// their fresh copy is in.
+  Future<void> _boot({bool quiet = false}) async {
+    if (quiet) {
+      _staleCat.addAll(_itemsByCat.keys);
+    } else {
+      setState(() {
+        _loadingCats = true;
+        _error = null;
+      });
+    }
     try {
       final cats =
           await ref.read(catalogRepositoryProvider).getCategories(widget.kind);
@@ -143,7 +151,10 @@ class _CatalogBrowseScreenState extends ConsumerState<CatalogBrowseScreen> {
         _providerCategories = unique;
         _categories = ordered;
         _loadingCats = false;
-        _shownCatCount = CatalogPaging.categoriesPageSize;
+        // A quiet reload keeps how far the user had scrolled.
+        if (!quiet || _shownCatCount < CatalogPaging.categoriesPageSize) {
+          _shownCatCount = CatalogPaging.categoriesPageSize;
+        }
         _queue.clear();
         // All packages expanded by default (client 20 Oct — was first 2).
         _expanded
@@ -408,6 +419,15 @@ class _CatalogBrowseScreenState extends ConsumerState<CatalogBrowseScreen> {
         if (mounted) unawaited(_boot());
       });
     }
+    // The screen used to load its categories once: opened before the sync
+    // saved anything, it stayed empty (device 2026-11-15). Now it reloads
+    // when synced data arrives (3× per sync) or the adult view changes.
+    ref.listen(catalogRevisionProvider, (_, _) {
+      if (mounted) unawaited(_boot(quiet: true));
+    });
+    ref.listen(catalogRepositoryProvider, (_, _) {
+      if (mounted) unawaited(_boot(quiet: true));
+    });
 
     final searching = _query.trim().isNotEmpty;
     final visible = searching

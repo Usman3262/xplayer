@@ -677,6 +677,19 @@ role has sports.read without sports.write).
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-15 — Device logs round 3: **data IS stored locally** (Home read 40/40/10 from the DB, even
+  before the sync ended) — the **Movies/Series screens loaded their category list once**; opened before
+  the sync saved anything they stayed empty. Fixed: browse screens reload quietly (no spinner, rows
+  kept) when synced data arrives — only 3× per sync (categories saved, 50 %, end) — or when the 18+
+  view changes. Also: Stalker live → on demand (`get_all_channels` timed out 3× on the user's
+  portal); bulk Xtream allowed for huge panels on mid/high-tier devices (low tier keeps ≤200
+  categories); metadata requests **wait until the sync ends** (then only titles missing from the cache
+  are sent); Home-details skip panels without a per-movie details call (Stalker); sign-out crash ("ref
+  after dispose") fixed; **Adult**: confirmed the user's 18+ category 382 is a *movies* category →
+  Adult button on Movies too; after the PIN the 18+ categories appear **in the same screens** among the
+  others (repository `includeAdult`), button toggles "Hide 18+", re-locks on background / 30 min.
+  **Bottom progress bar** (`CatalogSyncBar`, above the nav bar): "Loading catalog 45% · N titles",
+  "Catalog up to date · N titles", "Panel not answering", refresh button (forced sync).
 - 2026-11-15 — **Stalker device run on another network** (logs): connected (https refused → http), adult
   panel PIN works (`unlock ok (panel PIN)`), but movies/series stayed empty — the sync did all 921 live
   genres first on a 3–7 s/request portal (paged 14/page) ⇒ >1 h before the first movie. User asked:

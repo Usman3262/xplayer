@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../widgets/catalog_sync_bar.dart';
 import '../core/app_update.dart';
 import '../core/app_update_provider.dart';
 import '../core/in_app_update.dart';
@@ -149,7 +150,13 @@ class _MainShellState extends ConsumerState<MainShell> {
           cyanAccent: accents.$1,
           magentaAccent: accents.$2,
           background: accents.$3,
-          child: widget.navigationShell,
+          // Catalog progress + refresh, right above the navigation bar.
+          child: Column(
+            children: [
+              Expanded(child: widget.navigationShell),
+              const CatalogSyncBar(),
+            ],
+          ),
         ),
         // Frosted glass bar (client 17 Oct, same style as TV).
         bottomNavigationBar: ClipRect(
