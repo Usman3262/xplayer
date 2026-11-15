@@ -3971,6 +3971,272 @@ class SyncStateCompanion extends UpdateCompanion<SyncRow> {
   }
 }
 
+class $MetadataCacheTable extends MetadataCache
+    with TableInfo<$MetadataCacheTable, MetadataRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MetadataCacheTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _keyMeta = const VerificationMeta('key');
+  @override
+  late final GeneratedColumn<String> key = GeneratedColumn<String>(
+    'key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _jsonMeta = const VerificationMeta('json');
+  @override
+  late final GeneratedColumn<String> json = GeneratedColumn<String>(
+    'json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fetchedAtSecMeta = const VerificationMeta(
+    'fetchedAtSec',
+  );
+  @override
+  late final GeneratedColumn<int> fetchedAtSec = GeneratedColumn<int>(
+    'fetched_at_sec',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [key, json, fetchedAtSec];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'metadata_cache';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MetadataRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('key')) {
+      context.handle(
+        _keyMeta,
+        key.isAcceptableOrUnknown(data['key']!, _keyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_keyMeta);
+    }
+    if (data.containsKey('json')) {
+      context.handle(
+        _jsonMeta,
+        json.isAcceptableOrUnknown(data['json']!, _jsonMeta),
+      );
+    }
+    if (data.containsKey('fetched_at_sec')) {
+      context.handle(
+        _fetchedAtSecMeta,
+        fetchedAtSec.isAcceptableOrUnknown(
+          data['fetched_at_sec']!,
+          _fetchedAtSecMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_fetchedAtSecMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {key};
+  @override
+  MetadataRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MetadataRow(
+      key: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}key'],
+      )!,
+      json: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}json'],
+      ),
+      fetchedAtSec: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}fetched_at_sec'],
+      )!,
+    );
+  }
+
+  @override
+  $MetadataCacheTable createAlias(String alias) {
+    return $MetadataCacheTable(attachedDatabase, alias);
+  }
+}
+
+class MetadataRow extends DataClass implements Insertable<MetadataRow> {
+  /// "movie:tmdb:123" or "series:title:the office|2005".
+  final String key;
+  final String? json;
+  final int fetchedAtSec;
+  const MetadataRow({required this.key, this.json, required this.fetchedAtSec});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['key'] = Variable<String>(key);
+    if (!nullToAbsent || json != null) {
+      map['json'] = Variable<String>(json);
+    }
+    map['fetched_at_sec'] = Variable<int>(fetchedAtSec);
+    return map;
+  }
+
+  MetadataCacheCompanion toCompanion(bool nullToAbsent) {
+    return MetadataCacheCompanion(
+      key: Value(key),
+      json: json == null && nullToAbsent ? const Value.absent() : Value(json),
+      fetchedAtSec: Value(fetchedAtSec),
+    );
+  }
+
+  factory MetadataRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MetadataRow(
+      key: serializer.fromJson<String>(json['key']),
+      json: serializer.fromJson<String?>(json['json']),
+      fetchedAtSec: serializer.fromJson<int>(json['fetchedAtSec']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'key': serializer.toJson<String>(key),
+      'json': serializer.toJson<String?>(json),
+      'fetchedAtSec': serializer.toJson<int>(fetchedAtSec),
+    };
+  }
+
+  MetadataRow copyWith({
+    String? key,
+    Value<String?> json = const Value.absent(),
+    int? fetchedAtSec,
+  }) => MetadataRow(
+    key: key ?? this.key,
+    json: json.present ? json.value : this.json,
+    fetchedAtSec: fetchedAtSec ?? this.fetchedAtSec,
+  );
+  MetadataRow copyWithCompanion(MetadataCacheCompanion data) {
+    return MetadataRow(
+      key: data.key.present ? data.key.value : this.key,
+      json: data.json.present ? data.json.value : this.json,
+      fetchedAtSec: data.fetchedAtSec.present
+          ? data.fetchedAtSec.value
+          : this.fetchedAtSec,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MetadataRow(')
+          ..write('key: $key, ')
+          ..write('json: $json, ')
+          ..write('fetchedAtSec: $fetchedAtSec')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(key, json, fetchedAtSec);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MetadataRow &&
+          other.key == this.key &&
+          other.json == this.json &&
+          other.fetchedAtSec == this.fetchedAtSec);
+}
+
+class MetadataCacheCompanion extends UpdateCompanion<MetadataRow> {
+  final Value<String> key;
+  final Value<String?> json;
+  final Value<int> fetchedAtSec;
+  final Value<int> rowid;
+  const MetadataCacheCompanion({
+    this.key = const Value.absent(),
+    this.json = const Value.absent(),
+    this.fetchedAtSec = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MetadataCacheCompanion.insert({
+    required String key,
+    this.json = const Value.absent(),
+    required int fetchedAtSec,
+    this.rowid = const Value.absent(),
+  }) : key = Value(key),
+       fetchedAtSec = Value(fetchedAtSec);
+  static Insertable<MetadataRow> custom({
+    Expression<String>? key,
+    Expression<String>? json,
+    Expression<int>? fetchedAtSec,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (key != null) 'key': key,
+      if (json != null) 'json': json,
+      if (fetchedAtSec != null) 'fetched_at_sec': fetchedAtSec,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MetadataCacheCompanion copyWith({
+    Value<String>? key,
+    Value<String?>? json,
+    Value<int>? fetchedAtSec,
+    Value<int>? rowid,
+  }) {
+    return MetadataCacheCompanion(
+      key: key ?? this.key,
+      json: json ?? this.json,
+      fetchedAtSec: fetchedAtSec ?? this.fetchedAtSec,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (key.present) {
+      map['key'] = Variable<String>(key.value);
+    }
+    if (json.present) {
+      map['json'] = Variable<String>(json.value);
+    }
+    if (fetchedAtSec.present) {
+      map['fetched_at_sec'] = Variable<int>(fetchedAtSec.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MetadataCacheCompanion(')
+          ..write('key: $key, ')
+          ..write('json: $json, ')
+          ..write('fetchedAtSec: $fetchedAtSec, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$CatalogDb extends GeneratedDatabase {
   _$CatalogDb(QueryExecutor e) : super(e);
   $CatalogDbManager get managers => $CatalogDbManager(this);
@@ -3981,6 +4247,7 @@ abstract class _$CatalogDb extends GeneratedDatabase {
   late final $EpisodesTable episodes = $EpisodesTable(this);
   late final $EpgTable epg = $EpgTable(this);
   late final $SyncStateTable syncState = $SyncStateTable(this);
+  late final $MetadataCacheTable metadataCache = $MetadataCacheTable(this);
   late final Index categoriesByKind = Index(
     'categories_by_kind',
     'CREATE INDEX categories_by_kind ON categories (panel_id, kind, sort)',
@@ -4001,6 +4268,10 @@ abstract class _$CatalogDb extends GeneratedDatabase {
     'movies_by_tmdb',
     'CREATE INDEX movies_by_tmdb ON movies (tmdb_id)',
   );
+  late final Index moviesByRating = Index(
+    'movies_by_rating',
+    'CREATE INDEX movies_by_rating ON movies (panel_id, rating)',
+  );
   late final Index seriesByCategory = Index(
     'series_by_category',
     'CREATE INDEX series_by_category ON series (panel_id, category_id, sort)',
@@ -4012,6 +4283,10 @@ abstract class _$CatalogDb extends GeneratedDatabase {
   late final Index seriesByTmdb = Index(
     'series_by_tmdb',
     'CREATE INDEX series_by_tmdb ON series (tmdb_id)',
+  );
+  late final Index seriesByRating = Index(
+    'series_by_rating',
+    'CREATE INDEX series_by_rating ON series (panel_id, rating)',
   );
   late final Index episodesBySeries = Index(
     'episodes_by_series',
@@ -4033,14 +4308,17 @@ abstract class _$CatalogDb extends GeneratedDatabase {
     episodes,
     epg,
     syncState,
+    metadataCache,
     categoriesByKind,
     channelsByCategory,
     moviesByCategory,
     moviesByAdded,
     moviesByTmdb,
+    moviesByRating,
     seriesByCategory,
     seriesByAdded,
     seriesByTmdb,
+    seriesByRating,
     episodesBySeries,
     epgByEnd,
   ];
@@ -6022,6 +6300,179 @@ typedef $$SyncStateTableProcessedTableManager =
       SyncRow,
       PrefetchHooks Function()
     >;
+typedef $$MetadataCacheTableCreateCompanionBuilder =
+    MetadataCacheCompanion Function({
+      required String key,
+      Value<String?> json,
+      required int fetchedAtSec,
+      Value<int> rowid,
+    });
+typedef $$MetadataCacheTableUpdateCompanionBuilder =
+    MetadataCacheCompanion Function({
+      Value<String> key,
+      Value<String?> json,
+      Value<int> fetchedAtSec,
+      Value<int> rowid,
+    });
+
+class $$MetadataCacheTableFilterComposer
+    extends Composer<_$CatalogDb, $MetadataCacheTable> {
+  $$MetadataCacheTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get json => $composableBuilder(
+    column: $table.json,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get fetchedAtSec => $composableBuilder(
+    column: $table.fetchedAtSec,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$MetadataCacheTableOrderingComposer
+    extends Composer<_$CatalogDb, $MetadataCacheTable> {
+  $$MetadataCacheTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get json => $composableBuilder(
+    column: $table.json,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get fetchedAtSec => $composableBuilder(
+    column: $table.fetchedAtSec,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MetadataCacheTableAnnotationComposer
+    extends Composer<_$CatalogDb, $MetadataCacheTable> {
+  $$MetadataCacheTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get key =>
+      $composableBuilder(column: $table.key, builder: (column) => column);
+
+  GeneratedColumn<String> get json =>
+      $composableBuilder(column: $table.json, builder: (column) => column);
+
+  GeneratedColumn<int> get fetchedAtSec => $composableBuilder(
+    column: $table.fetchedAtSec,
+    builder: (column) => column,
+  );
+}
+
+class $$MetadataCacheTableTableManager
+    extends
+        RootTableManager<
+          _$CatalogDb,
+          $MetadataCacheTable,
+          MetadataRow,
+          $$MetadataCacheTableFilterComposer,
+          $$MetadataCacheTableOrderingComposer,
+          $$MetadataCacheTableAnnotationComposer,
+          $$MetadataCacheTableCreateCompanionBuilder,
+          $$MetadataCacheTableUpdateCompanionBuilder,
+          (
+            MetadataRow,
+            BaseReferences<_$CatalogDb, $MetadataCacheTable, MetadataRow>,
+          ),
+          MetadataRow,
+          PrefetchHooks Function()
+        > {
+  $$MetadataCacheTableTableManager(_$CatalogDb db, $MetadataCacheTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MetadataCacheTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MetadataCacheTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MetadataCacheTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> key = const Value.absent(),
+                Value<String?> json = const Value.absent(),
+                Value<int> fetchedAtSec = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MetadataCacheCompanion(
+                key: key,
+                json: json,
+                fetchedAtSec: fetchedAtSec,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String key,
+                Value<String?> json = const Value.absent(),
+                required int fetchedAtSec,
+                Value<int> rowid = const Value.absent(),
+              }) => MetadataCacheCompanion.insert(
+                key: key,
+                json: json,
+                fetchedAtSec: fetchedAtSec,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MetadataCacheTable, MetadataRow>(table),
+                  BaseReferences<_$CatalogDb, $MetadataCacheTable, MetadataRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MetadataCacheTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CatalogDb,
+      $MetadataCacheTable,
+      MetadataRow,
+      $$MetadataCacheTableFilterComposer,
+      $$MetadataCacheTableOrderingComposer,
+      $$MetadataCacheTableAnnotationComposer,
+      $$MetadataCacheTableCreateCompanionBuilder,
+      $$MetadataCacheTableUpdateCompanionBuilder,
+      (
+        MetadataRow,
+        BaseReferences<_$CatalogDb, $MetadataCacheTable, MetadataRow>,
+      ),
+      MetadataRow,
+      PrefetchHooks Function()
+    >;
 
 class $CatalogDbManager {
   final _$CatalogDb _db;
@@ -6039,4 +6490,6 @@ class $CatalogDbManager {
   $$EpgTableTableManager get epg => $$EpgTableTableManager(_db, _db.epg);
   $$SyncStateTableTableManager get syncState =>
       $$SyncStateTableTableManager(_db, _db.syncState);
+  $$MetadataCacheTableTableManager get metadataCache =>
+      $$MetadataCacheTableTableManager(_db, _db.metadataCache);
 }

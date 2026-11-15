@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:data/data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'backend.dart';
 import 'panels.dart';
 import 'remote_config.dart';
 
@@ -17,14 +20,53 @@ class CatalogService {
 
   static CatalogStore? _store;
   static CatalogSyncer? _syncer;
+  static MetadataResolver? _metadata;
+  static final _lastPhase = <String, SyncPhase>{};
+  static Timer? _bumpTimer;
+
+  /// Bumped when new catalog content / artwork is ready: screens reload.
+  static final ValueNotifier<int> revision = ValueNotifier(0);
+
+  /// Posters / plots from the global catalog via `metadata-tmdb` (null
+  /// without a backend: the panel's own artwork is used).
+  static MetadataResolver? get metadata {
+    final client = Backend.client;
+    if (client == null) return null;
+    return _metadata ??= MetadataResolver(
+      store: store,
+      fetch: (body) async => (await client.functions.invoke('metadata-tmdb', body: body)).data,
+    );
+  }
+
+  /// Several signals in a short time → one reload.
+  static void bumpSoon() {
+    _bumpTimer?.cancel();
+    _bumpTimer = Timer(const Duration(seconds: 3), () => revision.value++);
+  }
   static Set<String> _knownPanels = {};
   static bool _paused = false;
 
   static CatalogStore get store => _store ??= CatalogStore.open();
 
   static CatalogSyncer get syncer {
-    final s = _syncer ??= CatalogSyncer(store: store, policy: SyncPolicy.fromConfig(RemoteConfigService.current));
+    final s = _syncer ??= _newSyncer();
     s.policy = SyncPolicy.fromConfig(RemoteConfigService.current); // admin changes apply
+    return s;
+  }
+
+  static CatalogSyncer _newSyncer() {
+    final s = CatalogSyncer(store: store, policy: SyncPolicy.fromConfig(RemoteConfigService.current));
+    // A finished phase (live / movies / series / done) means new rows the
+    // screens can show → reload them (bundled).
+    s.progress.addListener(() {
+      for (final e in s.progress.value.entries) {
+        final prev = _lastPhase[e.key];
+        if (prev != e.value.phase) {
+          _lastPhase[e.key] = e.value.phase;
+          if (prev != null && prev != SyncPhase.categories || e.value.phase == SyncPhase.done) bumpSoon();
+        }
+      }
+    });
     return s;
   }
 
@@ -33,6 +75,7 @@ class CatalogService {
   static void useStore(CatalogStore s) {
     _store = s;
     _syncer = null;
+    _metadata = null;
   }
 
   /// A removed panel's catalog goes with it (any running sync stops first).
@@ -97,6 +140,15 @@ class CatalogService {
 /// Sync progress per panel, for screens (e.g. a small "updating…" hint).
 final catalogSyncProvider = Provider<Map<String, SyncProgress>>((ref) {
   final l = CatalogService.syncer.progress;
+  void listener() => ref.invalidateSelf();
+  l.addListener(listener);
+  ref.onDispose(() => l.removeListener(listener));
+  return l.value;
+});
+
+/// Changes when catalog content / artwork arrived (screens reload).
+final catalogRevisionProvider = Provider<int>((ref) {
+  final l = CatalogService.revision;
   void listener() => ref.invalidateSelf();
   l.addListener(listener);
   ref.onDispose(() => l.removeListener(listener));

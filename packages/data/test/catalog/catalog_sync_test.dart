@@ -110,13 +110,17 @@ void main() {
   test('cancel stops the run; the next run continues where it stopped', () async {
     final panel = FakePanel(liveCats: 10, movieCats: 0, seriesCats: 0)..delay = const Duration(milliseconds: 20);
     final s = syncer(policy: const SyncPolicy(parallelCategories: 1));
-    final run = s.sync('p', panel);
-    await Future<void>.delayed(const Duration(milliseconds: 90));
-    s.cancel('p');
-    final r = await run;
+    // Cancel exactly after 3 live categories finished (no timing guesses).
+    void onProgress() {
+      final p = s.progress.value['p'];
+      if (p != null && p.phase == SyncPhase.live && p.done == 3) s.cancel('p', reason: 'test');
+    }
+    s.progress.addListener(onProgress);
+    final r = await s.sync('p', panel);
+    s.progress.removeListener(onProgress);
     expect(r.phase, SyncPhase.stopped);
     final firstDone = panel.calls.where((c) => c.startsWith('live:')).length;
-    expect(firstDone, inInclusiveRange(1, 9));
+    expect(firstDone, inInclusiveRange(3, 4)); // the one in flight may finish
     panel.calls.clear();
     final r2 = await s.sync('p', panel);
     expect(r2.phase, SyncPhase.done);

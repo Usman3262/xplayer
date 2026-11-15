@@ -3,6 +3,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:data/data.dart';
 import 'package:domain/domain.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'catalog.dart';
+import 'panels.dart';
 import 'remote_config.dart';
 
 import 'demo_mode.dart';
@@ -19,6 +21,23 @@ final catalogRepositoryProvider = Provider<CatalogRepository>((ref) {
     return ref.watch(demoCatalogRepositoryProvider);
   }
   ref.watch(catalogEpochProvider);
+  // Phase 6.4: with a panel connected, every screen reads the user's panel
+  // (local catalog + panel details + global-catalog artwork). The admin's
+  // Home config decides the rails; content always comes from the panel.
+  ref.watch(catalogRevisionProvider);
+  final panel = ref.watch(panelsProvider).where((c) => c.isPrimary && c.enabled).firstOrNull;
+  if (panel != null) {
+    final config = ref.watch(remoteConfigProvider);
+    return PanelCatalogRepository(
+      store: CatalogService.store,
+      panelId: panel.id,
+      adapter: () => PanelsService.manager.adapterFor(panel.id),
+      layout: () => config.home,
+      metadata: CatalogService.metadata,
+      artwork: ArtworkUrls.fromConfig(config),
+      onMetadataArrived: CatalogService.bumpSoon,
+    );
+  }
   // Only what the catalog depends on. Watching the whole session rebuilt
   // the repository (dropping every cached list and reloading Home) on any
   // session change, e.g. a device-list refresh (19 Oct, live server).

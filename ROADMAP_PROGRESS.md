@@ -10,10 +10,9 @@ Spec: `new-platform.md` · Rules: `CLAUDE.md` · App "where to change": `XPLAYER
 ---
 
 ## ▶ NEXT
-**Verify 6.2 on the device via remote logs** (user runs the app; I read `[SYNC]`/`[PANEL]` lines with
-`apps/admin/scripts/read_app_logs.py --model LE2115`), then **Phase 6 · Step 6.4 — Home from the
-local catalog** (existing Home screen design; rails from the panel: newest movies/series by `added`,
-categories, live), so the user sees their panel content. (6.3 TMDB enrichment comes after.)
+**Phase 6 done → check it on the phone via remote logs** (`[SYNC]`, `[HOME]`, `[META]` lines), then
+**Phase 7.6 Player on panel streams** (today the details/player screens still call the old backend for
+playback, so content shows but doesn't play yet) → 7.1 dynamic Home sections → 7.2 Live + EPG.
 **TV still paused by the user.**
 
 ## Waiting on you
@@ -569,9 +568,33 @@ role has sports.read without sports.write).
   *Tested:* 10 sync tests (order, save, resume after cancel, TTL/force, bad category, expired stop,
   panel-down stop, parallel cap, pruning, joined runs, policy) → data 116+; mobile 49.
   *Not yet on a device* — next run, read via remote logs. (Live EPG download = later step.)
-- [ ] 6.3 Enrichment: match provider items → global catalog (tmdb id / title+year),
+- [x] 6.3 Enrichment: match provider items → global catalog (tmdb id / title+year),
   missing metadata via `metadata-tmdb`; admin overrides win.
-- [ ] 6.4 Data sources wired: home sections resolve from config + local catalog + global catalog.
+  *Implemented:* `catalog/metadata_resolver.dart` — `MetadataResolver` (cache first in the local DB
+  (schema v2 `metadata_cache`, also caches "no match", retried after 7 d), only titles on screen,
+  ≤25 per call, tmdb id first else panel name + year, never throws, `[META]` log), `enrichMedia`
+  (global catalog — which carries admin edits via `locked_fields` — wins for plot / poster /
+  backdrop / rating; panel title kept). Queries built from panel items (no tmdb id leaks into UI).
+- [x] 6.4 Data sources wired: home sections resolve from config + local catalog + global catalog.
+  *Implemented:* `catalog/home_content.dart` — `HomeContentResolver` (admin sections / Top 10 /
+  picks → the user's panel: newest by panel `added` (+days), panel rating, panel category, admin
+  picks matched tmdb → panel id (title must agree) → title; missing items skipped; never TMDB lists);
+  `catalog/panel_catalog_repository.dart` — `PanelCatalogRepository implements CatalogRepository`
+  (the existing screens' interface): Home feed (admin Top 10 list or newest), lists, categories,
+  keyset browse (movies/series/live), search (LIKE; FTS = 7.5), details (panel `get_vod_info` once per
+  session), seasons/episodes fetched on first open then stored, related = same category, container
+  extension + episode→series for playback, one metadata pass per Home load. Store v2: rating indexes,
+  lookups by ids / tmdb / name, search. Phone: `catalogRepositoryProvider` uses it whenever a panel is
+  connected (main panel); screens reload when a sync phase finishes or artwork arrives (bundled 3 s).
+  *Tested:* 15 new tests (resolver rules, picks matching, metadata cache/batches/offline/merge,
+  repository home/browse/details/episodes/search/related) + deterministic cancel test (3× stable);
+  **LIVE end to end with Neo + real metadata-tmdb**: sync 360 items in 4.2 s → Home in 53 ms →
+  18/20 titles matched (first call 12 s server-side TMDB fetch, background; cached after) → 20/20
+  top items with plot + backdrop → browse 90 categories → details (Arabic title, 1h 50m, plot) →
+  series 25 episodes → Arabic search. Phase milestone: data 414 / domain 159 / design_system 33 /
+  mobile 49 tests pass; analyze 0 errors.
+  *Not yet:* on the phone (next run, via logs); playback still on the old backend (7.6); genres,
+  continue-watching, favorites, matches, live EPG download → Phase 7.
 
 ## Phase 7 — Flutter screens on the new data
 - [ ] 7.1 Home (dynamic sections), 7.2 Live TV + EPG, 7.3 Movies, 7.4 Series,
@@ -647,6 +670,8 @@ role has sports.read without sports.write).
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-15 — **Phase 6 complete** (6.3 metadata on demand + 6.4 panel-backed screens), verified live end to
+  end with Neo + metadata-tmdb. Next: device check via remote logs, then 7.6 player.
 - 2026-11-15 — **First check via remote logs (OnePlus LE2115):** `[BACKEND] ready (from bundled env/app.json)`
   ⇒ automatic Supabase config works on the user's Mac. Sync on the trial line: 921/447/388 categories,
   run 1 = 9,375 items in 47 s, 0 failed, stopped; run 2 skipped 200 fresh categories and continued

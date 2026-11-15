@@ -390,6 +390,140 @@ class CatalogStore {
           );
   }
 
+  // ── Lookups for Home sections / search / details ─────────────────────────
+
+  /// Best rated first (panel rating), keyset by offset (small pages only).
+  Future<List<ProviderMovie>> topRatedMovies(String panelId, {int limit = 20, int offset = 0}) async {
+    final rows = await (db.select(db.movies)
+          ..where((m) => m.panelId.equals(panelId) & m.rating.isNotNull())
+          ..orderBy([(m) => OrderingTerm.desc(m.rating), (m) => OrderingTerm.desc(m.addedSec)])
+          ..limit(limit, offset: offset))
+        .get();
+    return [for (final r in rows) _movie(r)];
+  }
+
+  Future<List<ProviderSeries>> topRatedSeries(String panelId, {int limit = 20, int offset = 0}) async {
+    final rows = await (db.select(db.seriesItems)
+          ..where((s) => s.panelId.equals(panelId) & s.rating.isNotNull())
+          ..orderBy([(s) => OrderingTerm.desc(s.rating), (s) => OrderingTerm.desc(s.addedSec)])
+          ..limit(limit, offset: offset))
+        .get();
+    return [for (final r in rows) _series(r)];
+  }
+
+  Future<List<ProviderMovie>> moviesByIds(String panelId, Iterable<String> ids) async {
+    final list = ids.toList();
+    if (list.isEmpty) return const [];
+    final rows = await (db.select(db.movies)..where((m) => m.panelId.equals(panelId) & m.id.isIn(list))).get();
+    final byId = {for (final r in rows) r.id: _movie(r)};
+    return [for (final id in list) ?byId[id]];
+  }
+
+  Future<List<ProviderSeries>> seriesByIds(String panelId, Iterable<String> ids) async {
+    final list = ids.toList();
+    if (list.isEmpty) return const [];
+    final rows = await (db.select(db.seriesItems)..where((s) => s.panelId.equals(panelId) & s.id.isIn(list))).get();
+    final byId = {for (final r in rows) r.id: _series(r)};
+    return [for (final id in list) ?byId[id]];
+  }
+
+  Future<ProviderSeries?> seriesItem(String panelId, String id) async {
+    final r = await (db.select(db.seriesItems)..where((s) => s.panelId.equals(panelId) & s.id.equals(id))).getSingleOrNull();
+    return r == null ? null : _series(r);
+  }
+
+  Future<ProviderMovie?> movieByTmdb(String panelId, int tmdbId) async {
+    final r = await (db.select(db.movies)
+          ..where((m) => m.panelId.equals(panelId) & m.tmdbId.equals(tmdbId))
+          ..limit(1))
+        .getSingleOrNull();
+    return r == null ? null : _movie(r);
+  }
+
+  Future<ProviderSeries?> seriesByTmdb(String panelId, int tmdbId) async {
+    final r = await (db.select(db.seriesItems)
+          ..where((s) => s.panelId.equals(panelId) & s.tmdbId.equals(tmdbId))
+          ..limit(1))
+        .getSingleOrNull();
+    return r == null ? null : _series(r);
+  }
+
+  /// Name contains [q] (case-insensitive; `%`/`_` taken literally).
+  /// Simple LIKE for now — full-text search is Phase 7.5.
+  Future<List<ProviderMovie>> searchMovies(String panelId, String q, {int limit = 40, int offset = 0, String? categoryId}) async {
+    final pattern = _like(q);
+    if (pattern == null) return const [];
+    final query = db.select(db.movies)
+      ..where((m) => m.panelId.equals(panelId) & m.name.like(pattern, escapeChar: r'\'));
+    if (categoryId != null) query.where((m) => m.categoryId.equals(categoryId));
+    query
+      ..orderBy([(m) => OrderingTerm.desc(m.addedSec)])
+      ..limit(limit, offset: offset);
+    return [for (final r in await query.get()) _movie(r)];
+  }
+
+  Future<List<ProviderSeries>> searchSeries(String panelId, String q, {int limit = 40, int offset = 0, String? categoryId}) async {
+    final pattern = _like(q);
+    if (pattern == null) return const [];
+    final query = db.select(db.seriesItems)
+      ..where((s) => s.panelId.equals(panelId) & s.name.like(pattern, escapeChar: r'\'));
+    if (categoryId != null) query.where((s) => s.categoryId.equals(categoryId));
+    query
+      ..orderBy([(s) => OrderingTerm.desc(s.addedSec)])
+      ..limit(limit, offset: offset);
+    return [for (final r in await query.get()) _series(r)];
+  }
+
+  Future<List<ProviderChannel>> searchChannels(String panelId, String q, {int limit = 40, int offset = 0, String? categoryId}) async {
+    final pattern = _like(q);
+    if (pattern == null) return const [];
+    final query = db.select(db.channels)
+      ..where((c) => c.panelId.equals(panelId) & c.name.like(pattern, escapeChar: r'\'));
+    if (categoryId != null) query.where((c) => c.categoryId.equals(categoryId));
+    query
+      ..orderBy([(c) => OrderingTerm(expression: c.sort)])
+      ..limit(limit, offset: offset);
+    return [for (final r in await query.get()) _channel(r)];
+  }
+
+  /// First matching item by exact (case-insensitive) name — admin picks
+  /// that only carry a title.
+  Future<ProviderMovie?> movieByName(String panelId, String name) async =>
+      (await searchMovies(panelId, name, limit: 20)).where((m) => m.name.toLowerCase() == name.trim().toLowerCase()).firstOrNull ??
+      (await searchMovies(panelId, name, limit: 1)).firstOrNull;
+
+  Future<ProviderSeries?> seriesByName(String panelId, String name) async =>
+      (await searchSeries(panelId, name, limit: 20)).where((s) => s.name.toLowerCase() == name.trim().toLowerCase()).firstOrNull ??
+      (await searchSeries(panelId, name, limit: 1)).firstOrNull;
+
+  static String? _like(String q) {
+    final t = q.trim();
+    if (t.isEmpty) return null;
+    final esc = t.replaceAll(r'\', r'\').replaceAll('%', r'\%').replaceAll('_', r'\_');
+    return '%$esc%';
+  }
+
+  // ── Metadata cache (global catalog via metadata-tmdb) ────────────────────
+
+  /// Cached entries for [keys]: found → json (may be null = "no match").
+  Future<Map<String, ({String? json, DateTime fetchedAt})>> metadata(Iterable<String> keys) async {
+    final list = keys.toList();
+    if (list.isEmpty) return const {};
+    final rows = await (db.select(db.metadataCache)..where((m) => m.key.isIn(list))).get();
+    return {
+      for (final r in rows)
+        r.key: (json: r.json, fetchedAt: DateTime.fromMillisecondsSinceEpoch(r.fetchedAtSec * 1000, isUtc: true)),
+    };
+  }
+
+  Future<void> saveMetadata(Map<String, String?> entries, {required DateTime at}) async {
+    if (entries.isEmpty) return;
+    await _insertChunks(db.metadataCache, [
+      for (final e in entries.entries)
+        MetadataCacheCompanion.insert(key: e.key, json: Value(e.value), fetchedAtSec: at.millisecondsSinceEpoch ~/ 1000),
+    ], replace: true);
+  }
+
   // ── Panel-wide ───────────────────────────────────────────────────────────
 
   Future<CatalogCounts> counts(String panelId) async {

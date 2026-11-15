@@ -53,6 +53,7 @@ class Channels extends Table {
 @TableIndex(name: 'movies_by_category', columns: {#panelId, #categoryId, #sort})
 @TableIndex(name: 'movies_by_added', columns: {#panelId, #addedSec})
 @TableIndex(name: 'movies_by_tmdb', columns: {#tmdbId})
+@TableIndex(name: 'movies_by_rating', columns: {#panelId, #rating})
 class Movies extends Table {
   TextColumn get panelId => text()();
   TextColumn get id => text()();
@@ -75,6 +76,7 @@ class Movies extends Table {
 @TableIndex(name: 'series_by_category', columns: {#panelId, #categoryId, #sort})
 @TableIndex(name: 'series_by_added', columns: {#panelId, #addedSec})
 @TableIndex(name: 'series_by_tmdb', columns: {#tmdbId})
+@TableIndex(name: 'series_by_rating', columns: {#panelId, #rating})
 class SeriesItems extends Table {
   @override
   String get tableName => 'series';
@@ -149,16 +151,38 @@ class SyncState extends Table {
   Set<Column> get primaryKey => {panelId, scope};
 }
 
-@DriftDatabase(tables: [Categories, Channels, Movies, SeriesItems, Episodes, Epg, SyncState])
+/// Global-catalog metadata (via `metadata-tmdb`), fetched once per title and
+/// shared by all panels. [json] null = "no confident match" (retried later).
+@DataClassName('MetadataRow')
+class MetadataCache extends Table {
+  /// "movie:tmdb:123" or "series:title:the office|2005".
+  TextColumn get key => text()();
+  TextColumn get json => text().nullable()();
+  IntColumn get fetchedAtSec => integer()();
+
+  @override
+  Set<Column> get primaryKey => {key};
+}
+
+@DriftDatabase(tables: [Categories, Channels, Movies, SeriesItems, Episodes, Epg, SyncState, MetadataCache])
 class CatalogDb extends _$CatalogDb {
   CatalogDb(super.e);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.createTable(metadataCache);
+            await m.createIndex(Index('movies_by_rating',
+                'CREATE INDEX IF NOT EXISTS movies_by_rating ON movies (panel_id, rating)'));
+            await m.createIndex(Index('series_by_rating',
+                'CREATE INDEX IF NOT EXISTS series_by_rating ON series (panel_id, rating)'));
+          }
+        },
         beforeOpen: (details) async {
           // WAL: readers (screens) don't wait for the sync writer.
           await customStatement('PRAGMA journal_mode = WAL');
