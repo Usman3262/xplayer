@@ -395,4 +395,21 @@ void main() {
       expect(calls, 1);
     });
   });
+
+  test('remote log sink gets only scrubbed lines (uploaded to the server)', () async {
+    final sent = <String>[];
+    Diag.remoteSink = (tag, msg) => sent.add('[$tag] $msg');
+    addTearDown(() => Diag.remoteSink = null);
+    final a = XtreamAdapter(
+      const XtreamCredentials(server: 'http://panel.example', username: 'alice99', password: 'S3cr3tPw'),
+      http: ProviderHttp(client: MockClient((r) async => throw http.ClientException('refused: ${r.url}', r.url))),
+    );
+    await expectLater(a.authenticate(), throwsA(isA<ProviderFailure>()));
+    Diag.event('ACCOUNT', 'login for http://x/get.php?username=alice99&password=S3cr3tPw failed');
+    final all = sent.join(' | ');
+    expect(sent, isNotEmpty);
+    expect(all, contains('[PANEL] GET http://panel.example/player_api.php'));
+    expect(all, isNot(contains('S3cr3tPw')));
+    expect(all, isNot(contains('alice99')));
+  });
 }

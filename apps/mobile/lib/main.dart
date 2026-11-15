@@ -22,6 +22,8 @@ import 'core/downloads_controller.dart';
 import 'core/backend.dart';
 import 'core/providers.dart';
 import 'core/account.dart';
+import 'core/catalog.dart';
+import 'core/remote_logs.dart';
 import 'core/panels.dart';
 import 'core/remote_config.dart';
 import 'core/screen_record_protect.dart';
@@ -49,12 +51,19 @@ Future<void> main() async {
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   applyAppOrientations();
   // Kick device caps + image-cache caps ASAP so low-end UI does not thrash.
-  unawaited(DeviceCapabilitiesStore.instance.ensureLoaded());
+  unawaited(DeviceCapabilitiesStore.instance.ensureLoaded().then((c) {
+    RemoteLogs.setModel('${c.brand} ${c.model}'.trim());
+    Diag.event('APP', 'device ${c.brand} ${c.model}, android ${c.release} (sdk ${c.sdkInt}), tier ${c.tier.name}');
+  }));
   widgetsBinding.addPostFrameCallback((_) {
     unawaited(logDeviceStartupDiag());
   });
   // App name comes from /app.config via the native launcher label.
   final packageInfo = await PackageInfo.fromPlatform();
+  // Important log lines go to the server (support / remote testing).
+  await RemoteLogs.start(appVersion: '${packageInfo.version}+${packageInfo.buildNumber}');
+  Diag.event('APP', 'start ${packageInfo.version}+${packageInfo.buildNumber} '
+      '(${kDebugMode ? 'debug' : 'release'}), install ${RemoteLogs.deviceId}');
   AppBrand.init(packageInfo.appName);
   // Backend + admin config: cached config applies before the first frame
   // (instant, no network); the fresh one arrives in the background.
@@ -152,10 +161,13 @@ class _MobileRootAppState extends ConsumerState<MobileRootApp>
     // Demo has no account and no downloads: never start the controller.
     final demo = ref.read(demoModeProvider);
     if (state == AppLifecycleState.paused) {
+      CatalogService.pause(); // panel catalog sync continues on return
+      unawaited(RemoteLogs.flush());
       _pausedAt ??= DateTime.now();
       if (!demo) ref.read(appDownloadsProvider.notifier).appPaused();
     }
     if (state == AppLifecycleState.resumed) {
+      CatalogService.resume();
       if (!demo) ref.read(appDownloadsProvider.notifier).appResumed();
       unawaited(_catalogSync.check());
       // Lists reload only after a long time away (client 2 Nov: content

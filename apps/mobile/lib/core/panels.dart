@@ -31,8 +31,13 @@ class PanelsService {
       () => registerProviderAdapters(RemoteConfigService.current),
     );
     await manager.load();
+    CatalogService.init();
     // Spec §3.5: never assume a panel is still active. Not blocking start.
-    Future<void>.delayed(const Duration(seconds: 2), manager.recheckAll);
+    // Then fill / refresh the local catalog in the background.
+    Future<void>.delayed(const Duration(seconds: 2), () async {
+      await manager.recheckAll();
+      await CatalogService.syncAll();
+    });
   }
 
   /// At least one panel is switched on → the app can open Home.

@@ -84,13 +84,13 @@ class SupabaseAccountAuth implements AccountAuth {
       return await f();
     } on AuthException catch (e) {
       final mapped = mapAuthError(e.code, e.statusCode, e.message);
-      debugPrint('[ACCOUNT] Supabase auth error: ${e.runtimeType} code=${e.code} status=${e.statusCode} '
+      Diag.event('ACCOUNT', 'Supabase auth error: ${e.runtimeType} code=${e.code} status=${e.statusCode} '
           'message="${e.message}" → ${mapped.name}');
       throw AccountException(mapped);
     } on AccountException {
       rethrow;
     } catch (e) {
-      debugPrint('[ACCOUNT] request failed (treated as no internet): ${e.runtimeType}: $e');
+      Diag.event('ACCOUNT', 'request failed (treated as no internet): ${e.runtimeType}: $e');
       throw const AccountException(AccountError.network);
     }
   }
@@ -193,7 +193,7 @@ class AccountService {
   static AccountAuth _require() {
     final a = auth;
     if (a == null) {
-      debugPrint('[ACCOUNT] no backend in this build (Supabase not configured / init failed)');
+      Diag.event('ACCOUNT', 'no backend in this build (Supabase not configured / init failed)');
       throw const AccountException(AccountError.notConfigured);
     }
     return a;

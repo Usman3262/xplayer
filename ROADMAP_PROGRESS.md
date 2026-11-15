@@ -10,10 +10,10 @@ Spec: `new-platform.md` · Rules: `CLAUDE.md` · App "where to change": `XPLAYER
 ---
 
 ## ▶ NEXT
-**Phase 6 · Step 6.2 — Background catalog sync (phone):** per panel: categories first (fast Home), then
-category-by-category items into `CatalogStore` (concurrency from admin, resumable via `sync_state`,
-re-sync after admin `cache.catalog_ttl_hours`, "new since last time" by `added`), EPG window with
-`cache.epg_retention_hours` pruning, progress for the UI, never blocking the screen.
+**Verify 6.2 on the device via remote logs** (user runs the app; I read `[SYNC]`/`[PANEL]` lines with
+`apps/admin/scripts/read_app_logs.py --model LE2115`), then **Phase 6 · Step 6.4 — Home from the
+local catalog** (existing Home screen design; rails from the panel: newest movies/series by `added`,
+categories, live), so the user sees their panel content. (6.3 TMDB enrichment comes after.)
 **TV still paused by the user.**
 
 ## Waiting on you
@@ -556,7 +556,19 @@ role has sports.read without sports.write).
   *Tested:* 9 store tests on in-memory SQLite (replace-per-category, paging, newest keyset, series
   details, EPG window/prune, sync info, panel isolation, **60k movies: write 1.3 s, page + newest read
   3 ms**) + removal hook test → data 100/100; mobile 47/47; TV analyze: no errors (TV untouched).
-- [ ] 6.2 Incremental sync per connection (hashes/counts/timestamps), background, resumable.
+- [x] 6.2 Incremental sync per connection (hashes/counts/timestamps), background, resumable.
+  *Implemented:* `packages/data/lib/src/catalog/catalog_sync.dart` — `CatalogSyncer` (categories first,
+  then live → movies → series category by category, N at a time; resumable: per-category sync time,
+  fresh ones skipped within the admin TTL; force = refresh all; login/expired/banned/unsupported ⇒
+  stop; one bad category ⇒ skipped and retried next run; N failures in a row ⇒ panel down, stop;
+  removed categories pruned with their items; cancellable; progress per panel; EPG pruned by
+  retention), `SyncPolicy.fromConfig` (`cache.catalog_ttl_hours`, new `cache.sync_parallel_categories`
+  (migration 022, admin Cache card), `cache.epg_retention_hours`). Phone: `CatalogService` runs it
+  after the start-up panel check, right after a panel is connected, on app resume; pauses in the
+  background; failed sync re-checks the panel (status in My panels). `[SYNC]` log lines.
+  *Tested:* 10 sync tests (order, save, resume after cancel, TTL/force, bad category, expired stop,
+  panel-down stop, parallel cap, pruning, joined runs, policy) → data 116+; mobile 49.
+  *Not yet on a device* — next run, read via remote logs. (Live EPG download = later step.)
 - [ ] 6.3 Enrichment: match provider items → global catalog (tmdb id / title+year),
   missing metadata via `metadata-tmdb`; admin overrides win.
 - [ ] 6.4 Data sources wired: home sections resolve from config + local catalog + global catalog.
@@ -635,6 +647,13 @@ role has sports.read without sports.write).
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-15 — **Remote app logs** (user request: "test by reading the logs the app shares"):
+  migration 023 `app_logs` + `log_app_events` (anon/auth RPC: on/off switch, ≤100 lines/batch, field
+  checks, flood guard 600/10 min/device, auto-prune by `diagnostics.log_retention_days`); read only
+  with `support.read`. Phone `core/remote_logs.dart`: `Diag.event`/`Diag.err`/crashes → buffered from
+  start-up, uploaded every 8 s + on pause; random install id (not hardware); scrubbed (test).
+  Admin: Versions → Diagnostics card. Reader for me: `apps/admin/scripts/read_app_logs.py`.
+  *Tested:* live DB 11/11; upload→read→delete self-test; data 98 provider tests; mobile 49.
 - 2026-11-15 — Device round 2 (user builds on **another PC**): M3U link `get.php?username&password` →
   https refused → http **884** (provider blocks playlist download for every client; checked VLC /
   Smarters / okhttp). Fix: a refused `get.php` M3U link that carries username+password is connected as

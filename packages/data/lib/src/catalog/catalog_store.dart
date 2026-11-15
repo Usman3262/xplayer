@@ -63,6 +63,27 @@ class CatalogStore {
     return [for (final r in rows) ProviderCategory(id: r.id, name: r.name, parentId: r.parentId)];
   }
 
+  /// Deletes items whose category the panel no longer has ([keepIds] =
+  /// the current category ids for [kind]). Items without a category stay.
+  Future<int> pruneMissingCategories(String panelId, CatalogKind kind, Set<String> keepIds) =>
+      db.transaction(() async {
+        final keep = keepIds.toList();
+        switch (kind) {
+          case CatalogKind.live:
+            return (db.delete(db.channels)
+                  ..where((t) => t.panelId.equals(panelId) & t.categoryId.isNotNull() & t.categoryId.isNotIn(keep)))
+                .go();
+          case CatalogKind.movie:
+            return (db.delete(db.movies)
+                  ..where((t) => t.panelId.equals(panelId) & t.categoryId.isNotNull() & t.categoryId.isNotIn(keep)))
+                .go();
+          case CatalogKind.series:
+            return (db.delete(db.seriesItems)
+                  ..where((t) => t.panelId.equals(panelId) & t.categoryId.isNotNull() & t.categoryId.isNotIn(keep)))
+                .go();
+        }
+      });
+
   // ── Live ─────────────────────────────────────────────────────────────────
 
   /// Replaces one category's channels ([categoryId] null = the whole list).

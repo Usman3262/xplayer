@@ -22,8 +22,9 @@ export default function VersionsPage() {
 }
 
 const PLAYER_KEYS = ["player.live_format", "player.retry_count", "player.buffer_seconds", "player.progress_save_s"];
+const DIAG_KEYS = ["diagnostics.remote_logs", "diagnostics.log_retention_days"];
 const PANEL_KEYS = ["providers.request_timeout_ms", "providers.request_concurrency"];
-const CACHE_KEYS = ["cache.catalog_ttl_hours", "cache.epg_retention_hours", "cache.image_cache_mb", "config.refresh_interval_s", "search.min_chars"];
+const CACHE_KEYS = ["cache.catalog_ttl_hours", "cache.sync_parallel_categories", "cache.epg_retention_hours", "cache.image_cache_mb", "config.refresh_interval_s", "search.min_chars"];
 
 const LABELS: Record<string, string> = {
   "player.live_format": "Live stream format",
@@ -31,11 +32,14 @@ const LABELS: Record<string, string> = {
   "player.buffer_seconds": "Buffer",
   "player.progress_save_s": "Save watch progress every",
   "cache.catalog_ttl_hours": "Refresh panel catalog after",
+  "cache.sync_parallel_categories": "Categories synced at once",
   "cache.epg_retention_hours": "Keep TV guide for",
   "cache.image_cache_mb": "Image cache on device",
   "config.refresh_interval_s": "Apps check for new settings every",
   "search.min_chars": "Start searching after",
   "providers.request_timeout_ms": "Catalog request timeout",
+  "diagnostics.remote_logs": "Apps upload diagnostic logs",
+  "diagnostics.log_retention_days": "Keep app logs for",
   "providers.request_concurrency": "Parallel requests per panel",
 };
 const UNITS: Record<string, string> = {
@@ -47,6 +51,7 @@ const UNITS: Record<string, string> = {
   "config.refresh_interval_s": "s",
   "search.min_chars": "chars",
   "providers.request_timeout_ms": "ms",
+  "diagnostics.log_retention_days": "days",
 };
 
 async function VersionsContent() {
@@ -60,7 +65,7 @@ async function VersionsContent() {
       .select("id,title,message,platforms,starts_at,ends_at,is_active")
       .order("starts_at", { ascending: false })
       .limit(20),
-    supabase.from("app_settings").select("key,value_type,value,validation,description").in("key", [...PLAYER_KEYS, ...CACHE_KEYS, ...PANEL_KEYS]),
+    supabase.from("app_settings").select("key,value_type,value,validation,description").in("key", [...PLAYER_KEYS, ...CACHE_KEYS, ...PANEL_KEYS, ...DIAG_KEYS]),
   ]);
   if (versions.error || maintenance.error || settings.error) {
     return <ErrorState description="These settings could not be loaded." />;
@@ -87,6 +92,7 @@ async function VersionsContent() {
         <SettingsCard title="Player" description="Defaults for every user; users can change some in their settings." rows={pick(PLAYER_KEYS)} labels={LABELS} units={UNITS} canWrite={canWrite} />
         <SettingsCard title="Cache & refresh" description="How long the apps keep data before refreshing." rows={pick(CACHE_KEYS)} labels={LABELS} units={UNITS} canWrite={canWrite} />
         <SettingsCard title="Panel connections" description="How the apps talk to users' panels (login timeout and panel limit are under Access)." rows={pick(PANEL_KEYS)} labels={LABELS} units={UNITS} canWrite={canWrite} />
+        <SettingsCard title="Diagnostics" description="Important app log lines (panel requests, sync, sign-in, crashes) are uploaded for support. Scrubbed on the device: no passwords, MACs or stream links." rows={pick(DIAG_KEYS)} labels={LABELS} units={UNITS} canWrite={canWrite} />
       </div>
     </div>
   );

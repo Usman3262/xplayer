@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:data/data.dart' show Diag;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -38,16 +39,16 @@ class Backend {
     if (!configured) {
       // Accounts + admin config need these. Run with
       // --dart-define-from-file=../../env/app.json
-      debugPrint('[BACKEND] NOT CONFIGURED: SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY missing '
+      Diag.event('BACKEND', 'NOT CONFIGURED: SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY missing '
           '(run with --dart-define-from-file=../../env/app.json). Accounts and admin config are off.');
       return;
     }
     try {
       await Supabase.initialize(url: url, publishableKey: publishableKey);
       _ready = true;
-      debugPrint('[BACKEND] ready: ${Uri.tryParse(url)?.host ?? '?'} (from $_source)');
+      Diag.event('BACKEND', 'ready: ${Uri.tryParse(url)?.host ?? '?'} (from $_source)');
     } catch (e) {
-      debugPrint('[BACKEND] Supabase init FAILED: ${e.runtimeType}: $e');
+      Diag.event('BACKEND', 'Supabase init FAILED: ${e.runtimeType}: $e');
     }
   }
 

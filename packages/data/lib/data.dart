@@ -86,3 +86,4 @@ export 'src/providers/connections/connection_store.dart';
 export 'src/providers/connections/connection_manager.dart';
 export 'src/catalog/catalog_db.dart' show CatalogDb;
 export 'src/catalog/catalog_store.dart';
+export 'src/catalog/catalog_sync.dart';

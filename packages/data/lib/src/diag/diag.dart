@@ -51,10 +51,25 @@ abstract final class Diag {
   /// IPTV panel traffic (Xtream / M3U / Stalker): host + path + status +
   /// timing + the real error. Callers pass text already made safe with
   /// [panelUrl] / [panelText]; this never prints credentials.
-  static void panel(String message) {
-    DiagTrail.add('PANEL', message);
+  static void panel(String message) => event('PANEL', message);
+
+  /// Where important lines also go (the app uploads them for support /
+  /// remote testing). Gets text that is already scrubbed.
+  static void Function(String tag, String message)? remoteSink;
+
+  /// A tagged, important line (`[PANEL]`, `[SYNC]`, `[ACCOUNT]`, `[BACKEND]`,
+  /// `[APP]`, `[CRASH]`): printed in debug, kept in the trail, and handed to
+  /// [remoteSink]. URLs / credential params are masked first.
+  static void event(String tag, String message) {
+    final safe = panelText(message);
+    DiagTrail.add(tag, safe);
+    try {
+      remoteSink?.call(tag, safe);
+    } catch (_) {
+      // Logging must never break the app.
+    }
     if (!DiagConfig.isOn) return;
-    debugPrint('[PANEL] ${panelText(message)}');
+    debugPrint('[$tag] $safe');
   }
 
   static final _credPath = RegExp(r'/(live|movie|series|timeshift)/[^/\s]+/[^/\s]+/');
@@ -87,6 +102,9 @@ abstract final class Diag {
     final buf = StringBuffer('[ERR] t=${bootMs()} ${scrub(message)}');
     if (error != null) buf.write(' error=${scrub('$error')}');
     DiagTrail.add('ERR', buf.toString().substring(6));
+    try {
+      remoteSink?.call('ERR', panelText(buf.toString().substring(6)));
+    } catch (_) {}
     if (!DiagConfig.errOn) return;
     debugPrint(buf.toString());
     if (st != null) {
