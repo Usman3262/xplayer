@@ -421,6 +421,9 @@ class CatalogStore {
             maxAddedSec: Value(maxAddedSec),
           ));
 
+  Future<void> clearSync(String panelId, String scope) =>
+      (db.delete(db.syncState)..where((t) => t.panelId.equals(panelId) & t.scope.equals(scope))).go();
+
   Future<SyncInfo?> syncInfo(String panelId, String scope) async {
     final r = await (db.select(db.syncState)..where((s) => s.panelId.equals(panelId) & s.scope.equals(scope)))
         .getSingleOrNull();

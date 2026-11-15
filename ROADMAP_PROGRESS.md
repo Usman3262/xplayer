@@ -677,6 +677,25 @@ role has sports.read without sports.write).
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-15 — **Stalker device run on another network** (logs): connected (https refused → http), adult
+  panel PIN works (`unlock ok (panel PIN)`), but movies/series stayed empty — the sync did all 921 live
+  genres first on a 3–7 s/request portal (paged 14/page) ⇒ >1 h before the first movie. User asked:
+  "home first, then movie titles, series, live, then details; user requests first; minimum requests;
+  handle new network blocks". Done:
+  * **List strategies per panel type** (`ProviderCapabilities.lists`): Xtream `bulkIfSmall` (≤200
+    categories → ONE request per kind, split into categories on the phone), Stalker live `bulk`
+    (`get_all_channels`), Stalker VOD `onDemand` (warm-up + on open), M3U `bulk`.
+  * **Order**: Home warm-up (bulk kinds, or the first 2 movie / 2 series / 1 live categories) → movies →
+    series → live. Details: Home items only, one at a time in the background (`[PANEL] home details
+    ready`); everything else on open (priority). Whole-catalog details = 1 request/title (14.7k Neo,
+    187k trial) → would get the line blocked, so not done.
+  * **Open an unsynced category ⇒ fetched now** with priority (deduped), then stored.
+  * **Block handling**: panel not answering / refusing ⇒ background sync paused for
+    `cache.sync_cooldown_min` (30, migration 026), kept across restarts; success clears it; force ignores.
+  * Screens refresh every 25 synced categories; crash logs keep source file paths.
+  *Verified live (Neo, full catalog):* **8 requests** (was ~300): 14,703 movies + 10,064 series + 2,958
+  live in 34.5 s, saved into 90/95/113 categories. Tests: data 150 (budget 4, on-demand 1), mobile 53.
+  Stalker portal not re-testable from this PC (provider not answering this IP).
 - 2026-11-15 — **Adult 18+ section (user request)**: data — `AdultClassifier` (whole words, so Sussex/Essex
   are fine; Arabic too), adult flags parsed (Xtream `is_adult`, Stalker `censored`), Stalker
   `parentalPin`, DB schema v3 (`adult` on categories/channels/movies/series; adult categories mark

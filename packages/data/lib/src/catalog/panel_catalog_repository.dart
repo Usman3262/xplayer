@@ -148,6 +148,7 @@ class PanelCatalogRepository implements CatalogRepository {
     final series = enriched.sublist(rawTop.length);
     final movies = results[1];
     final hero = top.firstOrNull ?? movies.firstOrNull ?? series.firstOrNull ?? _emptyHero();
+    _prefetchDetailsOnce([...top, ...series.take(10)]);
     Diag.event('HOME', 'home from panel in ${sw.elapsedMilliseconds}ms: top ${top.length}'
         '${top10List != null ? ' (admin list "${top10List.title}", ${top10List.source.wire})' : ' (newest)'}, '
         'movies ${movies.length}, series ${series.length}, live ${channels.length}');
@@ -159,6 +160,28 @@ class PanelCatalogRepository implements CatalogRepository {
       arabicOriginals: series.isNotEmpty ? series : movies,
       liveChannels: [for (final c in channels) providerChannelToDomain(c)],
     );
+  }
+
+  bool _prefetched = false;
+
+  /// Details of what Home shows, one at a time in the background (movie plot /
+  /// runtime, series episodes), so they are ready when opened. Only Home
+  /// items: fetching details for the whole catalog would be one request per
+  /// title (thousands) and gets the user's connection blocked.
+  void _prefetchDetailsOnce(List<MediaItem> items) {
+    if (_prefetched || items.isEmpty) return;
+    _prefetched = true;
+    unawaited(() async {
+      final sw = Stopwatch()..start();
+      var movies = 0, series = 0;
+      for (final m in items.take(30)) {
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        if (m.kind == MediaKind.movie && await _movieDetails(m.id) != null) movies++;
+        if (m.kind == MediaKind.series && await _seriesDetails(m.id) != null) series++;
+      }
+      Diag.event('PANEL', 'home details ready in background: $movies movies, $series series '
+          '(${(sw.elapsedMilliseconds / 1000).toStringAsFixed(0)}s)');
+    }());
   }
 
   /// Items for one admin Home section (dynamic Home, Phase 7.1).
@@ -211,9 +234,58 @@ class PanelCatalogRepository implements CatalogRepository {
         MediaKind.live || MediaKind.sports => CatalogKind.live,
       };
 
-  /// Keyset pages in panel order; cursor = the last row's position.
+  /// Keyset pages in panel order; cursor = the last row's position. A
+  /// category the background sync hasn't reached yet (or never syncs, like
+  /// Stalker VOD) is fetched right now with priority — the user is waiting.
   @override
   Future<CatalogPage<MediaItem>> browse({required MediaKind kind, String? categoryId, String? cursor, int limit = 10}) async {
+    var page = await _browse(kind, categoryId, cursor, limit);
+    if (page.items.isEmpty && cursor == null && categoryId != null && await _fetchCategoryNow(kind, categoryId)) {
+      page = await _browse(kind, categoryId, cursor, limit);
+    }
+    return page;
+  }
+
+  final _categoryLoads = <String, Future<bool>>{};
+
+  /// True when the category was fetched (or another call just did).
+  Future<bool> _fetchCategoryNow(MediaKind kind, String categoryId) {
+    final scope = '${_kind(kind).name}:cat:$categoryId';
+    return _categoryLoads[scope] ??= () async {
+      try {
+        if (await store.syncInfo(panelId, scope) != null) return false; // synced, really empty
+        final a = await _adapter();
+        if (a == null) return false;
+        final sw = Stopwatch()..start();
+        int n;
+        switch (kind) {
+          case MediaKind.movie:
+            final items = await a.movies(categoryId: categoryId, priority: true);
+            await store.saveMovies(panelId, categoryId, items);
+            n = items.length;
+          case MediaKind.series:
+            final items = await a.series(categoryId: categoryId, priority: true);
+            await store.saveSeries(panelId, categoryId, items);
+            n = items.length;
+          case MediaKind.live:
+          case MediaKind.sports:
+            final items = await a.liveChannels(categoryId: categoryId, priority: true);
+            await store.saveChannels(panelId, categoryId, items);
+            n = items.length;
+        }
+        await store.markSynced(panelId, scope, at: DateTime.now(), count: n);
+        Diag.event('PANEL', 'opened $scope: $n titles fetched now (${sw.elapsedMilliseconds}ms, ahead of the sync)');
+        return true;
+      } catch (e) {
+        Diag.event('PANEL', 'opened $scope: fetch failed: ${e.runtimeType}: $e');
+        return false;
+      } finally {
+        _categoryLoads.remove(scope);
+      }
+    }();
+  }
+
+  Future<CatalogPage<MediaItem>> _browse(MediaKind kind, String? categoryId, String? cursor, int limit) async {
     final after = int.tryParse(cursor ?? '');
     final List<(MediaItem, int)> rows = switch (kind) {
       MediaKind.movie => [

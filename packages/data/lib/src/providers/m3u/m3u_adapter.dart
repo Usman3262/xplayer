@@ -49,6 +49,8 @@ class M3uAdapter implements ProviderAdapter {
         movies: _catalog?.movies.isNotEmpty ?? true,
         series: _catalog?.series.isNotEmpty ?? true,
         epg: false, // XMLTV sync in Phase 6
+        // One playlist download holds everything.
+        lists: const {MediaKind.live: ListStrategy.bulk, MediaKind.movie: ListStrategy.bulk, MediaKind.series: ListStrategy.bulk},
       );
 
   /// Downloads + parses the playlist (always fresh: spec §3.5).
@@ -91,21 +93,21 @@ class M3uAdapter implements ProviderAdapter {
   Future<List<ProviderCategory>> liveCategories() async => (await _load()).liveCategories;
 
   @override
-  Future<List<ProviderChannel>> liveChannels({String? categoryId}) async =>
+  Future<List<ProviderChannel>> liveChannels({String? categoryId, bool priority = false}) async =>
       _filter((await _load()).channels, categoryId, (c) => c.categoryId);
 
   @override
   Future<List<ProviderCategory>> movieCategories() async => (await _load()).movieCategories;
 
   @override
-  Future<List<ProviderMovie>> movies({String? categoryId}) async =>
+  Future<List<ProviderMovie>> movies({String? categoryId, bool priority = false}) async =>
       _filter((await _load()).movies, categoryId, (m) => m.categoryId);
 
   @override
   Future<List<ProviderCategory>> seriesCategories() async => (await _load()).seriesCategories;
 
   @override
-  Future<List<ProviderSeries>> series({String? categoryId}) async =>
+  Future<List<ProviderSeries>> series({String? categoryId, bool priority = false}) async =>
       _filter((await _load()).series, categoryId, (s) => s.categoryId);
 
   @override

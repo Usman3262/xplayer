@@ -22,6 +22,7 @@ class CatalogService {
   static CatalogSyncer? _syncer;
   static MetadataResolver? _metadata;
   static final _lastPhase = <String, SyncPhase>{};
+  static final _lastShownDone = <String, int>{};
   static Timer? _bumpTimer;
 
   /// Bumped when new catalog content / artwork is ready: screens reload.
@@ -61,9 +62,18 @@ class CatalogService {
     s.progress.addListener(() {
       for (final e in s.progress.value.entries) {
         final prev = _lastPhase[e.key];
-        if (prev != e.value.phase) {
-          _lastPhase[e.key] = e.value.phase;
-          if (prev != null && prev != SyncPhase.categories || e.value.phase == SyncPhase.done) bumpSoon();
+        final p = e.value;
+        if (prev != p.phase) {
+          _lastPhase[e.key] = p.phase;
+          if (p.phase == SyncPhase.items || p.phase == SyncPhase.done) bumpSoon(); // categories ready / all done
+        }
+        // Content shows up while the sync runs (every 25 categories).
+        final shown = _lastShownDone[e.key] ?? 0;
+        if (p.phase == SyncPhase.items && p.done - shown >= 25) {
+          _lastShownDone[e.key] = p.done;
+          bumpSoon();
+        } else if (p.phase != SyncPhase.items) {
+          _lastShownDone.remove(e.key);
         }
       }
     });

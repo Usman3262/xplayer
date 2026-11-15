@@ -21,16 +21,18 @@ abstract class ProviderAdapter {
   Future<ProviderAccount> authenticate();
 
   Future<List<ProviderCategory>> liveCategories();
-  Future<List<ProviderChannel>> liveChannels({String? categoryId});
+  /// [priority]: the user opened this category and is waiting (jumps the
+  /// background sync).
+  Future<List<ProviderChannel>> liveChannels({String? categoryId, bool priority = false});
 
   /// Empty when [ProviderCapabilities.movies] is false.
   Future<List<ProviderCategory>> movieCategories();
-  Future<List<ProviderMovie>> movies({String? categoryId});
+  Future<List<ProviderMovie>> movies({String? categoryId, bool priority = false});
   Future<ProviderMovieDetails> movieDetails(String movieId);
 
   /// Empty when [ProviderCapabilities.series] is false.
   Future<List<ProviderCategory>> seriesCategories();
-  Future<List<ProviderSeries>> series({String? categoryId});
+  Future<List<ProviderSeries>> series({String? categoryId, bool priority = false});
   Future<ProviderSeriesDetails> seriesDetails(String seriesId);
 
   /// Now/next and a few upcoming programmes for one channel. Empty when the

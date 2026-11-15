@@ -29,17 +29,17 @@ class AdultPanel implements ProviderAdapter {
         ProviderCategory(id: 's3', name: 'Night shows', adult: true), // panel flag (Stalker censored)
       ];
   @override
-  Future<List<ProviderChannel>> liveChannels({String? categoryId}) async => [
+  Future<List<ProviderChannel>> liveChannels({String? categoryId, bool priority = false}) async => [
         ProviderChannel(id: '${categoryId}c', name: 'Ch $categoryId', stream: StreamRef(kind: MediaKind.live, id: '${categoryId}c'), categoryId: categoryId),
       ];
   @override
-  Future<List<ProviderMovie>> movies({String? categoryId}) async => [
+  Future<List<ProviderMovie>> movies({String? categoryId, bool priority = false}) async => [
         ProviderMovie(id: 'mv1', name: 'Family film', stream: const StreamRef(kind: MediaKind.movie, id: 'mv1'), categoryId: categoryId, addedSec: 10, rating: 6),
         // Item flagged adult inside a normal category (Xtream is_adult).
         ProviderMovie(id: 'mv2', name: 'Late film', stream: const StreamRef(kind: MediaKind.movie, id: 'mv2'), categoryId: categoryId, addedSec: 20, rating: 9, adult: true),
       ];
   @override
-  Future<List<ProviderSeries>> series({String? categoryId}) async => [
+  Future<List<ProviderSeries>> series({String? categoryId, bool priority = false}) async => [
         ProviderSeries(id: '${categoryId}x', name: 'Show $categoryId', categoryId: categoryId, addedSec: 100, rating: 8),
       ];
   @override

@@ -61,6 +61,12 @@ class XtreamAdapter implements ProviderAdapter {
         epg: true,
         catchup: true,
         incrementalByAdded: true,
+        // 3 requests for a whole normal-size panel instead of one per category.
+        lists: {
+          MediaKind.live: ListStrategy.bulkIfSmall,
+          MediaKind.movie: ListStrategy.bulkIfSmall,
+          MediaKind.series: ListStrategy.bulkIfSmall,
+        },
       );
 
   Uri _api([Map<String, String> extra = const {}]) => _base.replace(
@@ -157,8 +163,8 @@ class XtreamAdapter implements ProviderAdapter {
       categoryId == null || categoryId.isEmpty ? const {} : {'category_id': categoryId};
 
   @override
-  Future<List<ProviderChannel>> liveChannels({String? categoryId}) async =>
-      parseLiveStreams(await _action('get_live_streams', _cat(categoryId)));
+  Future<List<ProviderChannel>> liveChannels({String? categoryId, bool priority = false}) async =>
+      parseLiveStreams(await _action('get_live_streams', _cat(categoryId), priority));
 
   static List<ProviderChannel> parseLiveStreams(Object? raw) => [
         for (final s in _list(raw))
@@ -179,8 +185,8 @@ class XtreamAdapter implements ProviderAdapter {
       ];
 
   @override
-  Future<List<ProviderMovie>> movies({String? categoryId}) async =>
-      parseVodStreams(await _action('get_vod_streams', _cat(categoryId)));
+  Future<List<ProviderMovie>> movies({String? categoryId, bool priority = false}) async =>
+      parseVodStreams(await _action('get_vod_streams', _cat(categoryId), priority));
 
   static List<ProviderMovie> parseVodStreams(Object? raw) => [
         for (final s in _list(raw))
@@ -204,8 +210,8 @@ class XtreamAdapter implements ProviderAdapter {
   }
 
   @override
-  Future<List<ProviderSeries>> series({String? categoryId}) async =>
-      parseSeries(await _action('get_series', _cat(categoryId)));
+  Future<List<ProviderSeries>> series({String? categoryId, bool priority = false}) async =>
+      parseSeries(await _action('get_series', _cat(categoryId), priority));
 
   static List<ProviderSeries> parseSeries(Object? raw) => [
         for (final s in _list(raw))

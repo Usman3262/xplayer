@@ -312,7 +312,14 @@ class ProviderCapabilities {
     this.catchup = false,
     this.incrementalByAdded = false,
     this.linksExpire = false,
+    this.lists = const {},
   });
+
+  /// How the catalog sync may fetch each kind with the fewest requests.
+  /// Missing kind = [ListStrategy.perCategory].
+  final Map<MediaKind, ListStrategy> lists;
+
+  ListStrategy listsFor(MediaKind k) => lists[k] ?? ListStrategy.perCategory;
 
   final bool live;
   final bool movies;
@@ -325,6 +332,25 @@ class ProviderCapabilities {
 
   /// Stream links are short-lived (Stalker create_link) → resolve right before play.
   final bool linksExpire;
+}
+
+/// How a kind's items are fetched by the background sync (request budget:
+/// panels block clients that send too many requests).
+enum ListStrategy {
+  /// One request returns everything (Stalker `get_all_channels`, M3U).
+  bulk,
+
+  /// One request for everything when the panel is not huge (Xtream without
+  /// `category_id`); huge panels go category by category instead.
+  bulkIfSmall,
+
+  /// One request per category (paced).
+  perCategory,
+
+  /// Too expensive to sync fully (Stalker VOD: 14 items per page): only the
+  /// Home warm-up categories in the background, the rest when the user
+  /// opens a category.
+  onDemand,
 }
 
 /// Where a playable item lives on the panel. Turned into a URL only at play

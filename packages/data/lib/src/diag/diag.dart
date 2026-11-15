@@ -96,6 +96,8 @@ abstract final class Diag {
   static String panelText(String text) => text
       .replaceAllMapped(_url, (m) {
         final u = Uri.tryParse(m[0]!);
+        // Source locations in crash reports (file:///…/x.dart:12:3) are safe.
+        if (u != null && (u.scheme == 'file' || u.scheme == 'package')) return m[0]!;
         return u == null || u.host.isEmpty ? '<url>' : panelUrl(u);
       })
       .replaceAllMapped(_credParam, (m) => '${m[1]}=***');

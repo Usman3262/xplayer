@@ -19,6 +19,13 @@ ProviderSeries sr(String id, {String cat = 's1', int? added, double? rating, int
 
 class FakeAdapter implements ProviderAdapter {
   int seriesCalls = 0;
+  final movieCalls = <String>[];
+  @override
+  Future<List<ProviderMovie>> movies({String? categoryId, bool priority = false}) async {
+    movieCalls.add('$categoryId priority=$priority');
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    return [mv('n1', cat: categoryId!, added: 5), mv('n2', cat: categoryId, added: 6)];
+  }
   @override
   ProviderKind get kind => ProviderKind.xtream;
   @override
@@ -281,6 +288,19 @@ void main() {
       expect(r.knownContainerExtension('s1-1-2'), 'mp4');
       await repo().getEpisodes('s1', season: 2); // new repository, same store
       expect(adapter.seriesCalls, 1);
+    });
+
+    test('opening a category the sync has not reached: fetched now with priority, once', () async {
+      final r = repo();
+      final pages = await Future.wait([
+        r.browse(kind: MediaKind.movie, categoryId: 'new-cat'),
+        r.browse(kind: MediaKind.movie, categoryId: 'new-cat'), // screen asks twice
+      ]);
+      expect(pages.first.items.map((m) => m.id), ['n1', 'n2']);
+      expect(adapter.movieCalls, ['new-cat priority=true']);
+      // Now stored + marked synced: no more requests.
+      await r.browse(kind: MediaKind.movie, categoryId: 'new-cat');
+      expect(adapter.movieCalls, hasLength(1));
     });
 
     test('search across movies / series / live', () async {

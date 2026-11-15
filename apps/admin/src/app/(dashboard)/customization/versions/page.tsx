@@ -25,7 +25,7 @@ const PLAYER_KEYS = ["player.live_format", "player.retry_count", "player.buffer_
 const CONTENT_KEYS = ["content.adult_section", "content.adult_keywords"];
 const DIAG_KEYS = ["diagnostics.remote_logs", "diagnostics.log_retention_days"];
 const PANEL_KEYS = ["providers.request_timeout_ms", "providers.request_concurrency"];
-const CACHE_KEYS = ["cache.catalog_ttl_hours", "cache.sync_parallel_categories", "cache.sync_gap_ms", "cache.epg_retention_hours", "cache.image_cache_mb", "config.refresh_interval_s", "search.min_chars"];
+const CACHE_KEYS = ["cache.catalog_ttl_hours", "cache.sync_parallel_categories", "cache.sync_gap_ms", "cache.sync_cooldown_min", "cache.epg_retention_hours", "cache.image_cache_mb", "config.refresh_interval_s", "search.min_chars"];
 
 const LABELS: Record<string, string> = {
   "player.live_format": "Live stream format",
@@ -35,6 +35,7 @@ const LABELS: Record<string, string> = {
   "cache.catalog_ttl_hours": "Refresh panel catalog after",
   "cache.sync_parallel_categories": "Categories synced at once",
   "cache.sync_gap_ms": "Pause between category requests",
+  "cache.sync_cooldown_min": "Wait after a panel stops answering",
   "cache.epg_retention_hours": "Keep TV guide for",
   "cache.image_cache_mb": "Image cache on device",
   "config.refresh_interval_s": "Apps check for new settings every",
@@ -55,6 +56,7 @@ const UNITS: Record<string, string> = {
   "config.refresh_interval_s": "s",
   "search.min_chars": "chars",
   "cache.sync_gap_ms": "ms",
+  "cache.sync_cooldown_min": "min",
   "providers.request_timeout_ms": "ms",
   "diagnostics.log_retention_days": "days",
 };

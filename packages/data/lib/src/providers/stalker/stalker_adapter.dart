@@ -75,6 +75,13 @@ class StalkerAdapter implements ProviderAdapter {
         epg: true,
         catchup: true,
         linksExpire: true,
+        // Live: get_all_channels = 1 request (vs ~5 pages × every genre).
+        // VOD: 14 items per page → only warm-up + what the user opens.
+        lists: {
+          MediaKind.live: ListStrategy.bulk,
+          MediaKind.movie: ListStrategy.onDemand,
+          MediaKind.series: ListStrategy.onDemand,
+        },
       );
 
   Map<String, String> get _headers => {
@@ -253,11 +260,11 @@ class StalkerAdapter implements ProviderAdapter {
   }
 
   @override
-  Future<List<ProviderChannel>> liveChannels({String? categoryId}) async {
+  Future<List<ProviderChannel>> liveChannels({String? categoryId, bool priority = false}) async {
     final all = categoryId == null || categoryId.isEmpty;
     final raw = all
-        ? jsonMapList(jsonMap(await _call({'type': 'itv', 'action': 'get_all_channels'}))['data'])
-        : await _paged({'type': 'itv', 'action': 'get_ordered_list', 'genre': categoryId, 'sortby': 'number'});
+        ? jsonMapList(jsonMap(await _call({'type': 'itv', 'action': 'get_all_channels'}, priority: priority))['data'])
+        : await _paged({'type': 'itv', 'action': 'get_ordered_list', 'genre': categoryId, 'sortby': 'number'}, priority: priority);
     return parseChannels(raw, portal: _portal);
   }
 
@@ -281,10 +288,11 @@ class StalkerAdapter implements ProviderAdapter {
       ];
 
   @override
-  Future<List<ProviderMovie>> movies({String? categoryId}) async {
+  Future<List<ProviderMovie>> movies({String? categoryId, bool priority = false}) async {
     final raw = await _paged(
       {'type': 'vod', 'action': 'get_ordered_list', 'category': _catOrAll(categoryId), 'sortby': 'added'},
       maxPages: _isAll(categoryId) ? allPagesLimit : null,
+      priority: priority,
     );
     final out = <ProviderMovie>[];
     for (final m in raw) {
@@ -316,10 +324,11 @@ class StalkerAdapter implements ProviderAdapter {
   }
 
   @override
-  Future<List<ProviderSeries>> series({String? categoryId}) async {
+  Future<List<ProviderSeries>> series({String? categoryId, bool priority = false}) async {
     final raw = await _paged(
       {'type': 'series', 'action': 'get_ordered_list', 'category': _catOrAll(categoryId), 'sortby': 'added'},
       maxPages: _isAll(categoryId) ? allPagesLimit : null,
+      priority: priority,
     );
     final out = <ProviderSeries>[];
     for (final s in raw) {
