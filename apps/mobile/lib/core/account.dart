@@ -199,10 +199,15 @@ class AccountService {
     return a;
   }
 
+  /// After an explicit sign-in / sign-up on this device (not a restored
+  /// session): device check-in clears a remote sign-out (8.3).
+  static VoidCallback? onSignedIn;
+
   static Future<void> signIn(String email, String password) async {
     final a = _require();
     await a.signIn(email.trim(), password);
     user.value = a.current;
+    onSignedIn?.call();
   }
 
   /// Returns true when the user must confirm the email before signing in.
@@ -212,6 +217,7 @@ class AccountService {
     if (password.length < 8) throw const AccountException(AccountError.weakPassword);
     final needsConfirm = await a.signUp(email.trim(), password, displayName: displayName);
     user.value = a.current;
+    if (user.value != null) onSignedIn?.call();
     return needsConfirm;
   }
 

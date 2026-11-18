@@ -124,6 +124,48 @@ export type Database = {
           },
         ]
       }
+      app_logs: {
+        Row: {
+          app_version: string | null
+          created_at: string
+          device_id: string
+          device_model: string | null
+          id: number
+          logged_at: string
+          message: string
+          platform: string
+          session_id: string
+          tag: string
+          user_id: string | null
+        }
+        Insert: {
+          app_version?: string | null
+          created_at?: string
+          device_id: string
+          device_model?: string | null
+          id?: never
+          logged_at: string
+          message: string
+          platform: string
+          session_id: string
+          tag: string
+          user_id?: string | null
+        }
+        Update: {
+          app_version?: string | null
+          created_at?: string
+          device_id?: string
+          device_model?: string | null
+          id?: never
+          logged_at?: string
+          message?: string
+          platform?: string
+          session_id?: string
+          tag?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           category: string
@@ -1689,6 +1731,114 @@ export type Database = {
         }
         Relationships: []
       }
+      user_devices: {
+        Row: {
+          app_version: string | null
+          created_at: string
+          device_id: string
+          first_seen_at: string
+          last_seen_at: string
+          model: string | null
+          name: string | null
+          os_version: string | null
+          panel_kind: string | null
+          platform: string
+          revoked_at: string | null
+          revoked_by: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          app_version?: string | null
+          created_at?: string
+          device_id: string
+          first_seen_at?: string
+          last_seen_at?: string
+          model?: string | null
+          name?: string | null
+          os_version?: string | null
+          panel_kind?: string | null
+          platform?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          app_version?: string | null
+          created_at?: string
+          device_id?: string
+          first_seen_at?: string
+          last_seen_at?: string
+          model?: string | null
+          name?: string | null
+          os_version?: string | null
+          panel_kind?: string | null
+          platform?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_library: {
+        Row: {
+          changed_at: string
+          created_at: string
+          duration_sec: number | null
+          extra: Json
+          in_my_list: boolean
+          item_id: string
+          kind: string
+          panel_key: string
+          position_sec: number | null
+          poster_url: string | null
+          progress: number
+          rating: number
+          series_id: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          changed_at: string
+          created_at?: string
+          duration_sec?: number | null
+          extra?: Json
+          in_my_list?: boolean
+          item_id: string
+          kind: string
+          panel_key: string
+          position_sec?: number | null
+          poster_url?: string | null
+          progress?: number
+          rating?: number
+          series_id?: string | null
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          changed_at?: string
+          created_at?: string
+          duration_sec?: number | null
+          extra?: Json
+          in_my_list?: boolean
+          item_id?: string
+          kind?: string
+          panel_key?: string
+          position_sec?: number | null
+          poster_url?: string | null
+          progress?: number
+          rating?: number
+          series_id?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1731,6 +1881,14 @@ export type Database = {
       }
       admin_config_status: { Args: never; Returns: Json }
       admin_dashboard_stats: { Args: never; Returns: Json }
+      admin_device_counts: {
+        Args: never
+        Returns: {
+          active_7_days: number
+          revoked: number
+          total: number
+        }[]
+      }
       admin_find_user: { Args: { p_email: string }; Returns: string }
       admin_flag_overrides: {
         Args: never
@@ -1757,6 +1915,22 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_list_devices: {
+        Args: { p_before_seen?: string; p_limit?: number; p_search?: string }
+        Returns: {
+          app_version: string
+          device_id: string
+          email: string
+          first_seen_at: string
+          last_seen_at: string
+          model: string
+          name: string
+          panel_kind: string
+          platform: string
+          revoked_at: string
+          user_id: string
+        }[]
+      }
       admin_list_users: {
         Args: {
           p_before_created?: string
@@ -1774,13 +1948,19 @@ export type Database = {
           is_admin: boolean
           last_seen_at: string
           last_sign_in_at: string
+          library_titles: number
           status: string
+          watching: number
         }[]
       }
       admin_remove: { Args: { p_user: string }; Returns: undefined }
       admin_republish_version: {
         Args: { p_notes?: string; p_version: number }
         Returns: number
+      }
+      admin_revoke_device: {
+        Args: { p_device: string; p_reason?: string; p_user: string }
+        Returns: undefined
       }
       admin_security_state: { Args: never; Returns: Json }
       admin_session: { Args: never; Returns: Json }
@@ -1820,6 +2000,11 @@ export type Database = {
         }
         Returns: boolean
       }
+      device_checkin: {
+        Args: { p_device: Json; p_signed_in?: boolean }
+        Returns: Json
+      }
+      device_revoke_mine: { Args: { p_device: string }; Returns: undefined }
       get_app_config: {
         Args: {
           p_app_version?: string
@@ -1839,8 +2024,32 @@ export type Database = {
         }
         Returns: Json
       }
+      get_matches_between: {
+        Args: { p_from: string; p_limit?: number; p_to: string }
+        Returns: Json
+      }
+      get_standings: { Args: { p_competition: string }; Returns: Json }
       has_permission: { Args: { perm: string }; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
+      library_pull: {
+        Args: { p_panel: string; p_since?: string }
+        Returns: Json
+      }
+      library_push: {
+        Args: { p_items: Json; p_panel: string }
+        Returns: number
+      }
+      log_app_events: {
+        Args: {
+          p_device: string
+          p_events: Json
+          p_model: string
+          p_platform: string
+          p_session: string
+          p_version: string
+        }
+        Returns: number
+      }
       log_audit: {
         Args: {
           p_action: string

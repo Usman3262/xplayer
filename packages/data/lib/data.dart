@@ -93,3 +93,4 @@ export 'src/catalog/home_content.dart';
 export 'src/catalog/panel_catalog_repository.dart';
 export 'src/catalog/adult.dart';
 export 'src/catalog/adult_pin.dart';
+export 'src/local/library_sync.dart';

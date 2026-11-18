@@ -14,6 +14,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import 'core/device_checkin.dart';
+import 'core/library_cloud.dart';
 import 'core/appearance_controller.dart';
 import 'core/catalog_sync.dart';
 import 'core/demo_mode.dart';
@@ -70,6 +72,8 @@ Future<void> main() async {
   // (instant, no network); the fresh one arrives in the background.
   await Backend.init();
   AccountService.init();
+  LibraryCloud.init(); // signed-in library ↔ account (Phase 8)
+  DeviceCheckin.init(); // signed-in device ↔ account (8.3)
   await RemoteConfigService.init(appVersion: packageInfo.version);
   await PanelsService.init();
   runApp(const ProviderScope(child: MobileRootApp()));
@@ -170,6 +174,8 @@ class _MobileRootAppState extends ConsumerState<MobileRootApp>
     }
     if (state == AppLifecycleState.resumed) {
       CatalogService.resume();
+      LibraryCloud.syncSoon(const Duration(seconds: 3));
+      unawaited(DeviceCheckin.run());
       if (!demo) ref.read(appDownloadsProvider.notifier).appResumed();
       unawaited(_catalogSync.check());
       // Lists reload only after a long time away (client 2 Nov: content
@@ -226,6 +232,7 @@ class _MobileRootAppState extends ConsumerState<MobileRootApp>
         : const Locale('en');
 
     return MaterialApp.router(
+      scaffoldMessengerKey: appMessengerKey,
       key: ValueKey(
         'lang-$language-rtl-$rtl-theme-${AppThemeConfig.revision.value}',
       ),

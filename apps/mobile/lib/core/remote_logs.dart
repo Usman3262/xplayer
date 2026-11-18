@@ -37,6 +37,9 @@ class RemoteLogs {
   /// This install's id (shown in Settings → About for support).
   static String? get deviceId => _deviceId;
 
+  /// App version + build, e.g. "6.0.36+145".
+  static String get appVersion => _version;
+
   /// Call first in main(): starts buffering immediately (uploads begin once
   /// the backend is ready).
   static Future<void> start({required String appVersion}) async {

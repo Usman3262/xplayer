@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'demo_mode.dart';
+import 'library_cloud.dart';
 import 'providers.dart' show catalogRepositoryProvider;
 import 'session_controller.dart';
 
@@ -93,6 +94,10 @@ class LibraryController extends StateNotifier<LibraryState> {
       return;
     }
     _bootstrap();
+    // Titles from the signed-in account (other devices) show at once.
+    LibraryCloud.onPulled = () {
+      if (mounted && !state.remoteSynced) _reloadLocal();
+    };
   }
 
   final Ref _ref;
@@ -394,6 +399,8 @@ class LibraryController extends StateNotifier<LibraryState> {
     for (final e in before) {
       if (e.id == id) existing = e;
     }
+    // The title's copy, so My List still shows it after a restart.
+    if (adding && item != null) await _remember(item);
     try {
       await _toggleMyListRemote(
         id,
@@ -469,6 +476,16 @@ class LibraryController extends StateNotifier<LibraryState> {
     unawaited(syncFromRemote());
   }
 
+  /// Saves the title's copy on the device (never the player's placeholder
+  /// title: the stored name is kept instead).
+  Future<void> _remember(MediaItem item, {int? positionSec, int? durationSec}) async {
+    if (_demo) return;
+    final named = isPlaceholderTitle(item.title)
+        ? item.withTitle(findKnown(item.id)?.title ?? '')
+        : item;
+    await _store?.remember(named, positionSec: positionSec, durationSec: durationSec);
+  }
+
   /// The user's own copy of a title (Continue Watching, My List, liked),
   /// for screens whose catalog lookup missed.
   MediaItem? findKnown(String id) {
@@ -498,6 +515,7 @@ class LibraryController extends StateNotifier<LibraryState> {
     bool refreshRemote = false,
   }) async {
     await _store?.setProgress(id, progress);
+    if (item != null) await _remember(item, positionSec: positionSec, durationSec: durationSec);
 
     final session = _ref.read(sessionProvider);
     final profileId = session.activeProfileId;
@@ -530,6 +548,11 @@ class LibraryController extends StateNotifier<LibraryState> {
       } catch (_) {}
     }
 
+    // On the device only (guest / panel): the rows follow at once.
+    if (!state.remoteSynced && !_demo) {
+      _reloadLocal();
+      return;
+    }
     if (!refreshRemote) return;
     if (state.remoteSynced) {
       await syncFromRemote();
@@ -689,6 +712,7 @@ class LibraryController extends StateNotifier<LibraryState> {
     // Saved on the device at once, so a sync rebuilding from the store
     // keeps the newest tap.
     unawaited(_store?.setRating(id, rating));
+    if (item != null) unawaited(_remember(item));
     unawaited(_setRatingRemote(id, rating, item: item));
   }
 

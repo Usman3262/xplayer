@@ -10,6 +10,9 @@ Spec: `new-platform.md` · Rules: `CLAUDE.md` · App "where to change": `XPLAYER
 ---
 
 ## ▶ NEXT
+**Phases 8–12 planned 2026-11-19 (user: "work on all other phases").** Done: 8.1, 8.2, 8.3. Next: 8.4
+profiles → 8.5 account deletion/export → 8.6 Settings rows → Phase 9 (payments decision pending) →
+10 → 11 website (domain pending) → 12 admin UI. Older note below.
 **Phase 7 (phone) implemented, unit-tested — not yet verified on a device.** Next: the user rebuilds,
 plays a movie / episode / channel from each panel type and says "check logs" → verify `[PLAY] panel:`
 lines (link ready / playing / failed kind), `[HOME]`, Live guide. Then Phase 8 (accounts & devices on
@@ -655,12 +658,12 @@ Phone done 2026-11-15 (implemented + unit tests; **untested on a device**). TV v
 ## Phase 8 — Accounts & devices (Supabase; optional account, guests stay local)
 Rule: everything the app shows still comes from the user's panel; an account only stores the user's
 own data (library, devices, settings). Every module has its admin page in the same step.
-- [ ] 8.1 Library in the cloud: `user_library` (favorites / my list), `watch_progress` (continue
+- [x] 8.1 Library in the cloud: `user_library` (favorites / my list), `watch_progress` (continue
   watching + history, batched ≤1 write / 30 s per title), RLS by `user_id`; one RPC to pull, one to push
   in batches. App: signed in → sync both ways; guest → stays on the device. Admin: Users → library counts.
-- [ ] 8.2 Guest → account migration: on sign-up / first sign-in the device library is uploaded once
+- [x] 8.2 Guest → account migration: on sign-up / first sign-in the device library is uploaded once
   (merge, newest wins), then the device copy follows the account.
-- [ ] 8.3 Devices & sessions: `user_devices` (device id, model, platform, app version, last seen, panel
+- [x] 8.3 Devices & sessions: `user_devices` (device id, model, platform, app version, last seen, panel
   type — never panel credentials), app registers on sign-in + heartbeat ≤1/day; user removes devices
   in Settings; device limit from the plan (9.1). Admin: **Devices** module (search, revoke).
 - [ ] 8.4 Profiles (kids, PIN, avatar) per account (`account_profiles`), library per profile.
@@ -669,6 +672,26 @@ own data (library, devices, settings). Every module has its admin page in the sa
   Edge Function deletes the auth user; export = JSON of the user's rows. App: Settings → Account.
 - [ ] 8.6 Settings rows that used the old server (profiles, devices, sessions, security) rebuilt on
   Supabase and shown again for signed-in users.
+
+  **8.1/8.2 done 2026-11-19 (implemented + tested; untested on a device):** found and fixed first: the
+  device library kept only ids, so guests' My List / Continue Watching were empty after a restart (7.7
+  was wrongly called done) — `LibraryStore` now keeps a small copy per title (≤600). Cloud: migration
+  `20261119000001_user_library` (RLS own rows, `library_push` newest-wins ≤300/batch, `library_pull`
+  since), `LibrarySync` (pull → merge → push changes; first sync = whole guest library), app
+  `LibraryCloud` (on sign-in, resume, 30 s after a change; signed-in only). Admin: Users list shows
+  "N saved · N watching" (migration `…002`, counts only). Tests: 7 unit (store + sync), live
+  `live_library_check.py` 10/10 (anon refused, users isolated, newest wins, batch cap),
+  `live_users_check.py` all pass, admin tsc OK. Library is per primary panel (panel type + host).
+
+  **8.3 done 2026-11-19 (implemented + tested; untested on a device):** migration `…003_user_devices`
+  (no panel logins; RPC-only writes: `device_checkin`, `device_revoke_mine`; admin `admin_list_devices`,
+  `admin_device_counts`, `admin_revoke_device` + audit). App `DeviceCheckin`: after an explicit sign-in
+  and on start/resume ≤1 per 6 h; a remotely signed-out device signs out and shows a message (global
+  `appMessengerKey`). Admin **Devices** module live (search, counts, sign out with reason). Device limit
+  per plan comes with 9.1; the user's own "My devices" screen comes with 8.6. Tests:
+  `live_devices_check.py` 14/14 (anon refused, isolation, RPC-only writes, revoke → sign-out,
+  re-sign-in clears, support agent list/revoke, audit row), admin tsc + types regenerated
+  (`npm run db:types`, `next typegen`), mobile 55 + data 77 pass.
 
 ## Phase 9 — Business (all controlled from the admin)
 - [ ] 9.1 Plans & entitlements: `plans` (features, device / profile limits, price label),

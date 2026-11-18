@@ -205,6 +205,15 @@ class ConnectionManager {
     return _adapters[id] = _create(creds);
   }
 
+  /// Which panel a library row belongs to across devices: panel type +
+  /// host (never the username, password or MAC). Title ids only mean
+  /// something on their own panel.
+  Future<String?> panelKey(String id) async {
+    final creds = await _store.loadCredentials(id);
+    if (creds == null) return null;
+    return '${creds.kind.name}:${creds.safeLabel.toLowerCase()}';
+  }
+
   Future<void> setPrimary(String id) async {
     await load();
     final c = _byId(id);

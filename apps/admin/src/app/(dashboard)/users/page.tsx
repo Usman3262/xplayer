@@ -27,6 +27,8 @@ type Row = {
   created_at: string;
   last_sign_in_at: string | null;
   last_seen_at: string | null;
+  library_titles: number | null;
+  watching: number | null;
 };
 
 const STATUSES = ["active", "suspended", "banned"] as const;
@@ -97,6 +99,16 @@ async function UsersContent({ searchParams }: { searchParams: Promise<SearchPara
           {r.is_admin ? <Badge className="bg-primary/15 text-primary rounded-full">Admin</Badge> : null}
           {!r.email_confirmed ? <Badge className="bg-secondary text-muted-foreground rounded-full">Unconfirmed</Badge> : null}
         </div>
+      ),
+    },
+    {
+      key: "library",
+      header: "Library",
+      className: "w-36 whitespace-nowrap",
+      cell: (r) => (
+        <span className="text-muted-foreground text-sm tabular-nums">
+          {r.library_titles ?? 0} saved · {r.watching ?? 0} watching
+        </span>
       ),
     },
     {
