@@ -78,3 +78,25 @@ class ProviderAdapterFactory {
     return build(credentials);
   }
 }
+
+/// One page of a paged panel list.
+class ProviderPage<T> {
+  const ProviderPage(this.items, {required this.page, required this.pages});
+  final List<T> items;
+
+  /// 1-based page number, and how many pages the panel says it has.
+  final int page;
+  final int pages;
+
+  bool get hasMore => page < pages;
+}
+
+/// Panels whose lists only come in small pages and have no "whole list"
+/// call (Stalker portals: 14 titles a page). Screens load page 1 when a
+/// category is shown and further pages as the user scrolls — never the
+/// whole category at once (that burst got HTTP 429 from the panel).
+abstract interface class PagedLists {
+  Future<ProviderPage<ProviderChannel>> liveChannelsPage(String categoryId, int page);
+  Future<ProviderPage<ProviderMovie>> moviesPage(String categoryId, int page);
+  Future<ProviderPage<ProviderSeries>> seriesPage(String categoryId, int page);
+}

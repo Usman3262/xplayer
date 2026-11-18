@@ -44,6 +44,9 @@ final catalogRepositoryProvider = Provider<CatalogRepository>((ref) {
       metadata: CatalogService.metadata,
       artwork: ArtworkUrls.fromConfig(config),
       onMetadataArrived: CatalogService.metadataArrived,
+      // Titles go to our server only for Home rails + opened details
+      // (admin can widen it to lists / search).
+      metadataInLists: config.boolSetting('content.metadata_in_lists', false),
     );
   }
   // Only what the catalog depends on. Watching the whole session rebuilt

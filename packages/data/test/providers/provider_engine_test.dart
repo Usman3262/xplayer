@@ -106,6 +106,11 @@ void main() {
   });
 
   group('ProviderHttp', () {
+    setUp(ProviderHttp.clearPauses);
+    tearDown(() {
+      ProviderHttp.clearPauses();
+      ProviderHttp.clock = DateTime.now;
+    });
     ProviderHttp make(MockClientHandler h, {ProviderLimits limits = const ProviderLimits()}) =>
         ProviderHttp(client: MockClient(h), limits: limits, backoffBase: Duration.zero);
     final uri = Uri.parse('http://p.tv/player_api.php?username=u&password=secret');
@@ -123,6 +128,7 @@ void main() {
 
     test('status codes → failure kinds; HTML instead of JSON = badResponse', () async {
       Future<ProviderFailureKind> kindFor(int code, [String body = '']) async {
+        ProviderHttp.clearPauses();
         final h = make((_) async => http.Response(body, code),
             limits: const ProviderLimits(retries: 0));
         try {
@@ -140,6 +146,67 @@ void main() {
       expect(await kindFor(503), ProviderFailureKind.server);
       expect(await kindFor(404), ProviderFailureKind.badResponse);
       expect(await kindFor(200, '<html>blocked</html>'), ProviderFailureKind.badResponse);
+    });
+
+    test('429: the panel host is paused — no request reaches it until the pause ends', () async {
+      var now = DateTime.utc(2026, 11, 19, 12);
+      ProviderHttp.clock = () => now;
+      var calls = 0;
+      final h = make((_) async {
+        calls++;
+        return http.Response('slow down', 429, headers: {'retry-after': '30'});
+      });
+      await expectLater(h.getJson(uri), throwsA(isA<ProviderFailure>()));
+      final sent = calls;
+      expect(ProviderHttp.pausedFor('p.tv'), const Duration(seconds: 30));
+      // Another screen / the sync: refused at once, nothing sent.
+      final other = make((_) async {
+        calls++;
+        return http.Response('{}', 200);
+      });
+      await expectLater(other.getJson(uri.replace(path: '/x')),
+          throwsA(isA<ProviderFailure>().having((f) => f.kind, 'kind', ProviderFailureKind.rateLimited)));
+      expect(calls, sent);
+      now = now.add(const Duration(seconds: 31));
+      expect(await other.getJson(uri.replace(path: '/x')), <String, dynamic>{});
+    });
+
+    test('403 pauses 5 min; a successful login check lifts it; other hosts unaffected', () async {
+      final now = DateTime.utc(2026, 11, 19, 12);
+      ProviderHttp.clock = () => now;
+      final h = make((r) async => r.url.path == '/list' ? http.Response('no', 403) : http.Response('{"ok":1}', 200),
+          limits: const ProviderLimits(retries: 0));
+      await expectLater(h.getJson(uri.replace(path: '/list')), throwsA(isA<ProviderFailure>()));
+      expect(ProviderHttp.pausedFor('p.tv'), const Duration(minutes: 5));
+      await expectLater(h.getJson(uri.replace(path: '/other')), throwsA(isA<ProviderFailure>()));
+      expect(await h.getJson(Uri.parse('http://q.tv/a')), {'ok': 1});
+      expect(await h.getJson(uri, auth: true), {'ok': 1}); // login check goes through
+      expect(ProviderHttp.pausedFor('p.tv'), isNull);
+      expect(await h.getJson(uri.replace(path: '/other')), {'ok': 1});
+    });
+
+    test('a big reply that keeps arriving is never cut off; one that stalls fails', () async {
+      const limits = ProviderLimits(requestTimeout: Duration(milliseconds: 150), retries: 0);
+      Stream<List<int>> trickle(int chunks, Duration gap) async* {
+        yield utf8.encode('[');
+        for (var i = 0; i < chunks; i++) {
+          await Future<void>.delayed(gap);
+          yield utf8.encode('${i == 0 ? '' : ','}$i');
+        }
+        yield utf8.encode(']');
+      }
+
+      // 10 chunks 50 ms apart = 500 ms in all, over 3× the 150 ms limit.
+      final slow = ProviderHttp(
+          client: MockClient.streaming((_, _) async => http.StreamedResponse(trickle(10, const Duration(milliseconds: 50)), 200)),
+          limits: limits);
+      expect((await slow.getJson(uri) as List).length, 10);
+
+      final stalled = ProviderHttp(
+          client: MockClient.streaming((_, _) async => http.StreamedResponse(trickle(2, const Duration(milliseconds: 400)), 200)),
+          limits: limits);
+      await expectLater(stalled.getJson(uri),
+          throwsA(isA<ProviderFailure>().having((f) => f.kind, 'kind', ProviderFailureKind.timeout)));
     });
 
     test('retries retryable failures, then succeeds', () async {

@@ -268,6 +268,34 @@ void main() {
       expect(panel.calls, contains('movie:null'));
     });
 
+    test('whole lists (movies, series, live) download at the same time; per-category stays 1 at a time', () async {
+      FakePanel panel() => FakePanel(liveCats: 3, movieCats: 4, seriesCats: 2)
+        ..lists = const {MediaKind.movie: ListStrategy.bulk, MediaKind.series: ListStrategy.bulk, MediaKind.live: ListStrategy.bulk}
+        ..delay = const Duration(milliseconds: 40);
+      final fast3 = panel();
+      final r = await syncer(policy: const SyncPolicy(gap: Duration.zero, failureBackoff: Duration.zero)).sync('p', fast3);
+      expect(r.phase, SyncPhase.done);
+      expect(fast3.peak, 3);
+      // Low-end device: one after another.
+      final low = panel();
+      await syncer(policy: const SyncPolicy(gap: Duration.zero, failureBackoff: Duration.zero, parallelWholeLists: false))
+          .sync('q', low);
+      expect(low.peak, 1);
+    });
+
+    test('live lists refresh after 6 h, movies / series keep their copy for 24 h', () async {
+      final panel = FakePanel(liveCats: 1, movieCats: 1, seriesCats: 1);
+      await syncer().sync('p', panel);
+      now = now.add(const Duration(hours: 7));
+      panel.calls.clear();
+      await syncer().sync('p', panel);
+      expect(panel.calls.where((c) => !c.startsWith('cats:')).toList(), ['live:L0']);
+      now = now.add(const Duration(hours: 18)); // 25 h after the first sync
+      panel.calls.clear();
+      await syncer().sync('p', panel);
+      expect(panel.calls.where((c) => !c.startsWith('cats:')).toSet(), {'movie:M0', 'series:S0', 'live:L0'});
+    });
+
     test('bulkIfSmall: a huge panel goes category by category', () async {
       final panel = FakePanel(liveCats: 0, movieCats: 5, seriesCats: 0)..lists = const {MediaKind.movie: ListStrategy.bulkIfSmall};
       await syncer(policy: const SyncPolicy(gap: Duration.zero, failureBackoff: Duration.zero, bulkMaxCategories: 3)).sync('p', panel);

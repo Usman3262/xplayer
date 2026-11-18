@@ -22,10 +22,10 @@ export default function VersionsPage() {
 }
 
 const PLAYER_KEYS = ["player.live_format", "player.retry_count", "player.buffer_seconds", "player.progress_save_s"];
-const CONTENT_KEYS = ["content.adult_section", "content.adult_keywords"];
+const CONTENT_KEYS = ["content.adult_section", "content.adult_keywords", "content.metadata_in_lists"];
 const DIAG_KEYS = ["diagnostics.remote_logs", "diagnostics.log_retention_days"];
-const PANEL_KEYS = ["providers.request_timeout_ms", "providers.request_concurrency"];
-const CACHE_KEYS = ["cache.catalog_ttl_hours", "cache.sync_parallel_categories", "cache.sync_gap_ms", "cache.sync_cooldown_min", "cache.epg_retention_hours", "cache.image_cache_mb", "config.refresh_interval_s", "search.min_chars"];
+const PANEL_KEYS = ["providers.request_timeout_ms", "providers.list_timeout_ms", "providers.request_concurrency"];
+const CACHE_KEYS = ["cache.catalog_ttl_hours", "cache.live_ttl_hours", "cache.refresh_cooldown_min", "cache.sync_parallel_categories", "cache.sync_gap_ms", "cache.sync_cooldown_min", "cache.epg_retention_hours", "cache.image_cache_mb", "config.refresh_interval_s", "search.min_chars"];
 
 const LABELS: Record<string, string> = {
   "player.live_format": "Live stream format",
@@ -46,6 +46,10 @@ const LABELS: Record<string, string> = {
   "content.adult_keywords": "18+ words in category names",
   "diagnostics.log_retention_days": "Keep app logs for",
   "providers.request_concurrency": "Parallel requests per panel",
+  "content.metadata_in_lists": "Posters/plots from our server for list titles too",
+  "providers.list_timeout_ms": "Wait for a whole-list answer",
+  "cache.live_ttl_hours": "Refresh live channels after",
+  "cache.refresh_cooldown_min": "Refresh button pause after a refresh",
 };
 const UNITS: Record<string, string> = {
   "player.buffer_seconds": "s",
@@ -59,6 +63,9 @@ const UNITS: Record<string, string> = {
   "cache.sync_cooldown_min": "min",
   "providers.request_timeout_ms": "ms",
   "diagnostics.log_retention_days": "days",
+  "providers.list_timeout_ms": "ms",
+  "cache.live_ttl_hours": "h",
+  "cache.refresh_cooldown_min": "min",
 };
 
 async function VersionsContent() {

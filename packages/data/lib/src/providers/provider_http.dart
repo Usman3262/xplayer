@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
+import 'dart:typed_data' show BytesBuilder;
 
 import 'package:flutter/foundation.dart' show compute;
 import 'package:http/http.dart' as http;
@@ -17,6 +18,7 @@ class ProviderLimits {
   const ProviderLimits({
     this.authTimeout = const Duration(seconds: 8),
     this.requestTimeout = const Duration(seconds: 20),
+    this.listTimeout = const Duration(seconds: 60),
     this.concurrency = 4,
     this.retries = 2,
     this.isolateDecodeBytes = 256 * 1024,
@@ -32,6 +34,9 @@ class ProviderLimits {
       requestTimeout: Duration(
         milliseconds: clamp(c.intSetting('providers.request_timeout_ms', d.requestTimeout.inMilliseconds), 2000, 120000),
       ),
+      listTimeout: Duration(
+        milliseconds: clamp(c.intSetting('providers.list_timeout_ms', d.listTimeout.inMilliseconds), 10000, 300000),
+      ),
       concurrency: clamp(c.intSetting('providers.request_concurrency', d.concurrency), 1, 16),
     );
   }
@@ -39,8 +44,15 @@ class ProviderLimits {
   /// Login / account check — short, so "connect" answers in seconds.
   final Duration authTimeout;
 
-  /// Catalog requests (lists can be tens of MB).
+  /// Catalog requests: how long to wait for the panel's first answer, and
+  /// the longest gap allowed while the reply is arriving. A big reply that
+  /// keeps arriving is never cut off (a 20 s total limit killed 40+ MB lists
+  /// on slow panels, device log 15 Nov).
   final Duration requestTimeout;
+
+  /// Whole-list calls (all movies / series / channels in one reply): panels
+  /// build the whole reply before answering, so the first byte can take long.
+  final Duration listTimeout;
 
   /// Parallel requests per panel (panels ban bursts).
   final int concurrency;
@@ -70,8 +82,11 @@ class ProviderHttp {
   /// GET [uri] and decode JSON. [auth] uses the short login timeout.
   /// [priority] = the user is waiting (details, episodes, play): jumps the
   /// queue, may use the slot kept free for it, and fails fast (no retries).
-  Future<Object?> getJson(Uri uri, {Map<String, String> headers = const {}, bool auth = false, bool priority = false}) async {
-    final body = await getText(uri, headers: headers, auth: auth, priority: priority);
+  /// [wholeList]: the whole catalog of a kind in one reply (longer wait for
+  /// the first byte, see [ProviderLimits.listTimeout]).
+  Future<Object?> getJson(Uri uri,
+      {Map<String, String> headers = const {}, bool auth = false, bool priority = false, bool wholeList = false}) async {
+    final body = await getText(uri, headers: headers, auth: auth, priority: priority, wholeList: wholeList);
     return decodeJson(body);
   }
 
@@ -84,6 +99,37 @@ class ProviderHttp {
   static void Function(String host)? onHttpOnlyHost;
   Set<String> get _httpOnlyHosts => httpOnlyHosts;
 
+  /// The panel answered "too many requests" (429) or "refused" (403): no
+  /// more requests to that host until the pause ends — every screen and the
+  /// sync get the same answer at once instead of hammering it (device logs
+  /// 17 Nov: ~55 requests after a 429, ~25 after a 403). Login checks still
+  /// go through; a successful one lifts a 403 pause.
+  static final Map<String, ({DateTime until, ProviderFailure failure})> _paused = {};
+
+  /// Test hook for the pause clock.
+  static DateTime Function() clock = DateTime.now;
+  static void clearPauses() => _paused.clear();
+
+  /// How long a host is paused, or null.
+  static Duration? pausedFor(String host) {
+    final p = _paused[host];
+    if (p == null) return null;
+    final left = p.until.difference(clock());
+    return left.isNegative ? null : left;
+  }
+
+  static void _pause(String host, int code, String? retryAfter) {
+    final asked = int.tryParse((retryAfter ?? '').trim());
+    final d = code == 429
+        ? Duration(seconds: (asked ?? 60).clamp(5, 600))
+        : const Duration(minutes: 5);
+    _paused[host] = (
+      until: clock().add(d),
+      failure: ProviderFailure(failureKindForStatus(code), 'HTTP $code (panel paused ${d.inSeconds}s)'),
+    );
+    Diag.panel('$host answered HTTP $code → no requests to it for ${d.inSeconds}s');
+  }
+
   /// [uri] with the scheme that works for its host (http after a fallback).
   /// Adapters use it for stream URLs too.
   Uri effective(Uri uri) =>
@@ -93,19 +139,27 @@ class ProviderHttp {
   static int? _httpPort(Uri u) => u.hasPort && u.port != 443 ? u.port : null;
 
   /// GET [uri] as text (M3U playlists, XMLTV).
-  Future<String> getText(Uri uri, {Map<String, String> headers = const {}, bool auth = false, bool priority = false}) async {
-    final timeout = auth ? limits.authTimeout : limits.requestTimeout;
+  Future<String> getText(Uri uri,
+      {Map<String, String> headers = const {}, bool auth = false, bool priority = false, bool wholeList = false}) async {
+    final timeout = auth ? limits.authTimeout : (wholeList ? limits.listTimeout : limits.requestTimeout);
     uri = effective(uri);
     final urgent = priority || auth;
     var attempt = 0;
     while (true) {
+      final pause = _paused[uri.host];
+      if (!auth && pause != null) {
+        if (clock().isBefore(pause.until)) throw pause.failure;
+        _paused.remove(uri.host);
+      }
       try {
-        return await _slots.run(() => _once(uri, headers, timeout), priority: urgent);
+        final text = await _slots.run(() => _once(uri, headers, timeout, auth: auth), priority: urgent);
+        if (auth && _paused[uri.host]?.failure.kind != ProviderFailureKind.rateLimited) _paused.remove(uri.host);
+        return text;
       } on ProviderFailure catch (f) {
         if (uri.scheme == 'https' && _isHttpsProblem(f)) {
           final plain = uri.replace(scheme: 'http', port: _httpPort(uri));
           Diag.panel('https failed (${f.detail}) → trying http: ${Diag.panelUrl(plain)}');
-          final text = await _slots.run(() => _once(plain, headers, timeout), priority: urgent);
+          final text = await _slots.run(() => _once(plain, headers, timeout, auth: auth), priority: urgent);
           if (_httpOnlyHosts.add(uri.host)) onHttpOnlyHost?.call(uri.host);
           Diag.panel('http works for ${uri.host}: using http for this panel');
           return text;
@@ -133,13 +187,18 @@ class ProviderHttp {
         d.contains('reset by peer');
   }
 
-  Future<String> _once(Uri uri, Map<String, String> headers, Duration timeout) async {
+  /// [timeout]: wait for the panel's first answer (headers). The body may
+  /// take as long as it needs while data keeps arriving; a gap longer than
+  /// the idle limit fails.
+  Future<String> _once(Uri uri, Map<String, String> headers, Duration timeout, {bool auth = false}) async {
     if (_closed) throw const ProviderFailure(ProviderFailureKind.network, 'closed');
     final where = 'GET ${Diag.panelUrl(uri)}';
+    final idle = auth ? limits.authTimeout : limits.requestTimeout;
     final sw = Stopwatch()..start();
-    final http.Response res;
+    final http.StreamedResponse streamed;
+    final List<int> body;
     try {
-      res = await _client.get(uri, headers: headers).timeout(timeout);
+      streamed = await _client.send(http.Request('GET', uri)..headers.addAll(headers)).timeout(timeout);
     } on TimeoutException {
       Diag.panel('$where → TIMEOUT: no answer within ${timeout.inMilliseconds}ms');
       throw ProviderFailure(ProviderFailureKind.timeout, '${timeout.inMilliseconds}ms ${uri.host}');
@@ -150,6 +209,21 @@ class ProviderHttp {
       Diag.panel('$where → NETWORK ERROR after ${sw.elapsedMilliseconds}ms: ${e.runtimeType}: $why');
       throw ProviderFailure(ProviderFailureKind.network, '${uri.host}: $why');
     }
+    try {
+      final b = BytesBuilder(copy: false);
+      await for (final chunk in streamed.stream.timeout(idle)) {
+        b.add(chunk);
+      }
+      body = b.takeBytes();
+    } on TimeoutException {
+      Diag.panel('$where → TIMEOUT: reply stopped for ${idle.inMilliseconds}ms after ${sw.elapsedMilliseconds}ms');
+      throw ProviderFailure(ProviderFailureKind.timeout, 'reply stalled ${idle.inMilliseconds}ms ${uri.host}');
+    } catch (e) {
+      final why = Diag.panelText(e is http.ClientException ? e.message : '$e');
+      Diag.panel('$where → NETWORK ERROR while receiving, after ${sw.elapsedMilliseconds}ms: $why');
+      throw ProviderFailure(ProviderFailureKind.network, '${uri.host}: $why');
+    }
+    final res = (statusCode: streamed.statusCode, headers: streamed.headers, bodyBytes: body);
     final code = res.statusCode;
     final ms = sw.elapsedMilliseconds;
     // Panels rarely send a charset; `res.body` would then fall back to
@@ -160,11 +234,12 @@ class ProviderHttp {
           'type ${res.headers['content-type'] ?? '?'}, starts "${_peek(text)}"';
       // Upload only what matters: logins, slow or very big replies. Routine
       // catalog requests (thousands per sync) stay local.
-      final important = timeout == limits.authTimeout || ms > 3000 || res.bodyBytes.length > 5 * 1048576;
+      final important = auth || ms > 3000 || res.bodyBytes.length > 5 * 1048576;
       important ? Diag.panel(line) : Diag.panelQuiet(line);
       return text;
     }
     Diag.panel('$where → HTTP $code in ${ms}ms, server: ${res.headers['server'] ?? '?'}, body "${_peek(text)}"');
+    if (code == 429 || (code == 403 && !auth)) _pause(uri.host, code, res.headers['retry-after']);
     throw ProviderFailure(failureKindForStatus(code), 'HTTP $code');
   }
 

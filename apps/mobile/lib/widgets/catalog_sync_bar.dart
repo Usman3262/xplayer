@@ -66,6 +66,13 @@ class CatalogSyncBar extends ConsumerWidget {
                 onPressed: running
                     ? null
                     : () {
+                        if (CatalogService.refreshCooldownLeft(panel.id) != null) {
+                          Diag.event('SYNC', 'refresh tapped: refreshed moments ago, nothing downloaded');
+                          ScaffoldMessenger.of(context)
+                            ..hideCurrentSnackBar()
+                            ..showSnackBar(SnackBar(content: Text(copy.syncJustRefreshed)));
+                          return;
+                        }
                         Diag.event('SYNC', 'refresh tapped by the user');
                         CatalogService.syncPanel(panel.id, force: true);
                       },

@@ -17,7 +17,7 @@ import '../provider_models.dart';
 ///
 /// The MAC is a value sent in a cookie — not the device's network MAC — so a
 /// line keeps working on any Wi-Fi / mobile data.
-class StalkerAdapter implements ProviderAdapter {
+class StalkerAdapter implements ProviderAdapter, PagedLists {
   StalkerAdapter(
     this.credentials, {
     ProviderHttp? http,
@@ -119,6 +119,7 @@ class StalkerAdapter implements ProviderAdapter {
       headers: _headers,
       auth: auth,
       priority: priority,
+      wholeList: params['action'] == 'get_all_channels',
     );
     if (text.contains('Authorization failed')) {
       throw const ProviderFailure(ProviderFailureKind.unauthorized, 'token');
@@ -249,15 +250,40 @@ class StalkerAdapter implements ProviderAdapter {
     final per = jsonInt(first['max_page_items']) ?? (items.isEmpty ? 1 : items.length);
     var pages = per <= 0 ? 1 : (total / per).ceil();
     if (maxPages != null && pages > maxPages) pages = maxPages;
-    if (pages > 1) {
-      final rest = await Future.wait([
-        for (var p = 2; p <= pages; p++) _call({...params, 'p': '$p'}, priority: priority),
-      ]);
-      for (final r in rest) {
-        items.addAll(jsonMapList(jsonMap(r)['data']));
-      }
+    // One page after another: firing every page at once (~100 requests for
+    // a big category) made portals answer HTTP 429.
+    for (var p = 2; p <= pages; p++) {
+      items.addAll(jsonMapList(jsonMap(await _call({...params, 'p': '$p'}, priority: priority))['data']));
     }
     return items;
+  }
+
+  /// One page (the user is waiting: priority lane).
+  Future<(List<Map<String, dynamic>>, int)> _onePage(Map<String, String> params, int page) async {
+    final js = jsonMap(await _call({...params, 'p': '$page'}, priority: true));
+    final items = jsonMapList(js['data']);
+    final total = jsonInt(js['total_items']) ?? items.length;
+    final per = jsonInt(js['max_page_items']) ?? (items.isEmpty ? 1 : items.length);
+    final pages = per <= 0 || total <= 0 ? 1 : (total / per).ceil();
+    return (items, pages < page ? page : pages);
+  }
+
+  @override
+  Future<ProviderPage<ProviderChannel>> liveChannelsPage(String categoryId, int page) async {
+    final (raw, pages) = await _onePage({'type': 'itv', 'action': 'get_ordered_list', 'genre': categoryId, 'sortby': 'number'}, page);
+    return ProviderPage(parseChannels(raw, portal: _portal), page: page, pages: pages);
+  }
+
+  @override
+  Future<ProviderPage<ProviderMovie>> moviesPage(String categoryId, int page) async {
+    final (raw, pages) = await _onePage({'type': 'vod', 'action': 'get_ordered_list', 'category': categoryId, 'sortby': 'added'}, page);
+    return ProviderPage(_movies(raw), page: page, pages: pages);
+  }
+
+  @override
+  Future<ProviderPage<ProviderSeries>> seriesPage(String categoryId, int page) async {
+    final (raw, pages) = await _onePage({'type': 'series', 'action': 'get_ordered_list', 'category': categoryId, 'sortby': 'added'}, page);
+    return ProviderPage(_series(raw), page: page, pages: pages);
   }
 
   @override
@@ -295,6 +321,10 @@ class StalkerAdapter implements ProviderAdapter {
       maxPages: _isAll(categoryId) ? allPagesLimit : null,
       priority: priority,
     );
+    return _movies(raw);
+  }
+
+  List<ProviderMovie> _movies(List<Map<String, dynamic>> raw) {
     final out = <ProviderMovie>[];
     for (final m in raw) {
       if (jsonBool(m['is_series']) == true) continue;
@@ -331,6 +361,10 @@ class StalkerAdapter implements ProviderAdapter {
       maxPages: _isAll(categoryId) ? allPagesLimit : null,
       priority: priority,
     );
+    return _series(raw);
+  }
+
+  List<ProviderSeries> _series(List<Map<String, dynamic>> raw) {
     final out = <ProviderSeries>[];
     for (final s in raw) {
       final p = parseSeries(s);

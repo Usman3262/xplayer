@@ -23,6 +23,7 @@ class CatalogService {
   static MetadataResolver? _metadata;
   static final _lastPhase = <String, SyncPhase>{};
   static final _halfShown = <String>{};
+  static final _firstShown = <String>{};
   static Timer? _bumpTimer;
 
   /// Bumped when new catalog content / artwork is ready: screens reload.
@@ -66,6 +67,19 @@ class CatalogService {
     });
   }
 
+  static final _lastDone = <String, DateTime>{};
+
+  /// Time left before the refresh button may download again (admin
+  /// `cache.refresh_cooldown_min`, default 5): three taps re-downloaded
+  /// 27,746 titles three times in 2 minutes (device log 17 Nov).
+  static Duration? refreshCooldownLeft(String panelId) {
+    final done = _lastDone[panelId];
+    if (done == null) return null;
+    final gap = Duration(minutes: RemoteConfigService.current.intSetting('cache.refresh_cooldown_min', 5).clamp(0, 120));
+    final left = done.add(gap).difference(DateTime.now());
+    return left.isNegative || left == Duration.zero ? null : left;
+  }
+
   static Set<String> _knownPanels = {};
   static bool _paused = false;
 
@@ -88,8 +102,11 @@ class CatalogService {
         if (prev != p.phase) {
           _lastPhase[e.key] = p.phase;
           _halfShown.remove(e.key);
+          _firstShown.remove(e.key);
           if (p.phase == SyncPhase.items || p.phase == SyncPhase.done) bumpSoon();
         }
+        // First list saved (e.g. all movies): Home fills now, not at 50 %.
+        if (p.phase == SyncPhase.items && p.done >= 1 && _firstShown.add(e.key)) bumpSoon();
         if (p.phase == SyncPhase.items && p.total > 0 && p.done * 2 >= p.total && _halfShown.add(e.key)) {
           bumpSoon();
         }
@@ -148,7 +165,10 @@ class CatalogService {
     final adapter = await m.adapterFor(panelId);
     if (adapter == null) return;
     final r = await syncer.sync(panelId, adapter, force: force);
-    if (r.phase == SyncPhase.done) await m.markSynced(panelId);
+    if (r.phase == SyncPhase.done) {
+      _lastDone[panelId] = DateTime.now();
+      await m.markSynced(panelId);
+    }
     if (r.phase == SyncPhase.failed && r.failure != null) {
       // Login / expiry problems show on the panel (My panels) right away.
       await m.recheck(panelId);

@@ -50,6 +50,19 @@ Supabase: cloud sync of favorites/history, devices/sessions — replaces the old
 - Q6 Sports (matches & lineups) from an **external API** (provider to choose).
 
 ## Decisions made (defaults — change any time)
+- **D22 Catalog stays on the phone (user 2026-11-19, A1):** titles go to our server (metadata-tmdb) only
+  for Home rails and an opened details page; category lists, search and "related" use the panel's own
+  artwork + what is already cached (admin `content.metadata_in_lists`, default off). Watch history stays
+  on the phone until Phase 8. The ~3,500 global titles already resolved are kept (user didn't ask to
+  delete; shared cache).
+- **D23 Refresh policy (D1):** saved copy always shown first; movies/series refresh after 24 h
+  (`cache.catalog_ttl_hours`), live after 6 h (`cache.live_ttl_hours`); refresh button pauses 5 min after a
+  successful refresh (`cache.refresh_cooldown_min`). "Write only changed titles" not done — one
+  transaction per list first, measure, then decide.
+- **D24 Stalker = page by page (C1):** page 1 (14 titles) when a row shows, next pages on scroll, never a
+  whole-category crawl; position kept across restarts (`<scope>:pages` in sync_state).
+- **D25 Panel protection (E):** HTTP 429 → that host paused 60 s (or Retry-After, 5–600 s); 403 → 5 min;
+  login checks still allowed and a good one lifts a 403 pause.
 - **D20 Search without an FTS index:** LIKE per word over the device catalog — 130k titles: 0–11 ms
   with hits, 43 ms worst case (no hit) on the PC; a full-text index would need a DB migration on every
   phone. Revisit if a low-end TV box measures slow.
@@ -639,17 +652,70 @@ Phone done 2026-11-15 (implemented + unit tests; **untested on a device**). TV v
   package, devices, sign-in requests, security, stream session) shown only with an old-server login
   until Phase 8 rebuilds them on Supabase.
 
-## Phase 8 — Accounts & devices
-- [ ] Profiles, devices & sessions, cloud sync of favorites/history, guest → account migration,
-  account deletion / data export.
+## Phase 8 — Accounts & devices (Supabase; optional account, guests stay local)
+Rule: everything the app shows still comes from the user's panel; an account only stores the user's
+own data (library, devices, settings). Every module has its admin page in the same step.
+- [ ] 8.1 Library in the cloud: `user_library` (favorites / my list), `watch_progress` (continue
+  watching + history, batched ≤1 write / 30 s per title), RLS by `user_id`; one RPC to pull, one to push
+  in batches. App: signed in → sync both ways; guest → stays on the device. Admin: Users → library counts.
+- [ ] 8.2 Guest → account migration: on sign-up / first sign-in the device library is uploaded once
+  (merge, newest wins), then the device copy follows the account.
+- [ ] 8.3 Devices & sessions: `user_devices` (device id, model, platform, app version, last seen, panel
+  type — never panel credentials), app registers on sign-in + heartbeat ≤1/day; user removes devices
+  in Settings; device limit from the plan (9.1). Admin: **Devices** module (search, revoke).
+- [ ] 8.4 Profiles (kids, PIN, avatar) per account (`account_profiles`), library per profile.
+  Admin: profile limit per plan.
+- [ ] 8.5 Account deletion + data export (GDPR / Play Store requirement): RPC deletes the user's rows,
+  Edge Function deletes the auth user; export = JSON of the user's rows. App: Settings → Account.
+- [ ] 8.6 Settings rows that used the old server (profiles, devices, sessions, security) rebuilt on
+  Supabase and shown again for signed-in users.
 
-## Phase 9 — Business
-- [ ] Plans & entitlements engine, payments (store billing / manual), ads & placements,
-  coupons/referrals, notification center (inbox; push after Q5).
+## Phase 9 — Business (all controlled from the admin)
+- [ ] 9.1 Plans & entitlements: `plans` (features, device / profile limits, price label),
+  `user_entitlements` (written only by admin / server, never by clients); RPC `get_my_entitlements`;
+  app gates features by entitlement (config + plan). Admin: **Subscriptions** module (plans, grant /
+  revoke / extend per user, audit).
+- [ ] 9.2 Payments — **needs your decision** (Google Play Billing / Stripe / manual only). Default
+  until then: manual grants in the admin (9.1).
+- [ ] 9.3 Ads & promotions: `ad_placements` + `ads` (own promos: image, link, schedule, targeting,
+  frequency cap); app shows them in the existing banner / rail slots only; no ad SDK until decided.
+  Admin: **Ads & promotions** module.
+- [ ] 9.4 Coupons / referral codes (grant a plan for N days, usage limits). Admin: inside Subscriptions.
+- [ ] 9.5 Notification center: `notifications` (title, body, image, deep link, targeting, schedule) +
+  per-user read state; in-app inbox (existing screen) reads it; push (FCM) built but behind the admin
+  flag `push_notifications` (off, Q5). Admin: **Notifications** module (compose, preview, send).
 
-## Phase 10 — Analytics, support, hardening, release
-- [ ] Aggregated analytics, content reports, support tickets, provider health,
-  security audit (RLS tests, key scan), performance on low-end TV box, store prep.
+## Phase 10 — Analytics, support, health, hardening, release
+- [ ] 10.1 Analytics: app sends small aggregated events (app open, play start by kind, panel type,
+  errors) in batches; daily rollup table + retention job. Admin: **Analytics** module (active devices,
+  plays, panel types, top titles from XPlayer watch stats — also a Top 10 source).
+- [ ] 10.2 Support & reports: app "Help & feedback" → `support_tickets` (+ device info, last log lines,
+  never credentials); "Report a problem" on a title. Admin: **Support** module (reply, status).
+- [ ] 10.3 Provider health: per panel host (never credentials) error / timeout / 429 rates from app
+  logs, rolled up daily. Admin: **Providers** + **Health** modules (Supabase status, edge function
+  errors, log volume).
+- [ ] 10.4 Admin **Settings** module: every `app_settings` key in one searchable page (the cards on
+  Versions stay as shortcuts).
+- [ ] 10.5 Security audit: RLS tests for every table (`supabase/tests`), secret scan of the repo,
+  storage bucket policies, rate limits on public RPCs.
+- [ ] 10.6 Release prep: release signing (user's keystore), privacy policy + data-safety form text,
+  store listing texts/screenshots, version bump flow. Low-end TV box performance waits for TV.
+
+## Phase 11 — Public website (download page, about, legal)
+- [ ] 11.1 `apps/web` (Next.js, separate from the admin so the public site ships no admin code):
+  Home (hero, features, screenshots), Download (APK link + Play Store / App Store badges), About, FAQ,
+  Contact, Privacy policy, Terms. Fast static pages, SEO metadata, dark theme from the app's tokens.
+- [ ] 11.2 All website content from the admin: `site_content` (texts, images, FAQ, legal pages) +
+  `app_downloads` (APK version / file / size / SHA-256, store links) — admin **Website** module with
+  preview + publish; the APK file in a public Storage bucket (or an external link).
+- [ ] 11.3 The app's own "update available" uses the same `app_downloads` row (one source).
+- [ ] 11.4 Deploy (Vercel, its own project) + domain — **needs your domain**.
+
+## Phase 12 — Admin panel UI refresh
+- [ ] 12.1 One look for every page: page header (title, description, actions), cards, empty / loading
+  states, tables with search + filters, consistent forms; dashboard with real KPIs (users, devices,
+  plays, errors) once 10.1 exists. Follow the user's "taste" skill once installed.
+- [ ] 12.2 Every "Soon" module in the sidebar becomes real (done by the steps above) — none left greyed.
 
 ---
 
@@ -706,6 +772,18 @@ Phone done 2026-11-15 (implemented + unit tests; **untested on a device**). TV v
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-19 — **Fast & gentle catalog (user go: E → C1 → B1 → A1 → D1)**, after 3 days of device logs
+  + web research (OTT Navigator changelog, Xtream/Ministra docs, open-source players). Implemented +
+  unit-tested, **untested on a device**:
+  E — 429/403 pause per panel host (logs: ~55 requests after a 429 on a Pixel 8, ~25 after a 403);
+  Home background details 15 → 5. C1 — Stalker categories page by page (`PagedLists`,
+  `PagedCategory`; was ~100 requests per category, all at once). B1 — first-answer wait + "reply
+  stalled" limit instead of a 20 s total (whole lists 60 s, `providers.list_timeout_ms`); movies,
+  series, live whole lists in parallel on mid/high devices; one DB transaction per list; Home refreshes
+  when the first list is saved. A1 — metadata only for Home rails + opened details. D1 — live 6 h /
+  VOD 24 h, refresh-button pause. Migration 028 pushed (4 settings; reach apps after Publish — app
+  defaults are the same). Tests: data 460 (new: pause ×2, stalled/slow reply, paged ×4, parallel lists,
+  live/VOD TTL), mobile 55 pass; admin `tsc` NOT run (no node_modules in c:\dev\xplayer\apps\admin).
 - 2026-11-15 — **"Movies not showing" (Xtream World 8K line), from device logs:** the whole-list
   `get_vod_streams` timed out 3× (20 s each) and once came back **empty after 22 s** → the sync saved
   0 titles into all 447 movie categories and marked them synced → opening a category skipped the panel

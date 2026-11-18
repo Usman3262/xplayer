@@ -12,6 +12,7 @@ import '../remote/extras_api.dart' show VodInfoDto;
 import 'catalog_store.dart';
 import 'home_content.dart';
 import 'metadata_resolver.dart';
+import 'paged_category.dart';
 
 /// Phase 6.4 — the screens' existing [CatalogRepository], backed by the
 /// user's panel: lists from the local catalog (filled by the sync), details /
@@ -29,6 +30,7 @@ class PanelCatalogRepository implements CatalogRepository {
     this.onMetadataArrived,
     this.adultOnly = false,
     this.includeAdult = false,
+    this.metadataInLists = false,
     DateTime Function()? clock,
   })  : _adapter = adapter,
         _layout = layout ?? (() => HomeLayout.empty),
@@ -52,6 +54,15 @@ class PanelCatalogRepository implements CatalogRepository {
   /// rails stay without 18+ even when this is true.
   final bool includeAdult;
 
+  /// Ask our server for posters / plots of titles in category lists, search
+  /// and "related" too (admin `content.metadata_in_lists`, default off).
+  /// Off: only Home rails and an opened details page are sent; lists use
+  /// the panel's own artwork plus what is already cached on the phone.
+  final bool metadataInLists;
+
+  /// How many titles of a list to send for metadata (0 = cached only).
+  int _listFetch(int n) => metadataInLists ? n : 0;
+
   /// Store filter: false = hide 18+, true = only 18+, null = everything.
   bool? get _adult => adultOnly ? true : (includeAdult ? null : false);
 
@@ -71,6 +82,7 @@ class PanelCatalogRepository implements CatalogRepository {
         artwork: artwork,
         onMetadataArrived: onMetadataArrived,
         adultOnly: true,
+        metadataInLists: metadataInLists,
       );
 
   PanelCatalogRepository? _adultView;
@@ -189,7 +201,9 @@ class PanelCatalogRepository implements CatalogRepository {
       final sw = Stopwatch()..start();
       var movies = 0, series = 0;
       var movieDetailsWork = true;
-      for (final m in items.take(30)) {
+      // Only the first few: each series is one request; 15 per launch was
+      // wasteful (device logs 17 Nov). The rest load when opened.
+      for (final m in items.take(5)) {
         await Future<void>.delayed(const Duration(milliseconds: 500));
         if (m.kind == MediaKind.movie && movieDetailsWork) {
           if (await _movieDetails(m.id) != null) {
@@ -202,7 +216,11 @@ class PanelCatalogRepository implements CatalogRepository {
       }
       Diag.event('PANEL', 'home details ready in background: $movies movies, $series series '
           '(${(sw.elapsedMilliseconds / 1000).toStringAsFixed(0)}s)');
-    }());
+    }().catchError((Object e) {
+      // Background only: the panel / database went away (panel removed,
+      // app closing) — nothing to do.
+      Diag.panelQuiet('home details stopped: ${e.runtimeType}');
+    }));
   }
 
   /// Items for one admin Home section (dynamic Home, Phase 7.1).
@@ -261,10 +279,39 @@ class PanelCatalogRepository implements CatalogRepository {
   @override
   Future<CatalogPage<MediaItem>> browse({required MediaKind kind, String? categoryId, String? cursor, int limit = 10}) async {
     var page = await _browse(kind, categoryId, cursor, limit);
-    if (page.items.isEmpty && cursor == null && categoryId != null && await _fetchCategoryNow(kind, categoryId)) {
+    if (categoryId == null) return page;
+    if (page.items.isEmpty && cursor == null && await _fetchCategoryNow(kind, categoryId)) {
+      page = await _browse(kind, categoryId, cursor, limit);
+    }
+    // Paged panels (Stalker): at the end of what is stored, the next page
+    // from the panel (a few at most per scroll step).
+    for (var i = 0; i < 4 && page.items.length < limit && await _fetchNextPage(kind, categoryId); i++) {
       page = await _browse(kind, categoryId, cursor, limit);
     }
     return page;
+  }
+
+  /// Next page of a paged category (Stalker), if the panel has more.
+  Future<bool> _fetchNextPage(MediaKind kind, String categoryId) {
+    final scope = '${_kind(kind).name}:cat:$categoryId';
+    final key = '$scope:next';
+    return _categoryLoads[key] ??= () async {
+      try {
+        final a = await _adapter();
+        if (a is! PagedLists) return false;
+        final st = await PagedCategory.state(store, panelId, scope);
+        if (st == null || st.$1 >= st.$2) return false;
+        final sw = Stopwatch()..start();
+        final n = await PagedCategory.fetch(store, panelId, a as PagedLists, _kind(kind), categoryId, st.$1 + 1, now: _clock());
+        Diag.panelQuiet('opened $scope: page ${st.$1 + 1}/${st.$2}, $n titles (${sw.elapsedMilliseconds}ms)');
+        return n > 0;
+      } catch (e) {
+        Diag.event('PANEL', 'more of $scope failed: ${e.runtimeType}: $e');
+        return false;
+      } finally {
+        _categoryLoads.remove(key);
+      }
+    }();
   }
 
   final _categoryLoads = <String, Future<bool>>{};
@@ -284,6 +331,13 @@ class PanelCatalogRepository implements CatalogRepository {
         if (a == null) return false;
         final sw = Stopwatch()..start();
         int n;
+        if (a is PagedLists) {
+          // Page 1 only (14 titles); the rest as the user scrolls.
+          n = await PagedCategory.fetch(store, panelId, a as PagedLists, _kind(kind), categoryId, 1, now: _clock());
+          if (n == 0) _emptyOnPanel.add(scope);
+          Diag.event('PANEL', 'opened $scope: page 1, $n titles (${sw.elapsedMilliseconds}ms)');
+          return n > 0;
+        }
         switch (kind) {
           case MediaKind.movie:
             final items = await a.movies(categoryId: categoryId, priority: true);
@@ -325,7 +379,7 @@ class PanelCatalogRepository implements CatalogRepository {
           for (final r in await store.channels(panelId, categoryId: categoryId, limit: limit, afterSort: after, adult: _adult)) (_channelItem(r.$1), r.$2),
         ],
     };
-    final items = await _enrich([for (final r in rows) r.$1], fetchFirst: limit);
+    final items = await _enrich([for (final r in rows) r.$1], fetchFirst: _listFetch(limit));
     return CatalogPage(items: items, nextCursor: rows.length < limit ? null : '${rows.last.$2}');
   }
 
@@ -347,7 +401,7 @@ class PanelCatalogRepository implements CatalogRepository {
       if (kind == null || kind == MediaKind.live || kind == MediaKind.sports)
         ...(await store.searchChannels(panelId, query, limit: per, offset: offset, categoryId: categoryId, adult: _adult)).map(_channelItem),
     ];
-    return CatalogPage(items: await _enrich(items, fetchFirst: 10), nextCursor: items.length < per ? null : '${offset + per}');
+    return CatalogPage(items: await _enrich(items, fetchFirst: _listFetch(10)), nextCursor: items.length < per ? null : '${offset + per}');
   }
 
   // ── Details ──────────────────────────────────────────────────────────────
@@ -566,14 +620,14 @@ class PanelCatalogRepository implements CatalogRepository {
       return _enrich([
         for (final r in await store.movies(panelId, categoryId: m!.categoryId, limit: 21))
           if (r.$1.id != id) _movie(r.$1),
-      ].take(20).toList(), fetchFirst: 10);
+      ].take(20).toList(), fetchFirst: _listFetch(10));
     }
     final s = await store.seriesItem(panelId, id);
     if (s?.categoryId != null) {
       return _enrich([
         for (final r in await store.series(panelId, categoryId: s!.categoryId, limit: 21))
           if (r.$1.id != id) _series(r.$1),
-      ].take(20).toList(), fetchFirst: 10);
+      ].take(20).toList(), fetchFirst: _listFetch(10));
     }
     return const [];
   }

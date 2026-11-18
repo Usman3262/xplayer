@@ -115,12 +115,18 @@ class CatalogStore {
   // ── Live ─────────────────────────────────────────────────────────────────
 
   /// Replaces one category's channels ([categoryId] null = the whole list).
-  Future<void> saveChannels(String panelId, String? categoryId, List<ProviderChannel> list) =>
+  /// Several saves in ONE database transaction (one commit for a whole
+  /// list of 15k titles instead of one per category).
+  Future<T> inTransaction<T>(Future<T> Function() action) => db.transaction(action);
+
+  /// [appendAt]: add a further page after the rows already stored (paged
+  /// panels, Stalker) instead of replacing the category.
+  Future<void> saveChannels(String panelId, String? categoryId, List<ProviderChannel> list, {int? appendAt}) =>
       db.transaction(() async {
         final catAdult = await _categoryAdult(panelId, CatalogKind.live, categoryId);
         final del = db.delete(db.channels)..where((c) => c.panelId.equals(panelId));
         if (categoryId != null) del.where((c) => c.categoryId.equals(categoryId));
-        await del.go();
+        if (appendAt == null) await del.go();
         await _insertChunks(db.channels, [
           for (var i = 0; i < list.length; i++)
             ChannelsCompanion.insert(
@@ -134,7 +140,7 @@ class CatalogStore {
               catchupDays: Value(list[i].catchupDays),
               addedSec: Value(list[i].addedSec),
               command: Value(list[i].stream.command),
-              sort: i,
+              sort: (appendAt ?? 0) + i,
               adult: Value(catAdult || list[i].adult),
             ),
         ]);
@@ -173,11 +179,11 @@ class CatalogStore {
 
   // ── Movies ───────────────────────────────────────────────────────────────
 
-  Future<void> saveMovies(String panelId, String? categoryId, List<ProviderMovie> list) => db.transaction(() async {
+  Future<void> saveMovies(String panelId, String? categoryId, List<ProviderMovie> list, {int? appendAt}) => db.transaction(() async {
         final catAdult = await _categoryAdult(panelId, CatalogKind.movie, categoryId);
         final del = db.delete(db.movies)..where((m) => m.panelId.equals(panelId));
         if (categoryId != null) del.where((m) => m.categoryId.equals(categoryId));
-        await del.go();
+        if (appendAt == null) await del.go();
         await _insertChunks(db.movies, [
           for (var i = 0; i < list.length; i++)
             MoviesCompanion.insert(
@@ -192,7 +198,7 @@ class CatalogStore {
               tmdbId: Value(list[i].tmdbId),
               extension: Value(list[i].stream.extension),
               command: Value(list[i].stream.command),
-              sort: i,
+              sort: (appendAt ?? 0) + i,
               adult: Value(catAdult || list[i].adult),
             ),
         ]);
@@ -244,13 +250,13 @@ class CatalogStore {
 
   // ── Series ───────────────────────────────────────────────────────────────
 
-  Future<void> saveSeries(String panelId, String? categoryId, List<ProviderSeries> list) => db.transaction(() async {
+  Future<void> saveSeries(String panelId, String? categoryId, List<ProviderSeries> list, {int? appendAt}) => db.transaction(() async {
         final catAdult = await _categoryAdult(panelId, CatalogKind.series, categoryId);
         final del = db.delete(db.seriesItems)..where((s) => s.panelId.equals(panelId));
         if (categoryId != null) del.where((s) => s.categoryId.equals(categoryId));
-        await del.go();
+        if (appendAt == null) await del.go();
         await _insertChunks(db.seriesItems, [
-          for (var i = 0; i < list.length; i++) _seriesCompanion(panelId, list[i], categoryId, i, adult: catAdult || list[i].adult),
+          for (var i = 0; i < list.length; i++) _seriesCompanion(panelId, list[i], categoryId, (appendAt ?? 0) + i, adult: catAdult || list[i].adult),
         ]);
       });
 

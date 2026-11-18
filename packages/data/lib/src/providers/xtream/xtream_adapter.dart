@@ -79,8 +79,12 @@ class XtreamAdapter implements ProviderAdapter {
       );
 
   /// [priority]: the user is waiting on this (details, episodes, guide).
+  /// A list call without `category_id` is the whole catalog of that kind in
+  /// one reply (tens of MB): it gets the long first-answer wait.
   Future<Object?> _action(String action, [Map<String, String> extra = const {}, bool priority = false]) =>
-      _http.getJson(_api({'action': action, ...extra}), priority: priority);
+      _http.getJson(_api({'action': action, ...extra}),
+          priority: priority,
+          wholeList: const {'get_live_streams', 'get_vod_streams', 'get_series'}.contains(action) && !extra.containsKey('category_id'));
 
   // ── Account ──────────────────────────────────────────────────────────────
 

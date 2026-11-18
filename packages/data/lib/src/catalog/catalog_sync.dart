@@ -13,13 +13,15 @@ import 'package:domain/domain.dart' show MediaKind;
 import '../providers/provider_models.dart';
 import 'adult.dart';
 import 'catalog_store.dart';
+import 'paged_category.dart';
 
 /// How the sync behaves. Built-in defaults; admin config overrides
 /// (App customization → Versions → Cache & refresh).
 @immutable
 class SyncPolicy {
   const SyncPolicy({
-    this.ttl = const Duration(hours: 12),
+    this.ttl = const Duration(hours: 24),
+    this.liveTtl = const Duration(hours: 6),
     this.parallelCategories = 1,
     this.gap = const Duration(milliseconds: 300),
     this.maxConsecutiveFailures = 5,
@@ -28,23 +30,36 @@ class SyncPolicy {
     this.adultKeywords = AdultClassifier.defaultKeywords,
     this.cooldown = const Duration(minutes: 30),
     this.bulkMaxCategories = 200,
+    this.parallelWholeLists = true,
   });
 
   factory SyncPolicy.fromConfig(RemoteConfig c) {
     int clamp(int v, int lo, int hi) => v < lo ? lo : (v > hi ? hi : v);
     return SyncPolicy(
-      ttl: Duration(hours: clamp(c.intSetting('cache.catalog_ttl_hours', 12), 1, 24 * 14)),
+      ttl: Duration(hours: clamp(c.intSetting('cache.catalog_ttl_hours', 24), 1, 24 * 14)),
+      liveTtl: Duration(hours: clamp(c.intSetting('cache.live_ttl_hours', 6), 1, 24 * 7)),
       parallelCategories: clamp(c.intSetting('cache.sync_parallel_categories', 1), 1, 6),
       gap: Duration(milliseconds: clamp(c.intSetting('cache.sync_gap_ms', 300), 0, 5000)),
       epgRetention: Duration(hours: clamp(c.intSetting('cache.epg_retention_hours', 48), 1, 24 * 14)),
       adultKeywords: c.listSetting('content.adult_keywords', AdultClassifier.defaultKeywords),
       cooldown: Duration(minutes: clamp(c.intSetting('cache.sync_cooldown_min', 30), 1, 24 * 60)),
       bulkMaxCategories: _bulkLimitForDevice(),
+      parallelWholeLists: _bulkLimitForDevice() > 200,
     );
   }
 
-  /// A category synced more recently than this is skipped (resume / no waste).
+  /// Movies, series and live whole-list requests at the same time (3
+  /// requests, each one reply): total ≈ the slowest instead of the sum
+  /// (Neo: 4 + 7 + 2 s one after another). Off on low-end devices (three
+  /// big replies in memory at once).
+  final bool parallelWholeLists;
+
+  /// Movies / series synced more recently than this are skipped (the copy
+  /// on the phone is shown; admin `cache.catalog_ttl_hours`, default 24 h).
   final Duration ttl;
+
+  /// Same for live channel lists (admin `cache.live_ttl_hours`, default 6 h).
+  final Duration liveTtl;
 
   /// Categories fetched at the same time (panels ban bursts; keep low).
   final int parallelCategories;
@@ -276,14 +291,19 @@ class CatalogSyncer {
       var consecutiveFailures = 0;
       ProviderFailure? fatal;
 
-      Future<void> worker() async {
+      // [wholeListsOnly]: an extra worker for the parallel whole-list
+      // requests; it stops at the first per-category item (those keep the
+      // admin's parallel limit).
+      Future<void> worker({bool wholeListsOnly = false}) async {
         while (fatal == null && !_stop(panelId)) {
+          if (wholeListsOnly && (next >= work.length || work[next].$2 != null)) return;
           final i = next++;
           if (i >= work.length) return;
           final (kind, cat) = work[i];
           final scope = cat == null ? '${kind.name}:all' : '${kind.name}:cat:${cat.id}';
           final info = force ? null : await store.syncInfo(panelId, scope);
-          if (info != null && _clock().difference(info.syncedAt) < policy.ttl) {
+          final ttl = kind == CatalogKind.live ? policy.liveTtl : policy.ttl;
+          if (info != null && _clock().difference(info.syncedAt) < ttl) {
             emit(p.copyWith(done: p.done + 1, skipped: p.skipped + 1));
             continue;
           }
@@ -324,7 +344,12 @@ class CatalogSyncer {
         }
       }
 
-      await Future.wait([for (var w = 0; w < policy.parallelCategories; w++) worker()]);
+      final wholeLists = work.where((w) => w.$2 == null).length;
+      final extra = policy.parallelWholeLists ? (wholeLists - policy.parallelCategories).clamp(0, 2) : 0;
+      await Future.wait([
+        for (var w = 0; w < policy.parallelCategories; w++) worker(),
+        for (var w = 0; w < extra; w++) worker(wholeListsOnly: true),
+      ]);
       if (fatal != null) {
         if (_blocksUs(fatal!)) {
           await store.markSynced(panelId, _cooldownScope, at: _clock());
@@ -400,25 +425,31 @@ class CatalogSyncer {
       case CatalogKind.live:
         final items = await a.liveChannels();
         _requireItems(items.length, cats, kind);
-        for (final e in group(items, (x) => x.categoryId).entries) {
-          await store.saveChannels(panelId, e.key, e.value);
-        }
+        await store.inTransaction(() async {
+          for (final e in group(items, (x) => x.categoryId).entries) {
+            await store.saveChannels(panelId, e.key, e.value);
+          }
+        });
         count = items.length;
         newest = _max(items.map((x) => x.addedSec));
       case CatalogKind.movie:
         final items = await a.movies();
         _requireItems(items.length, cats, kind);
-        for (final e in group(items, (x) => x.categoryId).entries) {
-          await store.saveMovies(panelId, e.key, e.value);
-        }
+        await store.inTransaction(() async {
+          for (final e in group(items, (x) => x.categoryId).entries) {
+            await store.saveMovies(panelId, e.key, e.value);
+          }
+        });
         count = items.length;
         newest = _max(items.map((x) => x.addedSec));
       case CatalogKind.series:
         final items = await a.series();
         _requireItems(items.length, cats, kind);
-        for (final e in group(items, (x) => x.categoryId).entries) {
-          await store.saveSeries(panelId, e.key, e.value);
-        }
+        await store.inTransaction(() async {
+          for (final e in group(items, (x) => x.categoryId).entries) {
+            await store.saveSeries(panelId, e.key, e.value);
+          }
+        });
         count = items.length;
         newest = _max(items.map((x) => x.addedSec));
     }
@@ -461,6 +492,9 @@ class CatalogSyncer {
       }
       return m;
     }
+
+    // Paged panels (Stalker): page 1 only; more pages when the user scrolls.
+    if (a is PagedLists) return PagedCategory.fetch(store, panelId, a as PagedLists, kind, catId, 1, now: _clock());
 
     final int count;
     final int? newest;

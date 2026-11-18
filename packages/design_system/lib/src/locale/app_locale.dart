@@ -1948,6 +1948,11 @@ class AppCopy {
     'تم إيقاف تنزيل "$title" مؤقتاً أثناء المشاهدة: يسمح حسابك باتصال واحد في كل مرة. سيستأنف التنزيل تلقائياً عند إيقاف المشاهدة.',
     '"$title" کا ڈاؤن لوڈ دیکھنے کے دوران رکا ہوا ہے: آپ کے اکاؤنٹ میں ایک وقت میں ایک کنکشن ہے۔ دیکھنا بند کرنے پر یہ خود جاری ہو جائے گا۔',
   );
+  String get syncJustRefreshed => _t(
+    'Already up to date — refreshed a moment ago.',
+    'محدّث بالفعل — تم التحديث قبل قليل.',
+    'پہلے سے اپ ٹو ڈیٹ ہے — ابھی ریفریش ہوا تھا۔',
+  );
   /// Panel playback (7.6).
   String get playbackUnavailable => _t(
     'This title can\'t be played right now. Tap Retry.',

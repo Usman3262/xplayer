@@ -73,7 +73,7 @@ class M3uAdapter implements ProviderAdapter {
     if (ready != null) return Future.value(ready);
     return _loading ??= () async {
       try {
-        final text = await _http.getText(_uri);
+        final text = await _http.getText(_uri, wholeList: true); // the whole playlist
         final sw = Stopwatch()..start();
         final c = text.length >= _http.limits.isolateDecodeBytes
             ? await compute(buildM3uCatalog, text)
