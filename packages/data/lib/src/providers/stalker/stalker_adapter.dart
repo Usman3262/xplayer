@@ -239,8 +239,32 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
       _cats(await _call({'type': 'vod', 'action': 'get_categories'}));
 
   @override
-  Future<List<ProviderCategory>> seriesCategories() async =>
-      _cats(await _call({'type': 'series', 'action': 'get_categories'}));
+  Future<List<ProviderCategory>> seriesCategories() async {
+    final own = _cats(await _call({'type': 'series', 'action': 'get_categories'}));
+    _seriesInVod = own.isEmpty;
+    if (own.isNotEmpty) return own; // portal with its own series section (most portals)
+    // Older Ministra portals keep series inside the movie categories
+    // (entries with is_series = 1): the same categories, series only.
+    Diag.event('PANEL', 'stalker: no series section on this portal → series are read from the movie categories');
+    return movieCategories();
+  }
+
+  /// null = not checked yet; true = series live inside the VOD lists.
+  bool? _seriesInVod;
+
+  Future<bool> _seriesFromVod() async {
+    if (_seriesInVod == null) await seriesCategories();
+    return _seriesInVod ?? false;
+  }
+
+  /// A series entry of a VOD list → its seasons / episodes (the entry
+  /// carries `cmd` and the episode numbers in `series`).
+  ProviderSeriesDetails? _vodSeriesDetails(Map<String, dynamic> raw) {
+    final s = parseSeries(raw, portal: _portal);
+    if (s == null || _nonEmpty(raw['cmd']) == null || raw['series'] is! List) return null;
+    // One entry = one season; its title ("Dune 2", "24") is not a season.
+    return parseSeasons([{...raw, 'name': ''}], s.id, s);
+  }
 
   /// Page 1, then the remaining pages in parallel (ProviderHttp caps it).
   Future<List<Map<String, dynamic>>> _paged(Map<String, String> params, {int? maxPages, bool priority = false}) async {
@@ -277,11 +301,23 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
   @override
   Future<ProviderPage<ProviderMovie>> moviesPage(String categoryId, int page) async {
     final (raw, pages) = await _onePage({'type': 'vod', 'action': 'get_ordered_list', 'category': categoryId, 'sortby': 'added'}, page);
-    return ProviderPage(_movies(raw), page: page, pages: pages);
+    final movies = _movies(raw);
+    // Series-inside-VOD portals only: a page of series only = a series
+    // category; don't page through it under Movies. Other portals: as before.
+    final stop = _seriesInVod == true && movies.isEmpty && raw.isNotEmpty;
+    return ProviderPage(movies, page: page, pages: stop ? page : pages);
   }
 
   @override
   Future<ProviderPage<ProviderSeries>> seriesPage(String categoryId, int page) async {
+    if (await _seriesFromVod()) {
+      final (raw, pages) = await _onePage({'type': 'vod', 'action': 'get_ordered_list', 'category': categoryId, 'sortby': 'added'}, page);
+      final entries = [for (final m in raw) if (jsonBool(m['is_series']) == true) m];
+      // No series on this page of a movie category: stop here (portals
+      // keep series together; scanning every page would hammer the panel).
+      return ProviderPage(_series(entries), page: page, pages: entries.isEmpty ? page : pages,
+          details: [for (final m in entries) ?_vodSeriesDetails(m)]);
+    }
     final (raw, pages) = await _onePage({'type': 'series', 'action': 'get_ordered_list', 'category': categoryId, 'sortby': 'added'}, page);
     return ProviderPage(_series(raw), page: page, pages: pages);
   }
@@ -328,7 +364,7 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
     final out = <ProviderMovie>[];
     for (final m in raw) {
       if (jsonBool(m['is_series']) == true) continue;
-      final mv = parseMovie(m);
+      final mv = parseMovie(m, portal: _portal);
       if (mv == null) continue;
       _vod[mv.id] = m;
       out.add(mv);
@@ -336,7 +372,9 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
     return out;
   }
 
-  static ProviderMovie? parseMovie(Map<String, dynamic> m) {
+  /// [portal]: makes relative poster paths full addresses (some portals
+  /// send "/stalker_portal/screenshots/…": no image showed).
+  static ProviderMovie? parseMovie(Map<String, dynamic> m, {Uri? portal}) {
     final id = _id(m['id']);
     if (id == null) return null;
     final name = (jsonStr(m['name']) ?? jsonStr(m['o_name']) ?? '').trim();
@@ -344,7 +382,7 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
       id: id,
       name: name,
       stream: StreamRef(kind: MediaKind.movie, id: id, command: _nonEmpty(m['cmd'])),
-      posterUrl: _nonEmpty(m['screenshot_uri']),
+      posterUrl: _absUrl(m['screenshot_uri'], portal) ?? _nonEmpty(m['screenshot_uri']),
       rating: jsonDouble(m['rating_imdb']) ?? jsonDouble(m['rating_kinopoisk']),
       year: _year(m['year']) ?? _yearInName(name),
       categoryId: _id(m['category_id']),
@@ -356,6 +394,14 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
 
   @override
   Future<List<ProviderSeries>> series({String? categoryId, bool priority = false}) async {
+    if (await _seriesFromVod()) {
+      final raw = await _paged(
+        {'type': 'vod', 'action': 'get_ordered_list', 'category': _catOrAll(categoryId), 'sortby': 'added'},
+        maxPages: _isAll(categoryId) ? allPagesLimit : null,
+        priority: priority,
+      );
+      return _series([for (final m in raw) if (jsonBool(m['is_series']) == true) m]);
+    }
     final raw = await _paged(
       {'type': 'series', 'action': 'get_ordered_list', 'category': _catOrAll(categoryId), 'sortby': 'added'},
       maxPages: _isAll(categoryId) ? allPagesLimit : null,
@@ -367,7 +413,7 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
   List<ProviderSeries> _series(List<Map<String, dynamic>> raw) {
     final out = <ProviderSeries>[];
     for (final s in raw) {
-      final p = parseSeries(s);
+      final p = parseSeries(s, portal: _portal);
       if (p == null) continue;
       _vod[p.id] = s;
       out.add(p);
@@ -375,14 +421,14 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
     return out;
   }
 
-  static ProviderSeries? parseSeries(Map<String, dynamic> s) {
+  static ProviderSeries? parseSeries(Map<String, dynamic> s, {Uri? portal}) {
     final id = _id(s['id']);
     if (id == null) return null;
     final name = (jsonStr(s['name']) ?? '').trim();
     return ProviderSeries(
       id: id,
       name: name,
-      posterUrl: _nonEmpty(s['screenshot_uri']),
+      posterUrl: _absUrl(s['screenshot_uri'], portal) ?? _nonEmpty(s['screenshot_uri']),
       plot: _nonEmpty(s['description']),
       genres: _genres(s['genres_str']),
       rating: jsonDouble(s['rating_imdb']) ?? jsonDouble(s['rating_kinopoisk']),
@@ -423,6 +469,11 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
   /// numbers in `series` and plays through its own `cmd` + episode number.
   @override
   Future<ProviderSeriesDetails> seriesDetails(String seriesId) async {
+    final entry = _vod[seriesId];
+    if (entry != null && jsonBool(entry['is_series']) == true) {
+      final d = _vodSeriesDetails(entry);
+      if (d != null) return d; // series inside the VOD lists: no request
+    }
     final seasons = await _paged({
       'type': 'series',
       'action': 'get_ordered_list',
@@ -513,15 +564,26 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
         }
         throw const ProviderFailure(ProviderFailureKind.badResponse, 'no live link');
       case MediaKind.movie:
-        final url = ref.command == null ? null : await _createLink('vod', ref.command!);
-        if (url == null) throw const ProviderFailure(ProviderFailureKind.badResponse, 'no movie link');
-        return ResolvedStream(url: url, headers: {'User-Agent': _ua});
+        // The movie's own cmd first (as before); then the standard Ministra
+        // form — some portals send no / an unusable cmd in their lists.
+        for (final cmd in [ref.command, '/media/${ref.id}.mpg']) {
+          if (cmd == null) continue;
+          final url = await _createLink('vod', cmd);
+          if (url != null && !hasEmptyStreamParam(url)) return ResolvedStream(url: url, headers: {'User-Agent': _ua});
+        }
+        throw const ProviderFailure(ProviderFailureKind.badResponse, 'no movie link');
       case MediaKind.series:
         final hash = ref.id.lastIndexOf('#');
         final episode = hash < 0 ? '' : ref.id.substring(hash + 1);
-        final url = ref.command == null ? null : await _createLink('vod', ref.command!, series: episode);
-        if (url == null) throw const ProviderFailure(ProviderFailureKind.badResponse, 'no episode link');
-        return ResolvedStream(url: url, headers: {'User-Agent': _ua});
+        final entry = hash < 0 ? ref.id : ref.id.substring(0, hash);
+        // The season's / entry's own cmd first (as before), then the
+        // standard Ministra form for this entry.
+        for (final cmd in [ref.command, if (RegExp(r'^\d+$').hasMatch(entry)) '/media/$entry.mpg']) {
+          if (cmd == null) continue;
+          final url = await _createLink('vod', cmd, series: episode);
+          if (url != null) return ResolvedStream(url: url, headers: {'User-Agent': _ua});
+        }
+        throw const ProviderFailure(ProviderFailureKind.badResponse, 'no episode link');
     }
   }
 
@@ -535,8 +597,19 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
       'disable_ad': '0',
       'download': '0',
     }));
-    final link = cleanLink(jsonStr(js['cmd']));
-    return link == null ? null : _http.effective(link);
+    final raw = jsonStr(js['cmd']);
+    final link = cleanLink(raw);
+    if (link == null || hasEmptyStreamParam(link)) {
+      // Shape only (never the link): what did the portal send?
+      final shape = raw == null || raw.trim().isEmpty
+          ? 'no cmd (reply keys ${js.keys.take(6).toList()}${js['error'] != null ? ', error "${Diag.panelText('${js['error']}')}"' : ''})'
+          : link == null
+              ? 'no http address (starts "${Diag.panelText(raw.trim().split(' ').first)}", ${raw.length} chars)'
+              : 'empty stream id (${link.path})';
+      Diag.panel('stalker create_link $type${series.isEmpty ? '' : ' (episode $series)'}: unusable reply — $shape');
+      return null;
+    }
+    return _http.effective(link);
   }
 
   /// "ffmpeg http://…" / "auto http://…" → the URL.

@@ -132,7 +132,12 @@ class _CatalogBrowseScreenState extends ConsumerState<CatalogBrowseScreen> {
   /// and rows without a spinner; rows on screen stay until their fresh copy
   /// is in. Adult PIN toggle uses [quiet] false so 18+ packages replace the
   /// list at the top.
+  /// Extra category batches revealed by themselves (empty rows hidden);
+  /// capped so a portal with many empty categories isn't walked through.
+  int _autoReveals = 0;
+
   Future<void> _boot({bool quiet = false, bool resetForAdult = false}) async {
+    if (!quiet) _autoReveals = 0;
     if (quiet) {
       _staleCat.addAll(_itemsByCat.keys);
     } else {
@@ -463,11 +468,26 @@ class _CatalogBrowseScreenState extends ConsumerState<CatalogBrowseScreen> {
     });
 
     final searching = _query.trim().isNotEmpty;
+    // Categories that turned out empty for this screen are not shown (some
+    // Stalker portals keep series inside movie categories: those are empty
+    // under Movies, and the movie-only ones are empty under Series).
+    bool showRow(CatalogCategory c) {
+      final items = _itemsByCat[c.id];
+      return items == null || items.isNotEmpty || _loadingCat[c.id] == true || _failedCat.contains(c.id);
+    }
+
     final visible = searching
         ? const <CatalogCategory>[]
-        : _categories.take(_shownCatCount).toList(growable: false);
+        : _categories.take(_shownCatCount).where(showRow).toList(growable: false);
     final hasMoreCats =
         !searching && _shownCatCount < _categories.length;
+    // Few rows left after hiding empty ones: reveal the next categories.
+    if (!searching && !_loadingCats && hasMoreCats && visible.length < 6 && _autoReveals < 3) {
+      _autoReveals++;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _revealNextCategoryPage();
+      });
+    }
 
     // Keyboard open (search): only the search field + results fit (the
     // header rows overflowed by 15 px on the phone, device log 15 Nov).

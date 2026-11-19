@@ -57,6 +57,9 @@ class PagedCategory {
       case CatalogKind.series:
         final p = await a.seriesPage(categoryId, page);
         await store.saveSeries(panelId, categoryId, p.items, appendAt: at);
+        for (final d in p.details) {
+          await store.saveSeriesDetails(panelId, d);
+        }
         (n, pages) = (p.items.length, p.pages);
     }
     await store.markSynced(panelId, stateScope(scope), at: now, count: page, maxAddedSec: pages);

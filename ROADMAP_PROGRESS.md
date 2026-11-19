@@ -795,6 +795,21 @@ own data (library, devices, settings). Every module has its admin page in the sa
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-19 — **stream4k movies didn't play** (Pixel 8 log: 8× "panel link failed: badResponse"; live
+  played as .m3u8). Movie/episode links now: the title's own cmd first (unchanged for working portals —
+  test checks one request), then the standard Ministra `/media/<id>.mpg`; links with an empty stream id
+  are refused; an unusable `create_link` reply logs its shape (never the link). Tests: providers 106.
+  Untested on the device (the exact reply wasn't in the uploaded logs).
+- 2026-11-19 — **Stalker portal with series inside VOD (stream4k, from device logs):** portal at
+  `/stalker_portal/server/load.php` (found by the endpoint probe), login OK, live OK; series section
+  empty ("series: 0 categories") and many movie categories "0 titles" = older Ministra layout (series
+  are VOD entries with `is_series`, episodes in the entry's `series` list). Added as a **detected
+  fallback** (user rule: old working providers must not change): empty series section → series read
+  from the movie categories, episodes saved from the entry (no extra request), season 1 (title digits
+  never read as a season); in that mode only, a page without the wanted kind ends the category (no
+  scanning). Poster paths made absolute for both (relative `screenshot_uri` showed no image). Browse
+  screens hide categories that came back empty (≤3 automatic extra batches). Tests: Stalker 20 (both
+  layouts), data/mobile suites. Untested on the device.
 - 2026-11-19 — **Fast & gentle catalog (user go: E → C1 → B1 → A1 → D1)**, after 3 days of device logs
   + web research (OTT Navigator changelog, Xtream/Ministra docs, open-source players). Implemented +
   unit-tested, **untested on a device**:

@@ -81,8 +81,13 @@ class ProviderAdapterFactory {
 
 /// One page of a paged panel list.
 class ProviderPage<T> {
-  const ProviderPage(this.items, {required this.page, required this.pages});
+  const ProviderPage(this.items, {required this.page, required this.pages, this.details = const []});
   final List<T> items;
+
+  /// Seasons / episodes already known from this page (Stalker portals that
+  /// keep series inside the movie lists send them with each entry): saved
+  /// at once, so opening the series needs no request.
+  final List<ProviderSeriesDetails> details;
 
   /// 1-based page number, and how many pages the panel says it has.
   final int page;

@@ -134,6 +134,7 @@ void main() {
     late List<Map<String, String>> sentHeaders;
     var tokenExpiresAfter = -1; // calls with the first token before "Authorization failed"
     var handshakes = 0;
+    var seriesSection = true; // false = older portal: series inside the VOD lists
 
     http.Response route(http.Request r) {
       calls.add(r.url);
@@ -154,6 +155,22 @@ void main() {
             return _res('Authorization failed.', 200);
           }
           return _res(jsonEncode(fx('itv_genres')), 200);
+        case 'vod/get_categories':
+          return _res(body([{'id': '7', 'title': 'Drama'}, {'id': '8', 'title': 'TV shows'}]), 200);
+        case 'series/get_categories':
+          return _res(body(seriesSection ? [{'id': '50', 'title': 'Series A-Z'}] : <Object>[]), 200);
+        case 'series/get_ordered_list':
+          if (!seriesSection) return _res(body({'total_items': 0, 'max_page_items': 14, 'data': <Object>[]}), 200);
+          return _res(body({'total_items': 1, 'max_page_items': 14, 'data': [
+            {'id': '900', 'name': 'Own Section Show', 'cmd': 'c', 'screenshot_uri': 'http://img/900.jpg'},
+          ]}), 200);
+        case 'vod/get_ordered_list' when q['category'] == '8':
+          return _res(body({'total_items': 3, 'max_page_items': 14, 'data': [
+            {'id': '801', 'name': 'Dune 2', 'is_series': '1', 'cmd': 'eyJ0eXBlIjoic2VyaWVzIn0=', 'series': [3, 1, 2],
+             'screenshot_uri': '/stalker_portal/screenshots/801.jpg'},
+            {'id': '802', 'name': 'A Film', 'is_series': '0', 'cmd': 'm', 'screenshot_uri': 'screenshots/802.jpg'},
+            {'id': '803', 'name': 'Broken show', 'is_series': 1},
+          ]}), 200);
         case 'vod/get_ordered_list':
           final p = int.parse(q['p']!);
           return _res(body({
@@ -165,6 +182,8 @@ void main() {
           // List cmd → empty stream=, localhost form → full link (as measured).
           final ok = q['cmd']!.contains('localhost/ch/');
           return _res(body({'cmd': 'ffmpeg http://portal.example/play/live.php?mac=x&stream=${ok ? '42' : ''}&extension=ts&play_token=abc'}), 200);
+        case 'vod/create_link' when q['cmd'] == 'bad':
+          return _res(body({'cmd': 'ffmpeg ', 'error': 'nothing_to_play'}), 200);
         case 'vod/create_link':
           return _res(body({'cmd': 'ffmpeg http://portal.example/play/movie.php?id=1&series=${q['series']}'}), 200);
       }
@@ -182,7 +201,39 @@ void main() {
       sentHeaders = [];
       tokenExpiresAfter = -1;
       handshakes = 0;
+      seriesSection = true;
     });
+
+    test('portal WITH a series section: series come from it (unchanged behaviour)', () async {
+      final a = make();
+      expect((await a.seriesCategories()).map((c) => c.name), ['Series A-Z']);
+      final page = await a.seriesPage('50', 1);
+      expect(page.items.single.name, 'Own Section Show');
+      expect(page.details, isEmpty);
+      expect(calls.where((u) => u.queryParameters['type'] == 'series' && u.queryParameters['action'] == 'get_ordered_list'), isNotEmpty);
+    });
+
+    test('portal WITHOUT a series section: series read from the movie categories, episodes from the entry', () async {
+      seriesSection = false;
+      final a = make();
+      expect((await a.seriesCategories()).map((c) => c.id), ['7', '8']); // the movie categories
+      final page = await a.seriesPage('8', 1);
+      expect(page.items.map((s) => s.name), ['Dune 2', 'Broken show']);
+      expect(page.items.first.posterUrl, 'http://portal.example/stalker_portal/screenshots/801.jpg');
+      // Episodes come with the entry: season 1 (not "2" from the title), sorted.
+      final d = page.details.single;
+      expect(d.episodes.keys, [1]);
+      expect(d.episodes[1]!.map((e) => e.number), [1, 2, 3]);
+      // Opening the series asks nothing more.
+      final before = calls.length;
+      expect((await a.seriesDetails('801')).episodes[1], hasLength(3));
+      expect(calls.length, before);
+      // Movies of the same category stay movies only.
+      final movies = await a.moviesPage('8', 1);
+      expect(movies.items.map((m) => m.name), ['A Film']);
+      expect(movies.items.single.posterUrl, 'http://portal.example/stalker_portal/screenshots/802.jpg');
+    });
+
 
     test('login: handshake → profile → account; MAG headers + MAC cookie; MAC normalised', () async {
       final a = make();
@@ -242,6 +293,21 @@ void main() {
       final cmds = calls.where((u) => u.queryParameters['action'] == 'create_link').map((u) => u.queryParameters['cmd']).toList();
       expect(cmds.last, 'ffmpeg http://localhost/ch/42_');
       expect('$r', isNot(contains('play_token')));
+    });
+
+    test('movie link: own cmd first; unusable or missing → standard /media/<id>.mpg', () async {
+      final a = make();
+      final ok = await a.resolveStream(const StreamRef(kind: MediaKind.movie, id: '55', command: 'good'));
+      expect(ok.url.host, 'portal.example');
+      final firstTry = calls.where((u) => u.queryParameters['action'] == 'create_link').map((u) => u.queryParameters['cmd']).toList();
+      expect(firstTry, ['good']); // working portals: one request, as before
+      calls.clear();
+      final fb = await a.resolveStream(const StreamRef(kind: MediaKind.movie, id: '55', command: 'bad'));
+      expect(fb.url.host, 'portal.example');
+      expect(calls.where((u) => u.queryParameters['action'] == 'create_link').map((u) => u.queryParameters['cmd']), ['bad', '/media/55.mpg']);
+      calls.clear();
+      await a.resolveStream(const StreamRef(kind: MediaKind.movie, id: '56'));
+      expect(calls.where((u) => u.queryParameters['action'] == 'create_link').map((u) => u.queryParameters['cmd']), ['/media/56.mpg']);
     });
 
     test('episode link sends the episode number', () async {
