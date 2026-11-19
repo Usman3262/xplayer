@@ -580,7 +580,9 @@ class PanelCatalogRepository implements CatalogRepository {
 
   Future<ProviderSeriesDetails?> _loadSeriesDetails(String seriesId) async {
     final cached = await store.seriesDetails(panelId, seriesId);
-    if (cached != null) return cached;
+    // A stored copy without episodes (an answer we could not read before)
+    // is asked again.
+    if (cached != null && cached.episodes.values.any((l) => l.isNotEmpty)) return cached;
     final sw = Stopwatch()..start();
     try {
       final a = await _adapter();

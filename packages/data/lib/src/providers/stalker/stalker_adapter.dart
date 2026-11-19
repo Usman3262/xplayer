@@ -261,7 +261,7 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
   /// carries `cmd` and the episode numbers in `series`).
   ProviderSeriesDetails? _vodSeriesDetails(Map<String, dynamic> raw) {
     final s = parseSeries(raw, portal: _portal);
-    if (s == null || _nonEmpty(raw['cmd']) == null || raw['series'] is! List) return null;
+    if (s == null || _nonEmpty(raw['cmd']) == null || raw['series'] is! List || (raw['series'] as List).isEmpty) return null;
     // One entry = one season; its title ("Dune 2", "24") is not a season.
     return parseSeasons([{...raw, 'name': ''}], s.id, s);
   }
@@ -474,8 +474,10 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
       final d = _vodSeriesDetails(entry);
       if (d != null) return d; // series inside the VOD lists: no request
     }
+    // Series inside the VOD lists: their seasons come from the vod module.
+    final vodMode = _seriesInVod == true || (entry != null && jsonBool(entry['is_series']) == true);
     final seasons = await _paged({
-      'type': 'series',
+      'type': vodMode ? 'vod' : 'series',
       'action': 'get_ordered_list',
       'movie_id': seriesId,
       'season_id': '0',
@@ -483,12 +485,85 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
       'sortby': 'added',
     }, priority: true);
     final cached = _vod[seriesId];
-    final info = cached == null ? null : parseSeries(cached);
-    return parseSeasons(
-      seasons,
-      seriesId,
-      info ?? ProviderSeries(id: seriesId, name: (jsonStr(seasons.firstOrNull?['name']) ?? '').trim()),
-    );
+    final info = (cached == null ? null : parseSeries(cached, portal: _portal)) ??
+        ProviderSeries(id: seriesId, name: (jsonStr(seasons.firstOrNull?['name']) ?? '').trim());
+    var d = parseSeasons(seasons, seriesId, info);
+    if (vodMode && d.episodes.isEmpty && seasons.isNotEmpty) {
+      // Newer Ministra: seasons carry no episode numbers, so each season's
+      // episodes are asked separately (one request per season, in order).
+      d = await _episodesPerSeason(seriesId, seasons, info);
+    }
+    if (d.episodes.isEmpty) {
+      Diag.panel('stalker series $seriesId: no episodes understood: ${seasons.length} rows, '
+          'fields ${seasons.firstOrNull?.keys.take(14).toList()}');
+    }
+    return d;
+  }
+
+  /// (series, season, episode) ids behind an episode stream id, for the
+  /// files lookup when the portal says "nothing_to_play".
+  final _episodeIds = <String, (String, String, String)>{};
+
+  Future<ProviderSeriesDetails> _episodesPerSeason(
+      String seriesId, List<Map<String, dynamic>> seasons, ProviderSeries info) async {
+    final episodes = <int, List<ProviderEpisode>>{};
+    var fallbackSeason = 0;
+    for (final s in seasons) {
+      fallbackSeason++;
+      final sid = _id(s['id']);
+      if (sid == null) continue;
+      final season = jsonInt(s['season_number']) ?? _seasonNumber(sid, jsonStr(s['name'])) ?? fallbackSeason;
+      final rows = await _paged({
+        'type': 'vod',
+        'action': 'get_ordered_list',
+        'movie_id': seriesId,
+        'season_id': sid,
+        'episode_id': '0',
+      }, priority: true);
+      var i = 0;
+      for (final e in rows) {
+        i++;
+        final eid = _id(e['id']);
+        if (eid == null) continue;
+        final n = jsonInt(e['series_number']) ?? jsonInt(e['episode_number']) ?? i;
+        final id = '$sid#$n';
+        _episodeIds[id] = (seriesId, sid, eid);
+        (episodes[season] ??= []).add(ProviderEpisode(
+          id: id,
+          seriesId: seriesId,
+          season: season,
+          number: n,
+          title: (jsonStr(e['name']) ?? '').trim(),
+          stream: StreamRef(kind: MediaKind.series, id: id, command: _nonEmpty(e['cmd'])),
+          plot: _nonEmpty(e['description']),
+          stillUrl: _absUrl(e['screenshot_uri'], _portal),
+        ));
+      }
+    }
+    for (final l in episodes.values) {
+      l.sort((a, b) => a.number.compareTo(b.number));
+    }
+    return ProviderSeriesDetails(series: info, episodes: episodes);
+  }
+
+  /// Newer Ministra: the playable command sits in the title's file list.
+  Future<Uri?> _linkFromFiles(String movieId, {String seasonId = '0', String episodeId = '0', String series = ''}) async {
+    final files = await _paged({
+      'type': 'vod',
+      'action': 'get_ordered_list',
+      'movie_id': movieId,
+      'season_id': seasonId,
+      'episode_id': episodeId,
+    }, priority: true);
+    for (final f in files.take(3)) {
+      final cmd = _nonEmpty(f['cmd']);
+      if (cmd == null) continue;
+      final url = await _createLink('vod', cmd, series: series);
+      if (url != null) return url;
+    }
+    Diag.panel('stalker files of $movieId: no playable file: ${files.length} rows, '
+        'fields ${files.firstOrNull?.keys.take(14).toList()}');
+    return null;
   }
 
   static ProviderSeriesDetails parseSeasons(List<Map<String, dynamic>> seasons, String seriesId, ProviderSeries series) {
@@ -571,6 +646,9 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
           final url = await _createLink('vod', cmd);
           if (url != null && !hasEmptyStreamParam(url)) return ResolvedStream(url: url, headers: {'User-Agent': _ua});
         }
+        // "nothing_to_play": newer Ministra keeps the command in the file list.
+        final fromFiles = await _linkFromFiles(ref.id);
+        if (fromFiles != null) return ResolvedStream(url: fromFiles, headers: {'User-Agent': _ua});
         throw const ProviderFailure(ProviderFailureKind.badResponse, 'no movie link');
       case MediaKind.series:
         final hash = ref.id.lastIndexOf('#');
@@ -582,6 +660,11 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
           if (cmd == null) continue;
           final url = await _createLink('vod', cmd, series: episode);
           if (url != null) return ResolvedStream(url: url, headers: {'User-Agent': _ua});
+        }
+        final ids = _episodeIds[ref.id];
+        if (ids != null) {
+          final fromFiles = await _linkFromFiles(ids.$1, seasonId: ids.$2, episodeId: ids.$3);
+          if (fromFiles != null) return ResolvedStream(url: fromFiles, headers: {'User-Agent': _ua});
         }
         throw const ProviderFailure(ProviderFailureKind.badResponse, 'no episode link');
     }

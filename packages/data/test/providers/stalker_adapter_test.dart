@@ -164,6 +164,18 @@ void main() {
           return _res(body({'total_items': 1, 'max_page_items': 14, 'data': [
             {'id': '900', 'name': 'Own Section Show', 'cmd': 'c', 'screenshot_uri': 'http://img/900.jpg'},
           ]}), 200);
+        // Newer Ministra: seasons → episodes → files, through the vod module.
+        case 'vod/get_ordered_list' when q['movie_id'] == '777' && q['season_id'] == '0':
+          return _res(body({'total_items': 1, 'max_page_items': 14, 'data': [{'id': '777:1', 'name': 'Season 1'}]}), 200);
+        case 'vod/get_ordered_list' when q['movie_id'] == '777' && q['episode_id'] == '0':
+          return _res(body({'total_items': 2, 'max_page_items': 14, 'data': [
+            {'id': 'e2', 'series_number': 2, 'name': 'Second', 'cmd': 'bad'},
+            {'id': 'e1', 'series_number': 1, 'name': 'Pilot', 'cmd': 'ep1'},
+          ]}), 200);
+        case 'vod/get_ordered_list' when q['movie_id'] == '777' && q['episode_id'] == 'e2':
+          return _res(body({'total_items': 1, 'max_page_items': 14, 'data': [{'id': 'f2', 'cmd': 'file-e2'}]}), 200);
+        case 'vod/get_ordered_list' when q['movie_id'] == '901':
+          return _res(body({'total_items': 1, 'max_page_items': 14, 'data': [{'id': 'f9', 'cmd': 'file-901'}]}), 200);
         case 'vod/get_ordered_list' when q['category'] == '8':
           return _res(body({'total_items': 3, 'max_page_items': 14, 'data': [
             {'id': '801', 'name': 'Dune 2', 'is_series': '1', 'cmd': 'eyJ0eXBlIjoic2VyaWVzIn0=', 'series': [3, 1, 2],
@@ -182,6 +194,8 @@ void main() {
           // List cmd → empty stream=, localhost form → full link (as measured).
           final ok = q['cmd']!.contains('localhost/ch/');
           return _res(body({'cmd': 'ffmpeg http://portal.example/play/live.php?mac=x&stream=${ok ? '42' : ''}&extension=ts&play_token=abc'}), 200);
+        case 'vod/create_link' when q['cmd'] == 'bad' || q['cmd'] == '/media/901.mpg' || q['cmd'] == '/media/777:1.mpg':
+          return _res(body({'cmd': '', 'error': 'nothing_to_play'}), 200);
         case 'vod/create_link' when q['cmd'] == 'bad':
           return _res(body({'cmd': 'ffmpeg ', 'error': 'nothing_to_play'}), 200);
         case 'vod/create_link':
@@ -308,6 +322,24 @@ void main() {
       calls.clear();
       await a.resolveStream(const StreamRef(kind: MediaKind.movie, id: '56'));
       expect(calls.where((u) => u.queryParameters['action'] == 'create_link').map((u) => u.queryParameters['cmd']), ['/media/56.mpg']);
+    });
+
+    test('newer Ministra: series seasons → episodes per season; "nothing_to_play" → the file list', () async {
+      seriesSection = false;
+      final a = make();
+      await a.seriesCategories(); // detects series inside VOD
+      final d = await a.seriesDetails('777');
+      expect(d.episodes[1]!.map((e) => (e.number, e.title)), [(1, 'Pilot'), (2, 'Second')]);
+      // Episode 2: its cmd says nothing_to_play → its file list.
+      final link = await a.resolveStream(d.episodes[1]![1].stream);
+      expect(link.url.host, 'portal.example');
+      expect(calls.where((u) => u.queryParameters['action'] == 'create_link').map((u) => u.queryParameters['cmd']).last, 'file-e2');
+      // Movie 901: own cmd and /media both nothing_to_play → its file list.
+      calls.clear();
+      final movie = await a.resolveStream(const StreamRef(kind: MediaKind.movie, id: '901', command: 'bad'));
+      expect(movie.url.host, 'portal.example');
+      expect(calls.where((u) => u.queryParameters['action'] == 'create_link').map((u) => u.queryParameters['cmd']),
+          ['bad', '/media/901.mpg', 'file-901']);
     });
 
     test('episode link sends the episode number', () async {

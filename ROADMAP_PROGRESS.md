@@ -795,6 +795,13 @@ own data (library, devices, settings). Every module has its admin page in the sa
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-19 — **stream4k round 2 (new build's logs):** series now listed (detection works) but "0
+  seasons, 0 episodes"; movies: `create_link` → `error "nothing_to_play"` for the own cmd and
+  `/media/<id>.mpg`. = newer Ministra (seasons → episodes → files via the vod module). Added as
+  fallbacks after the old path: series seasons via `type=vod&movie_id`, episodes per season when seasons
+  carry no numbers, "nothing_to_play" → the title's file list (movies + episodes); empty stored episode
+  lists are fetched again and never saved; unreadable replies log their field names. Tests: fake portal
+  for both shapes; providers + catalog 177 pass. Untested on the device.
 - 2026-11-19 — **stream4k movies didn't play** (Pixel 8 log: 8× "panel link failed: badResponse"; live
   played as .m3u8). Movie/episode links now: the title's own cmd first (unchanged for working portals —
   test checks one request), then the standard Ministra `/media/<id>.mpg`; links with an empty stream id

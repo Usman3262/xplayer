@@ -58,7 +58,7 @@ class PagedCategory {
         final p = await a.seriesPage(categoryId, page);
         await store.saveSeries(panelId, categoryId, p.items, appendAt: at);
         for (final d in p.details) {
-          await store.saveSeriesDetails(panelId, d);
+          if (d.episodes.values.any((l) => l.isNotEmpty)) await store.saveSeriesDetails(panelId, d);
         }
         (n, pages) = (p.items.length, p.pages);
     }
