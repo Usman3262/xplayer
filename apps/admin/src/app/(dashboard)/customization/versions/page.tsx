@@ -21,7 +21,7 @@ export default function VersionsPage() {
   );
 }
 
-const PLAYER_KEYS = ["player.live_format", "player.retry_count", "player.buffer_seconds", "player.progress_save_s"];
+const PLAYER_KEYS = ["player.live_format", "player.retry_count", "player.buffer_seconds", "player.progress_save_s", "player.screen_protection"];
 const CONTENT_KEYS = ["content.adult_section", "content.adult_keywords", "content.metadata_in_lists"];
 const DIAG_KEYS = ["diagnostics.remote_logs", "diagnostics.log_retention_days"];
 const PANEL_KEYS = ["providers.request_timeout_ms", "providers.list_timeout_ms", "providers.request_concurrency"];
@@ -32,6 +32,7 @@ const LABELS: Record<string, string> = {
   "player.retry_count": "Automatic retries",
   "player.buffer_seconds": "Buffer",
   "player.progress_save_s": "Save watch progress every",
+  "player.screen_protection": "Block screenshots & screen recording",
   "cache.catalog_ttl_hours": "Refresh panel catalog after",
   "cache.sync_parallel_categories": "Categories synced at once",
   "cache.sync_gap_ms": "Pause between category requests",

@@ -174,6 +174,10 @@ void main() {
           ]}), 200);
         case 'vod/get_ordered_list' when q['movie_id'] == '777' && q['episode_id'] == 'e2':
           return _res(body({'total_items': 1, 'max_page_items': 14, 'data': [{'id': 'f2', 'cmd': 'file-e2'}]}), 200);
+        case 'vod/get_ordered_list' when q['movie_id'] == '902':
+          return _res(body({'total_items': 1, 'max_page_items': 14, 'data': [
+            {'id': '7001', 'video_id': '902', 'file_type': 'video', 'protocol': 'http', 'url': '', 'file_name': 'a.mkv'},
+          ]}), 200);
         case 'vod/get_ordered_list' when q['movie_id'] == '901':
           return _res(body({'total_items': 1, 'max_page_items': 14, 'data': [{'id': 'f9', 'cmd': 'file-901'}]}), 200);
         case 'vod/get_ordered_list' when q['category'] == '8':
@@ -194,7 +198,7 @@ void main() {
           // List cmd → empty stream=, localhost form → full link (as measured).
           final ok = q['cmd']!.contains('localhost/ch/');
           return _res(body({'cmd': 'ffmpeg http://portal.example/play/live.php?mac=x&stream=${ok ? '42' : ''}&extension=ts&play_token=abc'}), 200);
-        case 'vod/create_link' when q['cmd'] == 'bad' || q['cmd'] == '/media/901.mpg' || q['cmd'] == '/media/777:1.mpg':
+        case 'vod/create_link' when q['cmd'] == 'bad' || q['cmd'] == '/media/901.mpg' || q['cmd'] == '/media/902.mpg' || q['cmd'] == '/media/777:1.mpg':
           return _res(body({'cmd': '', 'error': 'nothing_to_play'}), 200);
         case 'vod/create_link' when q['cmd'] == 'bad':
           return _res(body({'cmd': 'ffmpeg ', 'error': 'nothing_to_play'}), 200);
@@ -340,6 +344,14 @@ void main() {
       expect(movie.url.host, 'portal.example');
       expect(calls.where((u) => u.queryParameters['action'] == 'create_link').map((u) => u.queryParameters['cmd']),
           ['bad', '/media/901.mpg', 'file-901']);
+    });
+
+    test('file rows without cmd (real stream4k shape) → /media/file_<id>.mpg', () async {
+      final a = make();
+      final link = await a.resolveStream(const StreamRef(kind: MediaKind.movie, id: '902', command: 'bad'));
+      expect(link.url.host, 'portal.example');
+      expect(calls.where((u) => u.queryParameters['action'] == 'create_link').map((u) => u.queryParameters['cmd']),
+          ['bad', '/media/902.mpg', '/media/file_7001.mpg']);
     });
 
     test('episode link sends the episode number', () async {

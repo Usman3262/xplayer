@@ -133,7 +133,7 @@ class _SeriesDetailsScreenState extends ConsumerState<SeriesDetailsScreen> {
                             if (resume != null) {
                               final start = resume.startSec;
                               context.push(
-                                '/player/${resume.episode.id}?kind=series'
+                                '/player/${Uri.encodeComponent(resume.episode.id)}?kind=series'
                                 '&seriesId=$id'
                                 '${start != null && start > 5 ? '&startSec=$start' : ''}',
                               );
@@ -155,7 +155,7 @@ class _SeriesDetailsScreenState extends ConsumerState<SeriesDetailsScreen> {
                               return;
                             }
                             context.push(
-                              '/player/${eps.first.id}?kind=series&seriesId=$id',
+                              '/player/${Uri.encodeComponent(eps.first.id)}?kind=series&seriesId=$id',
                             );
                           },
                           style: IconButton.styleFrom(
@@ -225,7 +225,7 @@ class _SeriesDetailsScreenState extends ConsumerState<SeriesDetailsScreen> {
                   if (resume != null) {
                     final start = resume.startSec;
                     context.push(
-                      '/player/${resume.episode.id}?kind=series&seriesId=$id'
+                      '/player/${Uri.encodeComponent(resume.episode.id)}?kind=series&seriesId=$id'
                       '${start != null && start > 5 ? '&startSec=$start' : ''}',
                     );
                     return;
@@ -243,7 +243,7 @@ class _SeriesDetailsScreenState extends ConsumerState<SeriesDetailsScreen> {
                     return;
                   }
                   context.push(
-                    '/player/${eps.first.id}?kind=series&seriesId=$id',
+                    '/player/${Uri.encodeComponent(eps.first.id)}?kind=series&seriesId=$id',
                   );
                 },
               ),
@@ -394,7 +394,7 @@ class _EpisodeTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => context.push(
-        '/player/${episode.id}?kind=series&seriesId=${episode.seriesId}',
+        '/player/${Uri.encodeComponent(episode.id)}?kind=series&seriesId=${episode.seriesId}',
       ),
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),

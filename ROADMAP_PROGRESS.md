@@ -795,6 +795,15 @@ own data (library, devices, settings). Every module has its admin page in the sa
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-23 — **stream4k round 3 (logs 22 Nov):** series episodes now load ("1 season, 4 episodes").
+  Fixed: Stalker episode ids ("season#n") lost everything after "#" when opening the player ("? 158725
+  not found") — all 16 player links now encode the id (affected every Stalker portal). Movies: file rows
+  have no cmd (fields id, video_id, url, protocol…) → "/media/file_<id>.mpg", then the file's direct url.
+  429 pause logged once (in-flight requests logged ~30 lines). Tests: providers 108, mobile 55; analyze
+  no errors. Untested on the device. Spicetv answered 429 (panel limit) — pause worked.
+- 2026-11-23 — **Screenshot protection → admin setting:** it was read from the old server (gone) so it
+  was stuck on. Now `player.screen_protection` (Versions → Player, default on; migration
+  `20261123000001`), app follows the published config; dead old-server refresh removed. Analyze/tsc OK.
 - 2026-11-19 — **stream4k round 2 (new build's logs):** series now listed (detection works) but "0
   seasons, 0 episodes"; movies: `create_link` → `error "nothing_to_play"` for the own cmd and
   `/media/<id>.mpg`. = newer Ministra (seasons → episodes → files via the vod module). Added as

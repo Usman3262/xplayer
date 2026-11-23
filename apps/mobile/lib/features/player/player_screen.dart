@@ -3673,7 +3673,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
     final q = series.isNotEmpty
         ? '?kind=series&seriesId=$series'
         : '?kind=series';
-    context.pushReplacement('/player/${ep.id}$q');
+    context.pushReplacement('/player/${Uri.encodeComponent(ep.id)}$q');
   }
 
   /// The playing episode's season as a list; tap plays that episode
@@ -4450,7 +4450,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
     final title = label.isEmpty ? ch.id : label;
     final kind = widget.kindHint == MediaKind.sports ? 'sports' : 'live';
     context.pushReplacement(
-      '/player/${ch.id}?kind=$kind&title=${Uri.encodeQueryComponent(title)}',
+      '/player/${Uri.encodeComponent(ch.id)}?kind=$kind&title=${Uri.encodeQueryComponent(title)}',
     );
   }
 

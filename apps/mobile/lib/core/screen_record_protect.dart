@@ -1,26 +1,26 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 
-import 'package:data/data.dart' show AppSettingsDto;
+import 'package:data/data.dart' show RemoteConfig;
 import 'package:design_system/design_system.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'app_settings_controller.dart';
+import 'remote_config.dart';
 import 'session_controller.dart';
 
 const _channelName = 'app/screen_secure';
 
-/// Screen capture protection follows the Control Panel (client 27 Oct): on by
-/// default, only the owner changes it; customers no longer get a switch (their
-/// old personal choice is ignored).
+/// Screen capture protection follows the admin panel (Versions → Player →
+/// `player.screen_protection`, default on); users get no switch. It used to
+/// come from the old server, which is gone — that left it stuck on.
 final screenRecordProtectProvider =
     StateNotifierProvider<ScreenRecordProtectController, bool>((ref) {
-  final controller =
-      ScreenRecordProtectController(ref.read(appSettingsProvider).screenProtection);
-  ref.listen<AppSettingsDto>(appSettingsProvider, (_, next) => controller.follow(next.screenProtection));
+  bool fromConfig(RemoteConfig c) => c.boolSetting('player.screen_protection', true);
+  final controller = ScreenRecordProtectController(fromConfig(ref.read(remoteConfigProvider)));
+  ref.listen<RemoteConfig>(remoteConfigProvider, (_, next) => controller.follow(fromConfig(next)));
   return controller;
 });
 
@@ -99,7 +99,6 @@ class _ScreenRecordGuardState extends ConsumerState<ScreenRecordGuard>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      ref.read(appSettingsProvider.notifier).refresh();
       final on = ref.read(screenRecordProtectProvider);
       ref.read(screenRecordProtectProvider.notifier).apply(on);
       _check();

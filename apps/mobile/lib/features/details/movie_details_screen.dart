@@ -127,7 +127,7 @@ class MovieDetailsScreen extends ConsumerWidget {
                             });
                             if (!context.mounted) return;
                             context.push(
-                              '/player/${resolved.id}?kind=movie',
+                              '/player/${Uri.encodeComponent(resolved.id)}?kind=movie',
                             );
                           },
                           style: IconButton.styleFrom(
@@ -207,7 +207,7 @@ class MovieDetailsScreen extends ConsumerWidget {
                     );
                   });
                   if (!context.mounted) return;
-                  context.push('/player/${resolved.id}?kind=movie');
+                  context.push('/player/${Uri.encodeComponent(resolved.id)}?kind=movie');
                 },
               ),
               const SizedBox(height: 12),

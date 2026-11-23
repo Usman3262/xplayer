@@ -516,17 +516,17 @@ class _ClipPageState extends ConsumerState<_ClipPage> {
     await _tearDown();
     if (!mounted) return;
     if (item.isLive) {
-      context.push('/player/${item.catalogId}');
+      context.push('/player/${Uri.encodeComponent(item.catalogId)}');
       return;
     }
     if (item.isSeries) {
       final sid = _playStreamId ?? item.catalogId;
       context.push(
-        '/player/$sid?kind=series&seriesId=${item.catalogId}&startSec=$start',
+        '/player/${Uri.encodeComponent(sid)}?kind=series&seriesId=${item.catalogId}&startSec=$start',
       );
       return;
     }
-    context.push('/player/${item.catalogId}?startSec=$start');
+    context.push('/player/${Uri.encodeComponent(item.catalogId)}?startSec=$start');
   }
 
   Future<void> _openDetails() async {
@@ -534,7 +534,7 @@ class _ClipPageState extends ConsumerState<_ClipPage> {
     await _tearDown();
     if (!mounted) return;
     if (item.isLive) {
-      context.push('/player/${item.catalogId}');
+      context.push('/player/${Uri.encodeComponent(item.catalogId)}');
       return;
     }
     if (item.isSeries) {

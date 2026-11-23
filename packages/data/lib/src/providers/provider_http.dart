@@ -119,6 +119,8 @@ class ProviderHttp {
   }
 
   static void _pause(String host, int code, String? retryAfter) {
+    // Requests already on their way answer 429 too: log the pause once.
+    final already = pausedFor(host) != null;
     final asked = int.tryParse((retryAfter ?? '').trim());
     final d = code == 429
         ? Duration(seconds: (asked ?? 60).clamp(5, 600))
@@ -127,7 +129,7 @@ class ProviderHttp {
       until: clock().add(d),
       failure: ProviderFailure(failureKindForStatus(code), 'HTTP $code (panel paused ${d.inSeconds}s)'),
     );
-    Diag.panel('$host answered HTTP $code → no requests to it for ${d.inSeconds}s');
+    if (!already) Diag.panel('$host answered HTTP $code → no requests to it for ${d.inSeconds}s');
   }
 
   /// [uri] with the scheme that works for its host (http after a fallback).

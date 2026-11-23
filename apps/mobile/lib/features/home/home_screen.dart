@@ -734,7 +734,7 @@ class _LiveRail extends StatelessWidget {
             badges: c.badge == null ? const [] : [c.badge!],
             imageUrl: c.imageUrl,
             seed: i,
-            onTap: () => context.push('/player/${c.id}?kind=live'),
+            onTap: () => context.push('/player/${Uri.encodeComponent(c.id)}?kind=live'),
           );
         },
       ),
@@ -808,7 +808,7 @@ class _HomeHeroCarouselState extends ConsumerState<HomeHeroCarousel> {
         final eps =
             await ref.read(catalogRepositoryProvider).getEpisodes(item.id);
         if (eps.isEmpty) return '/series/${item.id}';
-        return '/player/${eps.first.id}?kind=series&seriesId=${item.id}';
+        return '/player/${Uri.encodeComponent(eps.first.id)}?kind=series&seriesId=${item.id}';
       });
       if (!mounted) return;
       context.push(path);
@@ -1218,7 +1218,7 @@ class _MatchesRow extends StatelessWidget {
                   // Watch button (client 19 Oct: hard to select).
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onTap: () => context.push('/player/${m.id}?kind=live'),
+                    onTap: () => context.push('/player/${Uri.encodeComponent(m.id)}?kind=live'),
                     child: Stack(
                     fit: StackFit.expand,
                     children: [

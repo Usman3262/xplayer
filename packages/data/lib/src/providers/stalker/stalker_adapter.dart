@@ -556,10 +556,19 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
       'episode_id': episodeId,
     }, priority: true);
     for (final f in files.take(3)) {
-      final cmd = _nonEmpty(f['cmd']);
-      if (cmd == null) continue;
-      final url = await _createLink('vod', cmd, series: series);
-      if (url != null) return url;
+      // File rows (newer Ministra) have no cmd: the file command is
+      // "/media/file_<id>.mpg"; some portals give a direct url as well.
+      final fileId = _id(f['id']);
+      for (final cmd in [_nonEmpty(f['cmd']), if (fileId != null) '/media/file_$fileId.mpg']) {
+        if (cmd == null) continue;
+        final url = await _createLink('vod', cmd, series: series);
+        if (url != null) return url;
+      }
+      final direct = cleanLink(_nonEmpty(f['url']));
+      if (direct != null && !hasEmptyStreamParam(direct)) {
+        Diag.panel('stalker files of $movieId: playing the file\'s own address (${f['protocol'] ?? '?'})');
+        return _http.effective(direct);
+      }
     }
     Diag.panel('stalker files of $movieId: no playable file: ${files.length} rows, '
         'fields ${files.firstOrNull?.keys.take(14).toList()}');
