@@ -338,10 +338,16 @@ void main() {
       final link = await a.resolveStream(d.episodes[1]![1].stream);
       expect(link.url.host, 'portal.example');
       expect(calls.where((u) => u.queryParameters['action'] == 'create_link').map((u) => u.queryParameters['cmd']).last, 'file-e2');
-      // Movie 901: own cmd and /media both nothing_to_play → its file list.
+      // Movie 901: the file list already worked on this portal → it is asked first.
       calls.clear();
       final movie = await a.resolveStream(const StreamRef(kind: MediaKind.movie, id: '901', command: 'bad'));
       expect(movie.url.host, 'portal.example');
+      expect(calls.where((u) => u.queryParameters['action'] == 'create_link').map((u) => u.queryParameters['cmd']),
+          ['file-901']);
+      // A fresh adapter (portal not learnt yet): own cmd, /media, then the file list.
+      calls.clear();
+      final fresh = await make().resolveStream(const StreamRef(kind: MediaKind.movie, id: '901', command: 'bad'));
+      expect(fresh.url.host, 'portal.example');
       expect(calls.where((u) => u.queryParameters['action'] == 'create_link').map((u) => u.queryParameters['cmd']),
           ['bad', '/media/901.mpg', 'file-901']);
     });
@@ -352,6 +358,16 @@ void main() {
       expect(link.url.host, 'portal.example');
       expect(calls.where((u) => u.queryParameters['action'] == 'create_link').map((u) => u.queryParameters['cmd']),
           ['bad', '/media/902.mpg', '/media/file_7001.mpg']);
+    });
+
+    test('after the file list worked once, the next movie goes to it first', () async {
+      final a = make();
+      await a.resolveStream(const StreamRef(kind: MediaKind.movie, id: '902', command: 'bad'));
+      calls.clear();
+      final link = await a.resolveStream(const StreamRef(kind: MediaKind.movie, id: '902', command: 'bad'));
+      expect(link.url.host, 'portal.example');
+      expect(calls.where((u) => u.queryParameters['action'] == 'create_link').map((u) => u.queryParameters['cmd']),
+          ['/media/file_7001.mpg']);
     });
 
     test('episode link sends the episode number', () async {

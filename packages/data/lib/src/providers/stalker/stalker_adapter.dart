@@ -504,6 +504,12 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
   /// files lookup when the portal says "nothing_to_play".
   final _episodeIds = <String, (String, String, String)>{};
 
+  /// Set once the file list gave the link after the usual commands failed
+  /// (newer Ministra): later titles go to the file list first, skipping
+  /// create_link calls that only answer "nothing_to_play". Portals where the
+  /// usual commands work never set it.
+  bool _filesFirst = false;
+
   Future<ProviderSeriesDetails> _episodesPerSeason(
       String seriesId, List<Map<String, dynamic>> seasons, ProviderSeries info) async {
     final episodes = <int, List<ProviderEpisode>>{};
@@ -648,6 +654,10 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
         }
         throw const ProviderFailure(ProviderFailureKind.badResponse, 'no live link');
       case MediaKind.movie:
+        if (_filesFirst) {
+          final fromFiles = await _linkFromFiles(ref.id);
+          if (fromFiles != null) return ResolvedStream(url: fromFiles, headers: {'User-Agent': _ua});
+        }
         // The movie's own cmd first (as before); then the standard Ministra
         // form — some portals send no / an unusable cmd in their lists.
         for (final cmd in [ref.command, '/media/${ref.id}.mpg']) {
@@ -656,13 +666,24 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
           if (url != null && !hasEmptyStreamParam(url)) return ResolvedStream(url: url, headers: {'User-Agent': _ua});
         }
         // "nothing_to_play": newer Ministra keeps the command in the file list.
-        final fromFiles = await _linkFromFiles(ref.id);
-        if (fromFiles != null) return ResolvedStream(url: fromFiles, headers: {'User-Agent': _ua});
+        if (!_filesFirst) {
+          final fromFiles = await _linkFromFiles(ref.id);
+          if (fromFiles != null) {
+            _filesFirst = true;
+            Diag.panel('stalker: links come from the file list on this portal → tried first from now on');
+            return ResolvedStream(url: fromFiles, headers: {'User-Agent': _ua});
+          }
+        }
         throw const ProviderFailure(ProviderFailureKind.badResponse, 'no movie link');
       case MediaKind.series:
         final hash = ref.id.lastIndexOf('#');
         final episode = hash < 0 ? '' : ref.id.substring(hash + 1);
         final entry = hash < 0 ? ref.id : ref.id.substring(0, hash);
+        final ids = _episodeIds[ref.id];
+        if (_filesFirst && ids != null) {
+          final fromFiles = await _linkFromFiles(ids.$1, seasonId: ids.$2, episodeId: ids.$3);
+          if (fromFiles != null) return ResolvedStream(url: fromFiles, headers: {'User-Agent': _ua});
+        }
         // The season's / entry's own cmd first (as before), then the
         // standard Ministra form for this entry.
         for (final cmd in [ref.command, if (RegExp(r'^\d+$').hasMatch(entry)) '/media/$entry.mpg']) {
@@ -670,10 +691,12 @@ class StalkerAdapter implements ProviderAdapter, PagedLists {
           final url = await _createLink('vod', cmd, series: episode);
           if (url != null) return ResolvedStream(url: url, headers: {'User-Agent': _ua});
         }
-        final ids = _episodeIds[ref.id];
-        if (ids != null) {
+        if (ids != null && !_filesFirst) {
           final fromFiles = await _linkFromFiles(ids.$1, seasonId: ids.$2, episodeId: ids.$3);
-          if (fromFiles != null) return ResolvedStream(url: fromFiles, headers: {'User-Agent': _ua});
+          if (fromFiles != null) {
+            _filesFirst = true;
+            return ResolvedStream(url: fromFiles, headers: {'User-Agent': _ua});
+          }
         }
         throw const ProviderFailure(ProviderFailureKind.badResponse, 'no episode link');
     }

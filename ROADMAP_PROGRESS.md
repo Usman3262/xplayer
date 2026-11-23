@@ -795,6 +795,15 @@ own data (library, devices, settings). Every module has its admin page in the sa
   check auth + permission inside every server action, roles in `app_metadata`/tables.
 
 ## Log
+- 2026-11-24 — **stream4k round 4 (Pixel 8 logs 24 Nov):** movies now **play on a real device**
+  (496510, 494502 — "playing after ~12 s"); the link came from `/media/file_<id>.mpg` after
+  2–3 "nothing_to_play" create_link calls (~2.5 s each, ~7.7 s to link). Change: once the file
+  list gives the link on a portal, the adapter asks the file list first for later movies and
+  episodes (`_filesFirst`, per connection); portals where the usual commands work never switch.
+  Tested: stalker tests (new "learnt portal" case + fresh-adapter order unchanged), provider tests 109
+  pass. Untested on device. Episode playback: no episode opened in these logs — still unverified.
+  Seen, not changed: `movie details … unavailable: movie not loaded` (Stalker details need the
+  in-memory list after an app restart; the title still opened and played in the same session).
 - 2026-11-23 — **stream4k round 3 (logs 22 Nov):** series episodes now load ("1 season, 4 episodes").
   Fixed: Stalker episode ids ("season#n") lost everything after "#" when opening the player ("? 158725
   not found") — all 16 player links now encode the id (affected every Stalker portal). Movies: file rows
